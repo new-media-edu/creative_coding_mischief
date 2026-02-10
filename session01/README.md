@@ -15,11 +15,21 @@
 
 What is electricity?
 
-![electricity in a nut shell](electricity.png)
+<div align="center">
+  <figure>
+    <img src="electricity.png" alt="How electricity flows in circuits" width="600">
+    <figcaption><i>How electricity flows in circuits</i></figcaption>
+  </figure>
+</div>
 
 What is Arduino?
 
-![arduinos](arduinos.webp)
+<div align="center">
+  <figure>
+    <img src="arduinos.webp" alt="Different Arduino board models" width="600">
+    <figcaption><i>Different Arduino board models</i></figcaption>
+  </figure>
+</div>
 
 Pins, voltage, power, etc.
 
@@ -43,7 +53,12 @@ void loop() {
 
 But wait, pin 13? What about other pins... and what about resistors?
 
-![arduino wired to an LED](arduino-led-breadboard.jpg)
+<div align="center">
+  <figure>
+    <img src="arduino-led-breadboard.jpg" alt="Arduino wired to an LED on a breadboard" width="600">
+    <figcaption><i>Arduino wired to an LED on a breadboard</i></figcaption>
+  </figure>
+</div>
 
 LEDs are greedy. Unlike a resistor or a motor, an LED has almost no internal resistance once it starts conducting. It will try to pull as much current as the power supply can provide until it literally burns itself out. Think of the LED like a water wheel below a waterfall. Too much water will break the wheel, but it still needs enough to activate. A resistor basically "wastes" some of the voltage supplied to the LED circuit by converting it to heat. In short: if we don't use a resistor in series with the LED, the LED will burn out quickly. Fun fact: it does not matter whether the LED is "in front" or "behind" the resistor, it only matters that resistance is introduced into the circuit.
 
@@ -58,7 +73,12 @@ Make some changes to personalize the sketch and learn-by-doing. I learned to pro
 
 ## Classic input: button
 
-![button](button.png)
+<div align="center">
+  <figure>
+    <img src="button.png" alt="Push button component" width="600">
+    <figcaption><i>Push button component</i></figcaption>
+  </figure>
+</div>
 
 The Floating State
 
@@ -74,7 +94,12 @@ In a floating state, the pin will pick up electromagnetic interference from the 
 
 ### Using an External Pull-Down Resistor
 
-![pulldown](button-arduino-pulldown.png)
+<div align="center">
+  <figure>
+    <img src="button-arduino-pulldown.png" alt="Button circuit with external pull-down resistor" width="600">
+    <figcaption><i>Button circuit with external pull-down resistor</i></figcaption>
+  </figure>
+</div>
 
 This is the most intuitive way to wire a button for beginners: the button "pulses" the signal to HIGH when pressed.
 The Wiring
@@ -113,7 +138,12 @@ void loop() {
 
 ### Using an Internal Pull-Up Resistor
 
-![pullup](button-arduino-pullup.png)
+<div align="center">
+  <figure>
+    <img src="button-arduino-pullup.png" alt="Button circuit with internal pull-up resistor" width="600">
+    <figcaption><i>Button circuit with internal pull-up resistor</i></figcaption>
+  </figure>
+</div>
 
 This method uses the Arduino's built-in pull-up resistor, eliminating the need for an external resistor. The button "pulls" the signal to LOW when pressed.
 
@@ -153,7 +183,12 @@ void loop() {
 
 ## Serial Communication
 
-![serial](arduino-serial.webp)
+<div align="center">
+  <figure>
+    <img src="arduino-serial.webp" alt="Serial communication between Arduino and computer" width="600">
+    <figcaption><i>Serial communication between Arduino and computer</i></figcaption>
+  </figure>
+</div>
 
 ```c
 void setup()                      // run once, when the sketch starts
