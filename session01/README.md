@@ -41,6 +41,9 @@ void loop() {
 }
 ```
 
+Some experiments: Change the delay by substituting the number 1000 (technically referred to as a numeric literal) for a variable.
+
+
 ## Classic input: button
 
 ![button](button.png)
@@ -64,17 +67,17 @@ In a floating state, the pin will pick up electromagnetic interference from the 
 This is the most intuitive way to wire a button for beginners: the button "pulses" the signal to HIGH when pressed.
 The Wiring
 
-    Connect one side of the button to 5V.
++ Connect one side of the button to 5V.
 
-    Connect the other side of the button to your Digital Pin (e.g., Pin 2).
++ Connect the other side of the button to your Digital Pin (e.g., Pin 2).
 
-    Connect a 10kΩ resistor from that same Digital Pin to GND.
++ Connect a 10kΩ resistor from that same Digital Pin to GND.
 
 How it Works
 
-    Button Open (Not Pressed): The Digital Pin is connected to GND through the resistor. The resistor "pulls" the voltage down to 0V. The Arduino reads LOW.
++ Button Open (Not Pressed): The Digital Pin is connected to GND through the resistor. The resistor "pulls" the voltage down to 0V. The Arduino reads LOW.
 
-    Button Closed (Pressed): There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads HIGH.
++ Button Closed (Pressed): There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads HIGH.
 
 ### Using an Internal Pull-Up Resistor
 
@@ -84,14 +87,14 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 
 The Wiring
 
-    Connect one side of the button to your Digital Pin (e.g., Pin 2).
++ Connect one side of the button to your Digital Pin (e.g., Pin 2).
 
-    Connect the other side of the button to GND.
++ Connect the other side of the button to GND.
 
-    Enable the internal pull-up in your code using `pinMode(PIN, INPUT_PULLUP);`.
++ Enable the internal pull-up in your code using `pinMode(PIN, INPUT_PULLUP);`.
 
 How it Works
 
-    Button Open (Not Pressed): The internal pull-up resistor "pulls" the voltage up to 5V. The Arduino reads HIGH.
++ Button Open (Not Pressed): The internal pull-up resistor "pulls" the voltage up to 5V. The Arduino reads HIGH.
 
-    Button Closed (Pressed): There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads LOW.
++ Button Closed (Pressed): There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads LOW.
