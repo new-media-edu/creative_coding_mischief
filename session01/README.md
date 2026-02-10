@@ -1,5 +1,9 @@
 # Session 01: Introduction to Arduino
 
+## Before we do anything
+
+[Download Arduino](https://www.arduino.cc/en/software/)
+
 ## Agenda
 
 1. Introductions
