@@ -9,7 +9,7 @@
 4. Hands-on with Arduino
     + Overview
     + Basic wiring and electronics
-    + Basic programming: flow, variables, constants, etc.
+    + Basic programming: flow, variables, constants, comments, etc.
 
 ## Arduino and Electronics
 
@@ -46,7 +46,6 @@ But wait, pin 13? What about other pins... and what about resistors?
 ![arduino wired to an LED](arduino-led-breadboard.jpg)
 
 LEDs are greedy. Unlike a resistor or a motor, an LED has almost no internal resistance once it starts conducting. It will try to pull as much current as the power supply can provide until it literally burns itself out. Think of the LED like a water wheel below a waterfall. Too much water will break the wheel, but it still needs enough to activate. A resistor basically "wastes" some of the voltage supplied to the LED circuit by converting it to heat. In short: if we don't use a resistor in series with the LED, the LED will burn out quickly. Fun fact: it does not matter whether the LED is "in front" or "behind" the resistor, it only matters that resistance is introduced into the circuit.
-
 
 ### Experiment
 
@@ -92,6 +91,26 @@ How it Works
 
 + Button Closed (Pressed): There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads HIGH.
 
+```c
+const int BUTTON = 2;  // button connected to digital pin 2
+const int LED = 13;    // LED connected to digital pin 13
+
+void setup() {
+  pinMode(BUTTON, INPUT);   // set button pin as input
+  pinMode(LED, OUTPUT);     // set LED pin as output
+}
+
+void loop() {
+  int buttonState = digitalRead(BUTTON);  // read button state
+  
+  if (buttonState == HIGH) {  // button pressed (pulled HIGH by 5V)
+    digitalWrite(LED, HIGH);   // turn LED on
+  } else {                     // button not pressed
+    digitalWrite(LED, LOW);    // turn LED off
+  }
+}
+```
+
 ### Using an Internal Pull-Up Resistor
 
 ![pullup](button-arduino-pullup.png)
@@ -112,6 +131,47 @@ How it Works
 
 + Button Closed (Pressed): There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads LOW.
 
+```c
+const int BUTTON = 2;  // button connected to digital pin 2
+const int LED = 13;    // LED connected to digital pin 13
+
+void setup() {
+  pinMode(BUTTON, INPUT_PULLUP);  // set button pin with internal pull-up
+  pinMode(LED, OUTPUT);           // set LED pin as output
+}
+
+void loop() {
+  int buttonState = digitalRead(BUTTON);  // read button state
+  
+  if (buttonState == LOW) {   // button pressed (pulled LOW by GND)
+    digitalWrite(LED, HIGH);   // turn LED on
+  } else {                    // button not pressed
+    digitalWrite(LED, LOW);   // turn LED off
+  }
+}
+```
+
+## Serial Communication
+
+![serial](arduino-serial.webp)
+
+```c
+void setup()                      // run once, when the sketch starts
+{
+    Serial.begin(9600);           // set up Serial library at 9600 bps
+}
+
+void loop()                       // run over and over again
+{
+    Serial.println("Hello world!");  // prints hello with ending line break
+    delay(1000);
+}
+```
+
+### Experiment
+
++ Try it with print instead of println.
+
 ## Links to review this content
 
 [Blink an LED with Arduino](https://docs.arduino.cc/built-in-examples/basics/Blink/)
@@ -120,3 +180,4 @@ How it Works
 
 [Arduino button tutorial with a pullup resistor](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
 
+[In-depth Serial tutorial from the legendary Lady Ada](https://www.ladyada.net/learn/arduino/lesson4.html)
