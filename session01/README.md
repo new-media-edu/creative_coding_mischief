@@ -41,7 +41,20 @@ void loop() {
 }
 ```
 
-Some experiments: Change the delay by substituting the number 1000 (technically referred to as a numeric literal) for a variable.
+But wait, pin 13? What about other pins... and what about resistors?
+
+![arduino wired to an LED](arduino-led-breadboard.jpg)
+
+LEDs are greedy. Unlike a resistor or a motor, an LED has almost no internal resistance once it starts conducting. It will try to pull as much current as the power supply can provide until it literally burns itself out. Think of the LED like a water wheel below a waterfall. Too much water will break the wheel, but it still needs enough to activate. A resistor basically "wastes" some of the voltage supplied to the LED circuit by converting it to heat. In short: if we don't use a resistor in series with the LED, the LED will burn out quickly. Fun fact: it does not matter whether the LED is "in front" or "behind" the resistor, it only matters that resistance is introduced into the circuit.
+
+
+### Experiment
+
+Make some changes to personalize the sketch and learn-by-doing. I learned to program by downloading source code and changing things one at a time until I understood what each part did. Some ideas for this sketch:
+
++ Change the delay by substituting the number 1000 (technically referred to as a numeric literal) for a variable.
++ Rather than an on/off repeated pattern, how might you make this more complicated? (Bonus: [Random function](https://docs.arduino.cc/language-reference/en/functions/random-numbers/random/))
++ Make the sketch blink 2 or 3 LEDs
 
 
 ## Classic input: button
