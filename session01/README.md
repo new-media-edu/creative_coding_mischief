@@ -98,3 +98,12 @@ How it Works
 + Button Open (Not Pressed): The internal pull-up resistor "pulls" the voltage up to 5V. The Arduino reads HIGH.
 
 + Button Closed (Pressed): There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads LOW.
+
+## Links to review this content
+
+[Blink an LED with Arduino](https://docs.arduino.cc/built-in-examples/basics/Blink/)
+
+[Arduino button tutorial with a pulldown resistor](https://docs.arduino.cc/built-in-examples/digital/Button/)
+
+[Arduino button tutorial with a pullup resistor](https://docs.arduino.cc/tutorials/generic/digital-input-pullup/)
+
