@@ -20,7 +20,7 @@
 
 ### What is electricity?
 
-<p align="center">
+<p>
   <img src="electricity.png" alt="How electricity flows in circuits" width="600">
   <br>
   <em>How electricity flows in circuits</em>
@@ -28,7 +28,7 @@
 
 ### What is Arduino?
 
-<p align="center">
+<p>
   <img src="arduinos.webp" alt="Different Arduino board models" width="600">
   <br>
   <em>Different Arduino board models</em>
@@ -56,7 +56,7 @@ void loop() {
 
 But wait, pin 13? What about other pins... and what about resistors?
 
-<p align="center">
+<p>
   <img src="arduino-led-breadboard.jpg" alt="Arduino wired to an LED on a breadboard" width="600">
   <br>
   <em>Arduino wired to an LED on a breadboard</em>
@@ -74,7 +74,7 @@ Make some changes to personalize the sketch and learn-by-doing. I learned to pro
 
 ## Classic input: button
 
-<p align="center">
+<p>
   <img src="button.png" alt="Push button component" width="600">
   <br>
   <em>Push button component</em>
@@ -92,7 +92,7 @@ In a floating state, the pin will pick up electromagnetic interference from the 
 
 ### Using an External Pull-Down Resistor
 
-<p align="center">
+<p>
   <img src="button-arduino-pulldown.png" alt="Button circuit with external pull-down resistor" width="600">
   <br>
   <em>Button circuit with external pull-down resistor</em>
@@ -133,7 +133,7 @@ void loop() {
 
 ### Using an Internal Pull-Up Resistor
 
-<p align="center">
+<p>
   <img src="button-arduino-pullup.png" alt="Button circuit with internal pull-up resistor" width="600">
   <br>
   <em>Button circuit with internal pull-up resistor</em>
@@ -174,7 +174,7 @@ void loop() {
 
 ## Serial Communication
 
-<p align="center">
+<p>
   <img src="arduino-serial.webp" alt="Serial communication between Arduino and computer" width="600">
   <br>
   <em>Serial communication between Arduino and computer</em>
