@@ -39,7 +39,7 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 [Link to Tinkercad circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
 
 * Connect one side of the button to **5V**.
-* Connect the other side of the button to your **Digital Pin** (e.g., Pin 2).
+* Connect the other side of the button to your **Digital Pin** (e.g., Pin 7).
 * Connect a **10kΩ resistor** from that same Digital Pin to **GND**.
 
 #### How it Works
@@ -47,7 +47,7 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 * **Button Open (Not Pressed):** The Digital Pin is connected to GND through the resistor. The resistor "pulls" the voltage down to 0V. The Arduino reads `LOW`.
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads `HIGH`.
 
-```c
+```arduino
 const int BUTTON = 2;  // button connected to digital pin 2
 const int LED = 13;    // LED connected to digital pin 13
 
@@ -69,6 +69,10 @@ void loop() {
 
 [Link to Tinkercad Circuits example of pull-down button circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
 
+#### Experiment
+
+Make a "button circuit" without a button.
+
 ### Using an Internal Pull-Up Resistor
 
 <p>
@@ -81,7 +85,7 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 
 #### The Wiring
 
-* Connect one side of the button to your **Digital Pin** (e.g., Pin 2).
+* Connect one side of the button to your **Digital Pin** (e.g., Pin 7).
 * Connect the other side of the button to **GND**.
 * Enable the internal pull-up in your code using `pinMode(PIN, INPUT_PULLUP);`.
 
@@ -93,7 +97,7 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * **Button Open (Not Pressed):** The internal pull-up resistor "pulls" the voltage up to 5V. The Arduino reads `HIGH`.
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads `LOW`.
 
-```c
+```arduino
 const int BUTTON = 2;  // button connected to digital pin 2
 const int LED = 13;    // LED connected to digital pin 13
 
@@ -121,7 +125,7 @@ void loop() {
   <em>Serial communication between Arduino and computer</em>
 </p>
 
-```c
+```arduino
 void setup()                      // run once, when the sketch starts
 {
     Serial.begin(9600);           // set up Serial library at 9600 bps

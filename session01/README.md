@@ -38,7 +38,7 @@ Pins, voltage, power, etc.
 
 ## Start with the classic output: blinking an LED
 
-```c
+```arduino
 // Example 01: Blinking LED
 const int LED = 13;  // LED connected to digital pin 13
 
