@@ -1,5 +1,11 @@
 # Session 02: Inputs and Serial Communication
 
+## Agenda
+
++ Conditional logic (!)
++ Input (button circuit)
++ Serial communication
+
 ## Classic input: button
 
 <p>
@@ -30,6 +36,8 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 
 #### The Wiring
 
+[Link to Tinkercad circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
+
 * Connect one side of the button to **5V**.
 * Connect the other side of the button to your **Digital Pin** (e.g., Pin 2).
 * Connect a **10kΩ resistor** from that same Digital Pin to **GND**.
@@ -58,6 +66,8 @@ void loop() {
   }
 }
 ```
+
+[Link to Tinkercad Circuits example of pull-down button circuit]()
 
 ### Using an Internal Pull-Up Resistor
 
