@@ -6,6 +6,33 @@
 + Input (button circuit)
 + Serial communication
 
+## Serial Communication
+
+Serial communication is an incredible tool. Since the Arduino is an "opaque" hardware system, Serial is our way to look under the hood. We can use it to show the values of variables and diagnose problems that are otherwise elusive.
+
+<p>
+  <img src="arduino-serial.webp" alt="Serial communication between Arduino and computer" width="600">
+  <br>
+  <em>Serial communication between Arduino and computer</em>
+</p>
+
+```cpp
+void setup()                      // run once, when the sketch starts
+{
+    Serial.begin(9600);           // set up Serial library at 9600 bps
+}
+
+void loop()                       // run over and over again
+{
+    Serial.println("Hello world!");  // prints hello with ending line break
+    delay(1000);
+}
+```
+
+### Experiment
+
+* Try it with `print` instead of `println`.
+
 ## Classic input: button
 
 <p>
@@ -48,7 +75,7 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads `HIGH`.
 
 ```cpp
-const int BUTTON = 2;  // button connected to digital pin 2
+const int BUTTON = 7;  // button connected to digital pin 7
 const int LED = 13;    // LED connected to digital pin 13
 
 void setup() {
@@ -98,7 +125,7 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads `LOW`.
 
 ```cpp
-const int BUTTON = 2;  // button connected to digital pin 2
+const int BUTTON = 7;  // button connected to digital pin 7
 const int LED = 13;    // LED connected to digital pin 13
 
 void setup() {
@@ -116,31 +143,6 @@ void loop() {
   }
 }
 ```
-
-## Serial Communication
-
-<p>
-  <img src="arduino-serial.webp" alt="Serial communication between Arduino and computer" width="600">
-  <br>
-  <em>Serial communication between Arduino and computer</em>
-</p>
-
-```cpp
-void setup()                      // run once, when the sketch starts
-{
-    Serial.begin(9600);           // set up Serial library at 9600 bps
-}
-
-void loop()                       // run over and over again
-{
-    Serial.println("Hello world!");  // prints hello with ending line break
-    delay(1000);
-}
-```
-
-### Experiment
-
-* Try it with `print` instead of `println`.
 
 ## Links to review this content
 
