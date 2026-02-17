@@ -56,14 +56,12 @@ In a floating state, the pin will pick up electromagnetic interference from the 
 <p>
   <img src="button-arduino-pulldown.png" alt="Button circuit with external pull-down resistor" width="600">
   <br>
-  <em>Button circuit with external pull-down resistor</em>
+  <em>Button circuit with external pull-down resistor</em> [Tinkercad Circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
 </p>
 
 This is the most intuitive way to wire a button for beginners: the button "pulses" the signal to `HIGH` when pressed.
 
 #### The Wiring
-
-[Link to Tinkercad circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
 
 * Connect one side of the button to **5V**.
 * Connect the other side of the button to your **Digital Pin** (e.g., Pin 7).
@@ -94,8 +92,6 @@ void loop() {
 }
 ```
 
-[Link to Tinkercad Circuits example of pull-down button circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
-
 #### Experiment
 
 Make a "button circuit" without a button.
@@ -105,7 +101,7 @@ Make a "button circuit" without a button.
 <p>
   <img src="button-arduino-pullup.png" alt="Button circuit with internal pull-up resistor" width="600">
   <br>
-  <em>Button circuit with internal pull-up resistor</em>
+  <em>Button circuit with internal pull-up resistor</em> [Tinkercad Circuit](https://www.tinkercad.com/things/7B3QpxUSUb0-arduino-internal-pullup-button-circuit?sharecode=cQjVWPQ1o5n4zr0krJd_GhEf2hvhcsabkXQRBKI5UdU)
 </p>
 
 This method uses the Arduino's built-in pull-up resistor, eliminating the need for an external resistor. The button "pulls" the signal to `LOW` when pressed.
@@ -115,8 +111,6 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * Connect one side of the button to your **Digital Pin** (e.g., Pin 7).
 * Connect the other side of the button to **GND**.
 * Enable the internal pull-up in your code using `pinMode(PIN, INPUT_PULLUP);`.
-
-[Link to Tinkercad Circuits example of pull-down button circuit](https://www.tinkercad.com/things/7B3QpxUSUb0-arduino-internal-pullup-button-circuit?sharecode=cQjVWPQ1o5n4zr0krJd_GhEf2hvhcsabkXQRBKI5UdU)
 
 
 #### How it Works

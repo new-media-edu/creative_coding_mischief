@@ -78,3 +78,17 @@ Note that this schedule is subject to change due contingencies and the preferenc
 - Presentation and exhibition of Final Projects.
 - Course conclusion.
 
+
+
+Example Projects:
+
+Dead Drops
+Aram Bartholl
+Free Toilet NYC
+Philip Stearns analog neural network
+Tega Brain Synthetic Intelligence
+Julian Oliver Transparency Grenade
+Montreal-based dance robot artist?
+Face manipulation via Wiimote
+Watering Internet robot / Terra0
+Water graffiti
