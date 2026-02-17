@@ -47,7 +47,7 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 * **Button Open (Not Pressed):** The Digital Pin is connected to GND through the resistor. The resistor "pulls" the voltage down to 0V. The Arduino reads `LOW`.
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads `HIGH`.
 
-```arduino
+```cpp
 const int BUTTON = 2;  // button connected to digital pin 2
 const int LED = 13;    // LED connected to digital pin 13
 
@@ -97,7 +97,7 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * **Button Open (Not Pressed):** The internal pull-up resistor "pulls" the voltage up to 5V. The Arduino reads `HIGH`.
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads `LOW`.
 
-```arduino
+```cpp
 const int BUTTON = 2;  // button connected to digital pin 2
 const int LED = 13;    // LED connected to digital pin 13
 
@@ -125,7 +125,7 @@ void loop() {
   <em>Serial communication between Arduino and computer</em>
 </p>
 
-```arduino
+```cpp
 void setup()                      // run once, when the sketch starts
 {
     Serial.begin(9600);           // set up Serial library at 9600 bps

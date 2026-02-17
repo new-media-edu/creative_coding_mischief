@@ -18,7 +18,7 @@ A "square wave" is the simplest type of sound wave to generate with digital elec
 <p>
   <img src="wave_chart.jpg" alt="wave diagram" width="600">
   <br>
-  <em>Visualization of a square wave</em>
+  <em>Visualization of different wave forms</em>
 </p>
 
 To create a tone, we need to:
@@ -37,7 +37,7 @@ Connect a piezo buzzer or small speaker:
 *   Positive leg (+) to **Pin 8**.
 *   Negative leg (-) to **GND**.
 
-```arduino
+```cpp
 const int SPEAKER_PIN = 8;
 
 void setup() {
@@ -62,7 +62,7 @@ void loop() {
 
 By changing the delay time inside the loop, we can change the pitch.
 
-```arduino
+```cpp
 const int SPEAKER_PIN = 8;
 
 void setup() {
@@ -98,7 +98,7 @@ While manual manipulation helps us understand the physics, Arduino provides a bu
 
 ### Playing a Melody
 
-```arduino
+```cpp
 const int SPEAKER_PIN = 8;
 
 // Note frequencies (in Hz)
