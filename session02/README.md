@@ -67,7 +67,7 @@ void loop() {
 }
 ```
 
-[Link to Tinkercad Circuits example of pull-down button circuit]()
+[Link to Tinkercad Circuits example of pull-down button circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
 
 ### Using an Internal Pull-Up Resistor
 
@@ -84,6 +84,9 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * Connect one side of the button to your **Digital Pin** (e.g., Pin 2).
 * Connect the other side of the button to **GND**.
 * Enable the internal pull-up in your code using `pinMode(PIN, INPUT_PULLUP);`.
+
+[Link to Tinkercad Circuits example of pull-down button circuit](https://www.tinkercad.com/things/7B3QpxUSUb0-arduino-internal-pullup-button-circuit?sharecode=cQjVWPQ1o5n4zr0krJd_GhEf2hvhcsabkXQRBKI5UdU)
+
 
 #### How it Works
 
