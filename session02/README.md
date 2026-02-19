@@ -29,6 +29,58 @@ void loop()                       // run over and over again
 }
 ```
 
+### Counting Up Example
+
+Here we use a variable that starts at zero and grows by one each loop. It prints forever — there's no stopping condition.
+
+```cpp
+// keeps track of the current count.
+// declaring it here (outside of loop) means it persists between loops.
+int counter = 0;
+
+void setup() {
+  // start serial communication at 9600 baud rate.
+  Serial.begin(9600);
+}
+
+void loop() {
+  Serial.println(counter);  // print the current count to the serial monitor
+
+  counter = counter + 1;    // increment the counter by 1 each loop
+
+  delay(100);               // pause 100 milliseconds before looping again
+}
+```
+
+### Countdown Example
+
+Here we use a variable to hold a count and decrement it each loop. The `if` statement acts as a gate — once the counter drops below zero, the printing stops and the sketch goes quiet.
+
+```cpp
+// keeps track of the current countdown value.
+// declaring it here (outside of loop) means it persists between loops.
+int counter = 100;
+
+void setup() {
+  // start serial communication at 9600 baud rate.
+  // this must match the baud rate selected in the serial monitor.
+  Serial.begin(9600);
+}
+
+void loop() {
+  // only print while the counter is 0 or above.
+  // once it goes negative, this block is skipped and nothing is printed.
+  if (counter >= 0) {
+    Serial.println(counter);  // send the current count to the serial monitor
+
+    counter = counter - 1;    // decrement the counter by 1 each loop
+  }
+
+  // pause 100 milliseconds before running loop() again.
+  delay(100);
+}
+```
+
 ### Experiment
 
 * Try it with `print` instead of `println`.
@@ -73,21 +125,21 @@ This is the most intuitive way to wire a button for beginners: the button "pulse
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from 5V to the Digital Pin. The 5V "overpowers" the GND connection. The Arduino reads `HIGH`.
 
 ```cpp
-const int BUTTON = 7;  // button connected to digital pin 7
-const int LED = 13;    // LED connected to digital pin 13
+int BUTTON = 7;  // button connected to digital pin 7
+int LED = 13;    // led connected to digital pin 13
 
 void setup() {
   pinMode(BUTTON, INPUT);   // set button pin as input
-  pinMode(LED, OUTPUT);     // set LED pin as output
+  pinMode(LED, OUTPUT);     // set led pin as output
 }
 
 void loop() {
   int buttonState = digitalRead(BUTTON);  // read button state
   
-  if (buttonState == HIGH) {  // button pressed (pulled HIGH by 5V)
-    digitalWrite(LED, HIGH);   // turn LED on
+  if (buttonState == HIGH) {  // button pressed (pulled high by 5v)
+    digitalWrite(LED, HIGH);   // turn led on
   } else {                     // button not pressed
-    digitalWrite(LED, LOW);    // turn LED off
+    digitalWrite(LED, LOW);    // turn led off
   }
 }
 ```
@@ -119,21 +171,21 @@ This method uses the Arduino's built-in pull-up resistor, eliminating the need f
 * **Button Closed (Pressed):** There is now a direct, low-resistance path from the Digital Pin to GND. The connection to ground has no resistance, making it the path the electricity travels through. The Arduino reads `LOW`.
 
 ```cpp
-const int BUTTON = 7;  // button connected to digital pin 7
-const int LED = 13;    // LED connected to digital pin 13
+int BUTTON = 7;  // button connected to digital pin 7
+int LED = 13;    // led connected to digital pin 13
 
 void setup() {
   pinMode(BUTTON, INPUT_PULLUP);  // set button pin with internal pull-up
-  pinMode(LED, OUTPUT);           // set LED pin as output
+  pinMode(LED, OUTPUT);           // set led pin as output
 }
 
 void loop() {
   int buttonState = digitalRead(BUTTON);  // read button state
   
-  if (buttonState == LOW) {   // button pressed (pulled LOW by GND)
-    digitalWrite(LED, HIGH);   // turn LED on
+  if (buttonState == LOW) {   // button pressed (pulled low by gnd)
+    digitalWrite(LED, HIGH);   // turn led on
   } else {                    // button not pressed
-    digitalWrite(LED, LOW);   // turn LED off
+    digitalWrite(LED, LOW);   // turn led off
   }
 }
 ```
