@@ -31,7 +31,7 @@ void loop()                       // run over and over again
 
 ### Counting Up Example
 
-Here we use a variable that starts at zero and grows by one each loop. It prints forever — there's no stopping condition.
+Here we use a variable that starts at zero and grows by one each loop. It prints forever - there's no stopping condition.
 
 ```cpp
 // keeps track of the current count.
@@ -54,7 +54,7 @@ void loop() {
 
 ### Countdown Example
 
-Here we use a variable to hold a count and decrement it each loop. The `if` statement acts as a gate — once the counter drops below zero, the printing stops and the sketch goes quiet.
+Here we use a variable to hold a count and decrement it each loop. The `if` statement acts as a gate - once the counter drops below zero, the printing stops and the sketch goes quiet.
 
 ```cpp
 // keeps track of the current countdown value.
