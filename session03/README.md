@@ -37,7 +37,7 @@ The **pitch** (high or low note) depends on how fast we repeat this cycle (frequ
 The **duration** depends on how many times we repeat the cycle.
 
 <p>
-  <img src="speaker-circuit.png" alt="Arduino speaker circuit" width="600">
+  <img src="speaker_circuit.png" alt="Arduino speaker circuit" width="600">
   <br>
   <em>Arduino speaker circuit</em> <a href="https://www.tinkercad.com/things/fosHSFB6Ahh-simple-arduino-sound-circuit?sharecode=wD2p0_hYTjGaWhUoyKmZzskugx5eNmapXuxfyn0w9hc">Tinkercad Circuit</a>
 </p>
