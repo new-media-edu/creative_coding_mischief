@@ -2,7 +2,7 @@
 
 ## Agenda
 
-+ Conditional logic (!)
++ Conditional logic
 + Input (button circuit)
 + Serial communication
 
@@ -56,7 +56,7 @@ In a floating state, the pin will pick up electromagnetic interference from the 
 <p>
   <img src="button-arduino-pulldown.png" alt="Button circuit with external pull-down resistor" width="600">
   <br>
-  <em>Button circuit with external pull-down resistor</em> [Tinkercad Circuit](https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4)
+  <em>Button circuit with external pull-down resistor</em> <a href="https://www.tinkercad.com/things/jcplrXYEhUa-arduino-pulldown-button-circuit?sharecode=IzvD_H15lnABZCZ2j2yh9VKLpoTXc9dBGmMz7jC2Ow4">Tinkercad Circuit</a>
 </p>
 
 This is the most intuitive way to wire a button for beginners: the button "pulses" the signal to `HIGH` when pressed.
@@ -101,7 +101,7 @@ Make a "button circuit" without a button.
 <p>
   <img src="button-arduino-pullup.png" alt="Button circuit with internal pull-up resistor" width="600">
   <br>
-  <em>Button circuit with internal pull-up resistor</em> [Tinkercad Circuit](https://www.tinkercad.com/things/7B3QpxUSUb0-arduino-internal-pullup-button-circuit?sharecode=cQjVWPQ1o5n4zr0krJd_GhEf2hvhcsabkXQRBKI5UdU)
+  <em>Button circuit with internal pull-up resistor</em> <a href="https://www.tinkercad.com/things/7B3QpxUSUb0-arduino-internal-pullup-button-circuit?sharecode=cQjVWPQ1o5n4zr0krJd_GhEf2hvhcsabkXQRBKI5UdU">Tinkercad Circuit</a>
 </p>
 
 This method uses the Arduino's built-in pull-up resistor, eliminating the need for an external resistor. The button "pulls" the signal to `LOW` when pressed.

@@ -2,6 +2,11 @@
 
 In this session, we will explore how to generate sound using an Arduino. We will start by manipulating a piezoelectric buzzer directly with `digitalWrite()` to understand the fundamental concept of sound as a vibration over time.
 
+## Agenda
+
++ Introduction to sound
++ For & while loops
+
 ## How Speakers Work (Simplified)
 
 A speaker or buzzer works by vibrating a diaphragm (a thin membrane) back and forth. These vibrations compress and decompress the air, creating sound waves that travel to our ears.
@@ -30,6 +35,12 @@ To create a tone, we need to:
 
 The **pitch** (high or low note) depends on how fast we repeat this cycle (frequency).
 The **duration** depends on how many times we repeat the cycle.
+
+<p>
+  <img src="speaker-circuit.png" alt="Arduino speaker circuit" width="600">
+  <br>
+  <em>Arduino speaker circuit</em> <a href="https://www.tinkercad.com/things/fosHSFB6Ahh-simple-arduino-sound-circuit?sharecode=wD2p0_hYTjGaWhUoyKmZzskugx5eNmapXuxfyn0w9hc">Tinkercad Circuit</a>
+</p>
 
 ### Manual Tone Generator
 
@@ -71,22 +82,73 @@ void setup() {
 
 void loop() {
   // Rising tone
-  for (int i = 1000; i > 200; i--) {
+  int i = 1000;
+  while (i > 200) {
     digitalWrite(SPEAKER_PIN, HIGH);
     delayMicroseconds(i);
     digitalWrite(SPEAKER_PIN, LOW);
     delayMicroseconds(i);
+    i--;
   }
   
   // Falling tone
-  for (int i = 200; i < 1000; i++) {
+  i = 200;
+  while (i < 1000) {
     digitalWrite(SPEAKER_PIN, HIGH);
     delayMicroseconds(i);
     digitalWrite(SPEAKER_PIN, LOW);
     delayMicroseconds(i);
+    i++;
   }
 }
 ```
+
+### Experiment: Making a Techno Song
+
+Now that we have loops down, we can introduce **arrays** — a way to store a list of values under one name. We'll define an array of delay values (just like in the siren) and use a `while` loop to step through and play each one.
+
+A smaller delay = higher pitch. A larger delay = lower pitch. `0` = silence.
+
+```cpp
+const int SPEAKER_PIN = 6;
+
+// Each value is the delay time in microseconds (smaller = higher pitch)
+// 0 = rest (silence)
+int bassline[] = { 900, 0, 900, 0, 700, 0, 900, 0,
+                   900, 0, 900, 0, 600, 600, 0, 0 };
+
+int noteCount = 16;
+int noteDuration = 200; // how long each note plays (milliseconds)
+
+void setup() {
+  pinMode(SPEAKER_PIN, OUTPUT);
+}
+
+void loop() {
+  int i = 0;
+  while (i < noteCount) {
+
+    if (bassline[i] == 0) {
+      delay(noteDuration); // rest
+    } else {
+      int t = 0;
+      while (t < noteDuration) {
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delayMicroseconds(bassline[i]);
+        digitalWrite(SPEAKER_PIN, LOW);
+        delayMicroseconds(bassline[i]);
+        t++;
+      }
+    }
+
+    i++;
+  }
+
+  delay(50); // tiny gap between pattern repeats
+}
+```
+
+`bassline[i]` uses the index `i` to grab one value from the array at a time — `bassline[0]` is `900`, `bassline[1]` is `0`, and so on. Try swapping in different delay values to write your own bassline!
 
 ## The Easy Way: `tone()`
 

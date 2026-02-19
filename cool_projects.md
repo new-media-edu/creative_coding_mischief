@@ -1,0 +1,16 @@
++ [A Display Powered by Air: 3D Printed Microfluidic Multiplexing](https://www.youtube.com/watch?v=VZ2ZcOzLnGg) — 3D printed microfluidic channels that use air pressure to drive a physical pixel display.
++ [Barbie Liberation Organization](https://www.youtube.com/watch?v=OVT4T7OR3iQ) — Culture jamming group that switched voice boxes between Barbie and G.I. Joe dolls in 1993, then secretly returned them to store shelves to challenge gender stereotypes.
++ [TV-B-Gone!](https://www.youtube.com/watch?v=EG9G0PxKa0k) — A tiny wearable device by Mitch Altman that blasts universal TV-off IR codes, silently killing televisions in public spaces.
++ [Mine Kafon](https://vimeo.com/51887079) — Wind-powered dandelion-shaped sphere by Afghan designer Massoud Hassani that rolls across minefields and detonates landmines. Now in MoMA's collection.
++ [Useless Machine](https://www.geek.com/wp-content/uploads/2014/06/11.gif) — A box with a single switch; when you flip it on, a finger emerges from inside and flips it back off.
++ [Capitalism Works for Me!](https://www.youtube.com/watch?v=spR8q4iY9xc) — Interactive neon sign by Steve Lambert that invites passersby to vote TRUE or FALSE on whether capitalism works for them.
++ [Log Jammer](http://www.allisonburtch.net/log-jammer/) — Allison Burtch's device that defeats audio surveillance by injecting ultrasonic noise directly into a microphone's circuit.
++ [Controlling Paramecium with a Joystick](https://www.youtube.com/watch?v=OxdPZ23v43Q) — Researchers steer live paramecia through a maze using galvanotaxis — weak electrical fields applied via a joystick.
++ [Microtonal Wall](https://www.youtube.com/watch?v=MJSgaEaZytg) — Tristan Perich's installation of hundreds of tiny speakers embedded in a wall, each playing a single tone, creating a dense microtonal soundscape.
++ [Listening Post](https://vimeo.com/3885443) — Data sculpture by Mark Hansen and Ben Rubin that harvests live text from internet chat rooms and renders it as sound and scrolling text across 231 small screens.
++ [Zimoun](http://zimoun.net/) — Swiss artist who builds large-scale kinetic sound sculptures from hundreds of DC motors, cotton balls, cardboard, and wire — simple components creating complex emergent behavior.
++ [Creating Crankshafts from Paperclips](http://www.instructables.com/id/Building-Machines-From-Paperclips/) — Instructables guide to bending ordinary paperclips into cranks, levers, and linkages to build small working mechanical sculptures for ~37 cents.
++ [Wall Plotter (Arduino Polar V Plotter)](http://www.instructables.com/id/ARDUINO-POLAR-V-PLOTTER/) — Arduino-powered hanging drawbot controlled by two stepper motors and a belt; draws SVG files on walls, windows, or whiteboards.
++ [BMW Museum Kinetic Sculpture](https://www.youtube.com/watch?v=hlx-M53dC7M&feature=related) — 714 metal spheres suspended on individual cables that ripple and morph into the silhouettes of BMW concept cars.
++ [Kinetic Origami](https://www.youtube.com/watch?v=NdY7owk45II) — Demonstration of how a single servo can drive folded-paper flexures to produce smooth linear and rotary motion.
++ [Transform - MIT Media Lab](https://www.youtube.com/watch?v=lCARHatJQJA) — Table surface covered in hundreds of motorized pins that dynamically rise and fall to display shapes, respond to touch, and ripple like water.
