@@ -201,3 +201,64 @@ void loop() {
 Combine what we learned in Session 02 (Buttons) with Session 03 (Sound). Create a "keyboard" where pressing a button plays a specific note.
 
 **Bonus:** Can you make the pitch change based on a potentiometer (knob)? (Hint: Look up `analogRead()` and `map()`).
+
+## In class examples
+```cpp
+
+int speakerPin = 7;
+int speakerFreq = 15000;
+
+int section = 0;
+
+// 1/440 = .0023seconds = 2.3ms = 2300 microseconds
+// 
+
+void setup()
+{
+  pinMode(speakerPin, OUTPUT);
+}
+
+void loop()
+{
+  if(section == 0) {
+
+    digitalWrite(speakerPin, HIGH);
+    delayMicroseconds(speakerFreq);
+
+    digitalWrite(speakerPin, LOW);
+    delayMicroseconds(speakerFreq);
+
+    speakerFreq = speakerFreq - 500;
+
+    // make sure once it hits 0 it goes back to 15000
+    if(speakerFreq <= 5000) {
+      // set speaker frequency back to 15000
+      speakerFreq = 250000;
+      
+      // change the section
+      section = 1;
+    }
+  }
+  
+  if(section == 1) {
+
+    digitalWrite(speakerPin, HIGH);
+    delayMicroseconds(speakerFreq);
+
+    digitalWrite(speakerPin, LOW);
+    delayMicroseconds(speakerFreq);
+
+    speakerFreq = speakerFreq - 1500;
+
+    // make sure once it hits 0 it goes back to 15000
+    if(speakerFreq <= 15000) {
+      
+      // set speaker frequency back to 15000
+      speakerFreq = 15000;
+      
+      // change the section back to 0
+      section = 0;
+    }
+  }
+}
+```
