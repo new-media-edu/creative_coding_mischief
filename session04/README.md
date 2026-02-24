@@ -19,24 +19,67 @@ To read this, we use the analog input pins (A0, A1, A2, etc.) and the `analogRea
 
 *   `analogRead(pin)`: Reads the voltage on an analog pin and returns a number between **0** (for 0 volts) and **1023** (for 5 volts).
 
-### Circuit: Potentiometer controlling a speaker
+### Example 1: Reading the Potentiometer
 
-<p>
-  <img src="../session02/button-arduino-pulldown.png" alt="Potentiometer Circuit Diagram" width="600">
-  <br>
-  <em>(Imagine the button is a potentiometer. Connect the middle pin to A0, and the other two pins to 5V and GND)</em>
-</p>
+Let's start with the simplest possible example: reading the value from the potentiometer and printing it to the Serial Monitor so we can see what the Arduino is sensing.
 
-1.  **Speaker:** Positive leg to Pin 8, Negative leg to GND.
-2.  **Potentiometer:**
+#### Circuit: Potentiometer for Serial Output
+
+1.  **Potentiometer:**
     *   Connect the two outer pins to 5V and GND.
     *   Connect the middle pin to Analog Pin **A0**.
 
-### Code: Controlling Pitch with a Knob
+#### Code: Printing Analog Values
 
-This code reads the value from the potentiometer and uses it to control the pitch of the sound. A raw value of 0-1023 is not a good range for frequencies, so we use the `map()` function to scale it.
+This code initializes serial communication and, in the main loop, continuously reads the analog value from pin A0 and prints it to the Serial Monitor.
+
+```cpp
+// Analog pin connected to the potentiometer's middle leg
+const int POT_PIN = A0;
+
+void setup() {
+  // Initialize Serial communication at 9600 bits per second.
+  // This allows the Arduino to send data to the computer.
+  Serial.begin(9600);
+}
+
+void loop() {
+  // 1. Read the raw analog value from the potentiometer.
+  // This will be a number between 0 and 1023.
+  int potValue = analogRead(POT_PIN);
+
+  // 2. Print the value to the Serial Monitor.
+  // Open the Serial Monitor in the Arduino IDE (Tools > Serial Monitor) to see the output.
+  Serial.println(potValue);
+  
+  // Wait for 100 milliseconds before the next reading.
+  // This slows down the printing so we can read it easily.
+  delay(100); 
+}
+```
+*After uploading this code, open the Serial Monitor and turn the knob. You should see the numbers change from 0 to 1023.*
+
+---
+
+### Example 2: Controlling Pitch with a Knob
+
+Now let's use that value to do something more interesting, like controlling sound. This code reads the value from the potentiometer and uses it to control the pitch of the sound. A raw value of 0-1023 is not a good range for frequencies, so we use the `map()` function to scale it.
 
 `map(value, fromLow, fromHigh, toLow, toHigh)` is a super useful function that re-maps a number from one range to another.
+
+#### Circuit: Potentiometer and Speaker
+
+<p>
+  <img src="arduino-potentiometer-speaker.png" alt="Potentiometer Circuit Diagram" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/6f2VjdGorU9-mighty-snaget-vihelmo">Tinkercad Circuit</a></em>
+</p>
+
+1.  **Speaker:** Positive leg to Pin 8, Negative leg to GND.
+2.  **Potentiometer:** Connect middle pin to **A0**, and outer pins to 5V and GND.
+
+
+#### Code: Potentiometer-controlled Pitch
 
 ```cpp
 // Pin connected to the speaker
@@ -51,7 +94,6 @@ void setup() {
 
 void loop() {
   // 1. Read the raw analog value from the potentiometer.
-  // This will be a number between 0 and 1023.
   int potValue = analogRead(POT_PIN);
 
   // 2. Map the potentiometer's range (0-1023) to a musical frequency range.
@@ -59,8 +101,8 @@ void loop() {
   int frequency = map(potValue, 0, 1023, 120, 1500);
 
   // 3. Play the calculated frequency on the speaker.
-  // We use the simple tone(pin, frequency) version. It will play continuously,
-  // but the loop will update the frequency so fast it sounds instantaneous.
+  // This will play continuously, but the loop will update the frequency so fast
+  // it sounds like the pitch is changing instantly.
   tone(SPEAKER_PIN, frequency);
   
   // A small delay can sometimes help stabilize the readings, but is often not needed.
