@@ -123,9 +123,16 @@ while (condition) {
 }
 ```
 
+### The Concept of "Blocking" Code
+This is a very important concept. Code that is **blocking** "blocks" or pauses the entire program until it's finished. 
+
+The most common blocking function we use is `delay()`. When your program reaches `delay(1000)`, it stops dead in its tracks for one full second. It cannot read sensors, check buttons, or do anything else until that second is over.
+
+`while` loops can also be a form of blocking code. In the examples below, the `while` loop will capture the program's full attention until its condition is no longer true. This is useful for simple, dedicated actions, but it makes it very difficult to do two things at once. This is why the "state machine" technique we saw in Session 03 (using variables to remember a "state" in the main loop) is so powerful for more advanced projects.
+
 ### `while` Loop Example: Fading an LED
 
-This code uses a `while` loop to make an LED smoothly fade in. It uses `analogWrite()` which sends a PWM signal to the LED, allowing us to control its brightness.
+This code uses a `while` loop to make an LED smoothly fade in and out. The `loop()` function will be stuck inside the first `while` loop until the fade-in is complete, and then it will be stuck inside the second one until the fade-out is complete.
 
 **Circuit:** Connect an LED (with a 220-ohm resistor) to Pin 9.
 
@@ -137,29 +144,29 @@ void setup() {
 }
 
 void loop() {
-  // --- Fade In ---
+  // --- Fade In (This is a blocking loop) ---
   int brightness = 0;
   while (brightness <= 255) {
     analogWrite(LED_PIN, brightness);
     brightness = brightness + 5; // Increase brightness
-    delay(30); // Wait a bit
+    delay(30); // This delay is what makes the loop take time
   }
 
-  // --- Fade Out ---
+  // --- Fade Out (This is also a blocking loop) ---
   brightness = 255;
   while (brightness >= 0) {
     analogWrite(LED_PIN, brightness);
     brightness = brightness - 5; // Decrease brightness
-    delay(30); // Wait a bit
+    delay(30); // Program is paused here on each step
   }
 }
 ```
 *Warning: `while` loops can be dangerous! If the condition inside the `while()` parentheses never becomes false, your program will be stuck in the loop forever and will become unresponsive. Notice how we change the `brightness` variable inside the loop so it eventually ends.*
 
 
-### `while` Loop Example: Siren Sound
+### `while` Loop Example: A Blocking Siren
 
-Here is the siren example from before, but now implemented with `while` loops. These loops "block" the code—the rising tone must finish completely before the falling tone can begin.
+Here is the siren example, implemented with blocking `while` loops. The rising tone must finish completely before the falling tone can begin. While the siren is rising, the Arduino cannot do anything else (like check for a button press).
 
 ```cpp
 const int SPEAKER_PIN = 8;
@@ -173,6 +180,7 @@ void loop() {
   // Start with a low pitch (long period) and go to a high pitch (short period).
   int period = 1000;
   while (period > 200) {
+    // This inner code is our manual, blocking way of making a tone
     digitalWrite(SPEAKER_PIN, HIGH);
     delayMicroseconds(period);
     digitalWrite(SPEAKER_PIN, LOW);
@@ -256,3 +264,12 @@ void loop() {
   }
 }
 ```
+
+### Why can't I play two notes at once?
+
+This is a very common and insightful question. With the code above, if you press two buttons at once, you will only hear one note. Why?
+
+1.  **Sequential Code:** The `if...else if...` structure is sequential. The Arduino checks the first button. If it's pressed, it plays that note and *skips checking the rest of the buttons*. It can only ever be inside one of the `if` blocks at a time.
+2.  **Hardware Limitations:** The `tone()` function uses one of the Arduino's hardware timers to generate a frequency. This hardware can only be set to one frequency at a time. It's like a radio that can only be tuned to one station at a time.
+
+Playing multiple notes (polyphony) is more complicated because you can't use the simple `tone()` function or blocking code. It requires a non-blocking approach where you manually control the speaker's vibrations for all the notes you want to play, which is a more advanced topic.
