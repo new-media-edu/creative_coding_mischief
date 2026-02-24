@@ -1,155 +1,216 @@
-# Session 04: Stateful Changes and Sequences
+# Session 04: Analog Input and Loops
 
-In the previous session, our code either played one sound continuously or played a short melody once in `setup()`. But what if we want to create dynamic, changing sounds that evolve over time?
+In this session, we'll bridge the gap between the digital and analog worlds. We'll learn how to read variable inputs from a potentiometer and how to use loops to create repetitive actions like fading lights or warbling sirens. Finally, we'll combine these ideas with buttons to create an interactive musical instrument.
 
-This session introduces a powerful concept: **state management**. Instead of using `for` or `while` loops, which can "block" the Arduino's `loop()` function, we will use global variables to keep track of the program's "state." The `loop()` function will run very quickly, and on each pass, it will check these state variables and decide what to do next.
+## Agenda
 
-This approach is fundamental to writing responsive, non-blocking Arduino code.
-
-## Key Concepts
-
-*   **Global Variables:** Variables declared outside of any function. They retain their value between runs of the `loop()` function, allowing us to store information over time (e.g., the current pitch, the current note in a melody).
-*   **State Machine:** A programming pattern where the code can be in one of several "states." Based on the current state, it does something, and then it might transition to a new state. We will use `if` and `else if` statements to check our state.
-*   **Arrays:** A way to store a list of values (like a sequence of musical notes) under a single variable name.
++ Reading analog values with `analogRead()`
++ Mapping values with the `map()` function
++ Creating repetition with `while` loops
++ Project: Building a button-based keyboard
 
 ---
 
-### Example: A Dynamic Siren
+## Part 1: Analog Input with a Potentiometer
 
-This example creates a classic siren sound that smoothly rises in pitch, then falls, and repeats. It uses a variable `pitchPeriod` to control the tone and a `sirenMode` variable to keep track of whether the pitch should be rising or falling.
+So far, we've only used `digitalRead()` and `digitalWrite()`, which are limited to two states: HIGH and LOW. The real world is rarely that simple. An **analog** signal can be any value within a range. A potentiometer (or "pot") is a knob that provides a variable resistance, which we can read as an analog voltage.
+
+To read this, we use the analog input pins (A0, A1, A2, etc.) and the `analogRead()` function.
+
+*   `analogRead(pin)`: Reads the voltage on an analog pin and returns a number between **0** (for 0 volts) and **1023** (for 5 volts).
+
+### Circuit: Potentiometer controlling a speaker
+
+<p>
+  <img src="../session02/button-arduino-pulldown.png" alt="Potentiometer Circuit Diagram" width="600">
+  <br>
+  <em>(Imagine the button is a potentiometer. Connect the middle pin to A0, and the other two pins to 5V and GND)</em>
+</p>
+
+1.  **Speaker:** Positive leg to Pin 8, Negative leg to GND.
+2.  **Potentiometer:**
+    *   Connect the two outer pins to 5V and GND.
+    *   Connect the middle pin to Analog Pin **A0**.
+
+### Code: Controlling Pitch with a Knob
+
+This code reads the value from the potentiometer and uses it to control the pitch of the sound. A raw value of 0-1023 is not a good range for frequencies, so we use the `map()` function to scale it.
+
+`map(value, fromLow, fromHigh, toLow, toHigh)` is a super useful function that re-maps a number from one range to another.
 
 ```cpp
-// The pin connected to our speaker
+// Pin connected to the speaker
+const int SPEAKER_PIN = 8;
+// Analog pin connected to the potentiometer's middle leg
+const int POT_PIN = A0;
+
+void setup() {
+  // No pinMode is needed for analog inputs.
+  // The tone() function handles the speaker pin setup.
+}
+
+void loop() {
+  // 1. Read the raw analog value from the potentiometer.
+  // This will be a number between 0 and 1023.
+  int potValue = analogRead(POT_PIN);
+
+  // 2. Map the potentiometer's range (0-1023) to a musical frequency range.
+  // Let's choose a range from a low note (120Hz) to a high note (1500Hz).
+  int frequency = map(potValue, 0, 1023, 120, 1500);
+
+  // 3. Play the calculated frequency on the speaker.
+  // We use the simple tone(pin, frequency) version. It will play continuously,
+  // but the loop will update the frequency so fast it sounds instantaneous.
+  tone(SPEAKER_PIN, frequency);
+  
+  // A small delay can sometimes help stabilize the readings, but is often not needed.
+  delay(10); 
+}
+```
+
+---
+
+## Part 2: `while` Loops
+
+A `while` loop is a code structure that repeats a block of code **as long as** a certain condition is true. This is useful for creating sequences that need to run to completion before the main `loop()` continues.
+
+The structure is:
+```cpp
+while (condition) {
+  // ... this code repeats as long as condition is true
+}
+```
+
+### `while` Loop Example: Fading an LED
+
+This code uses a `while` loop to make an LED smoothly fade in. It uses `analogWrite()` which sends a PWM signal to the LED, allowing us to control its brightness.
+
+**Circuit:** Connect an LED (with a 220-ohm resistor) to Pin 9.
+
+```cpp
+const int LED_PIN = 9; // Must be a PWM pin (~)
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  // --- Fade In ---
+  int brightness = 0;
+  while (brightness <= 255) {
+    analogWrite(LED_PIN, brightness);
+    brightness = brightness + 5; // Increase brightness
+    delay(30); // Wait a bit
+  }
+
+  // --- Fade Out ---
+  brightness = 255;
+  while (brightness >= 0) {
+    analogWrite(LED_PIN, brightness);
+    brightness = brightness - 5; // Decrease brightness
+    delay(30); // Wait a bit
+  }
+}
+```
+*Warning: `while` loops can be dangerous! If the condition inside the `while()` parentheses never becomes false, your program will be stuck in the loop forever and will become unresponsive. Notice how we change the `brightness` variable inside the loop so it eventually ends.*
+
+
+### `while` Loop Example: Siren Sound
+
+Here is the siren example from before, but now implemented with `while` loops. These loops "block" the code—the rising tone must finish completely before the falling tone can begin.
+
+```cpp
 const int SPEAKER_PIN = 8;
 
-// This global variable stores the current period of the sound wave in microseconds.
-// A smaller number means a higher pitch. We'll start with a low pitch.
-int pitchPeriod = 1000;
-
-// This global variable is our "state" for the siren.
-// 0 = pitch is rising
-// 1 = pitch is falling
-int sirenMode = 0; 
-
 void setup() {
-  // Set the speaker pin as an output.
   pinMode(SPEAKER_PIN, OUTPUT);
 }
 
 void loop() {
-  // This check happens thousands of times per second.
-  // First, we check which mode the siren is in.
-  
-  if (sirenMode == 0) {
-    // --- RISING PITCH MODE ---
+  // --- Rising Tone ---
+  // Start with a low pitch (long period) and go to a high pitch (short period).
+  int period = 1000;
+  while (period > 200) {
+    digitalWrite(SPEAKER_PIN, HIGH);
+    delayMicroseconds(period);
+    digitalWrite(SPEAKER_PIN, LOW);
+    delayMicroseconds(period);
     
-    // Decrease the period slightly. This makes the pitch go up.
-    pitchPeriod = pitchPeriod - 5; 
-    
-    // This is a safety check. If the pitch gets too high (period gets too short),
-    // we switch to the falling pitch mode.
-    if (pitchPeriod <= 200) {
-      sirenMode = 1; // Switch to falling mode
-    }
-    
-  } else {
-    // --- FALLING PITCH MODE ---
-    
-    // Increase the period slightly. This makes the pitch go down.
-    pitchPeriod = pitchPeriod + 5;
-    
-    // If the pitch gets low enough (period gets long enough),
-    // we switch back to the rising pitch mode to repeat the cycle.
-    if (pitchPeriod >= 1000) {
-      sirenMode = 0; // Switch to rising mode
-    }
+    // Make the pitch higher for the next loop run
+    period = period - 5;
   }
+  
+  // --- Falling Tone ---
+  // Start with a high pitch and go to a low pitch.
+  period = 200;
+  while (period < 1000) {
+    digitalWrite(SPEAKER_PIN, HIGH);
+    delayMicroseconds(period);
+    digitalWrite(SPEAKER_PIN, LOW);
+    delayMicroseconds(period);
 
-  // --- Generate the sound ---
-  // After updating the pitchPeriod, we generate one cycle of the sound wave.
-  // Because the loop repeats so fast, this creates a continuous, changing tone.
-  digitalWrite(SPEAKER_PIN, HIGH);
-  delayMicroseconds(pitchPeriod);
-  digitalWrite(SPEAKER_PIN, LOW);
-  delayMicroseconds(pitchPeriod);
+    // Make the pitch lower for the next loop run
+    period = period + 5;
+  }
 }
 ```
+
 ---
 
-### Example: A "Techno" Bassline with Arrays
+## Part 3: Project: A Musical Keyboard
 
-This example plays a sequence of notes stored in an **array**. It uses an index variable (`currentNoteIndex`) to remember which note it should play next. When the sequence is finished, it starts over from the beginning.
+Let's combine what we know about buttons (`digitalRead`) and sound (`tone`) to create a simple musical keyboard. Each button will play a different note.
 
-This is much more powerful than writing `tone(...)`, `delay(...)` over and over, because you can easily change the melody just by changing the numbers in the array.
+### Circuit: Three-Button Keyboard
+
+1.  **Speaker:** Positive leg to Pin 8, Negative leg to GND.
+2.  **Buttons:**
+    *   Connect one side of each button to Pin 2, 3, and 4 respectively.
+    *   Connect the other side of each button to GND.
+    *   We will use the `INPUT_PULLUP` mode, so no external resistors are needed!
+
+### Code: Button Keyboard
+
+This code checks each button. If a button is pressed, it plays the corresponding note. If no buttons are pressed, it turns the sound off with `noTone()`.
 
 ```cpp
-const int SPEAKER_PIN = 6;
+// Speaker Pin
+const int SPEAKER_PIN = 8;
 
-// --- The Melody ---
-// An array is a list of values. This array holds the PERIOD of each note in
-// microseconds. A smaller number is a higher pitch.
-// A value of 0 will represent a "rest" or silence.
-int bassline[] = { 900, 0, 900, 0, 700, 0, 900, 0,
-                   900, 0, 900, 0, 600, 600, 0, 0 };
+// Button Pins
+const int BUTTON1_PIN = 2;
+const int BUTTON2_PIN = 3;
+const int BUTTON3_PIN = 4;
 
-// This constant holds the total number of notes in our array.
-// The `sizeof` operator is a handy way to calculate this automatically.
-const int NOTE_COUNT = sizeof(bassline) / sizeof(int);
-
-// This variable is our state! It's the index that tracks which note we are currently playing.
-int currentNoteIndex = 0;
-
-// This variable tracks time. We'll use it to decide when to move to the next note.
-unsigned long lastNoteTime = 0;
-
-// This constant defines how long each note should play, in milliseconds.
-const int NOTE_DURATION = 150;
-
+// Note Frequencies (in Hz)
+const int NOTE_C4 = 262;
+const int NOTE_D4 = 294;
+const int NOTE_E4 = 330;
 
 void setup() {
-  pinMode(SPEAKER_PIN, OUTPUT);
-  // Get the time at which the sketch starts.
-  lastNoteTime = millis();
+  // Set up the button pins with the internal pull-up resistor.
+  // This means the pin will be HIGH when the button is NOT pressed,
+  // and LOW when it IS pressed.
+  pinMode(BUTTON1_PIN, INPUT_PULLUP);
+  pinMode(BUTTON2_PIN, INPUT_PULLUP);
+  pinMode(BUTTON3_PIN, INPUT_PULLUP);
 }
 
 void loop() {
-  // Get the current note's period from the array using our index.
-  int notePeriod = bassline[currentNoteIndex];
+  // Check the state of the first button.
+  // Because we are using INPUT_PULLUP, a pressed button is LOW.
+  if (digitalRead(BUTTON1_PIN) == LOW) {
+    tone(SPEAKER_PIN, NOTE_C4); // Play note C4
 
-  // First, check if the current note is a rest.
-  if (notePeriod == 0) {
-    // If it's a rest, do nothing to the speaker (silence).
-    noTone(SPEAKER_PIN);
+  } else if (digitalRead(BUTTON2_PIN) == LOW) {
+    tone(SPEAKER_PIN, NOTE_D4); // Play note D4
+
+  } else if (digitalRead(BUTTON3_PIN) == LOW) {
+    tone(SPEAKER_PIN, NOTE_E4); // Play note E4
+    
   } else {
-    // If it's a note, generate the tone by rapidly pulsing the speaker.
-    // This is the same manual tone generation technique as in the previous examples.
-    digitalWrite(SPEAKER_PIN, HIGH);
-    delayMicroseconds(notePeriod);
-    digitalWrite(SPEAKER_PIN, LOW);
-    delayMicroseconds(notePeriod);
-  }
-
-  // --- Timekeeping Logic ---
-  // This section decides when to advance to the next note in the sequence.
-  
-  // `millis()` returns the number of milliseconds since the Arduino started.
-  // We check if NOTE_DURATION milliseconds have passed since we started playing the current note.
-  if (millis() - lastNoteTime > NOTE_DURATION) {
-    // If enough time has passed, it's time to move to the next note.
-    
-    // Move to the next index in the array.
-    currentNoteIndex = currentNoteIndex + 1;
-
-    // Check if we've reached the end of the array.
-    if (currentNoteIndex >= NOTE_COUNT) {
-      // If so, reset the index back to 0 to loop the melody.
-      currentNoteIndex = 0; 
-    }
-    
-    // Finally, record the time that this new note started.
-    lastNoteTime = millis();
+    // If no buttons are being pressed, turn the speaker off.
+    noTone(SPEAKER_PIN);
   }
 }
 ```
-
-Try changing the values in the `bassline` array to create your own unique melodies!
