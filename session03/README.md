@@ -48,13 +48,13 @@ The **duration** depends on how many times we repeat the cycle.
 This code generates a continuous tone by rapidly switching a digital pin HIGH and LOW. The `loop()` function constantly repeats, creating a square wave that we can hear.
 
 Connect a piezo buzzer or small speaker:
-*   Positive leg (+) to **Pin 8**.
+*   Positive leg (+) to **Pin 6**.
 *   Negative leg (-) to **GND**.
 
 ```cpp
 // This constant holds the pin number for our speaker.
 // Using a constant makes the code easier to read and modify.
-const int SPEAKER_PIN = 8;
+const int SPEAKER_PIN = 6;
 
 // The setup function runs once when the Arduino is powered on or reset.
 void setup() {
@@ -107,7 +107,7 @@ This example shows how to use the `tone()` function to play the first few notes 
 
 ```cpp
 // This constant holds the pin number for our speaker.
-const int SPEAKER_PIN = 8;
+const int SPEAKER_PIN = 6;
 
 // Define the frequencies (in Hertz) for musical notes.
 // These are standard values for the 4th octave (the one in the middle of a piano).
