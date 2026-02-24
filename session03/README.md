@@ -233,10 +233,12 @@ void loop()
     // make sure once it hits 0 it goes back to 15000
     if(speakerFreq <= 5000) {
       // set speaker frequency back to 15000
-      speakerFreq = 250000;
+      speakerFreq = 25000;
       
       // change the section
       section = 1;
+      
+      delay(500);
     }
   }
   
@@ -258,7 +260,11 @@ void loop()
       
       // change the section back to 0
       section = 0;
+      
+      delay(500);
+
     }
   }
+
 }
 ```
