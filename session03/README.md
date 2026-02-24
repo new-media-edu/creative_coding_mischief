@@ -5,7 +5,8 @@ In this session, we will explore how to generate sound using an Arduino. We will
 ## Agenda
 
 + Introduction to sound
-+ For & while loops
++ Generating tones with `digitalWrite()`
++ Using the `tone()` function
 
 ## How Speakers Work (Simplified)
 
@@ -42,157 +43,117 @@ The **duration** depends on how many times we repeat the cycle.
   <em>Arduino speaker circuit</em> <a href="https://www.tinkercad.com/things/fosHSFB6Ahh-simple-arduino-sound-circuit?sharecode=wD2p0_hYTjGaWhUoyKmZzskugx5eNmapXuxfyn0w9hc">Tinkercad Circuit</a>
 </p>
 
-### Manual Tone Generator
+### Code Example: Manual Tone Generator
+
+This code generates a continuous tone by rapidly switching a digital pin HIGH and LOW. The `loop()` function constantly repeats, creating a square wave that we can hear.
 
 Connect a piezo buzzer or small speaker:
 *   Positive leg (+) to **Pin 8**.
 *   Negative leg (-) to **GND**.
 
 ```cpp
+// This constant holds the pin number for our speaker.
+// Using a constant makes the code easier to read and modify.
 const int SPEAKER_PIN = 8;
 
+// The setup function runs once when the Arduino is powered on or reset.
 void setup() {
+  // We set the speaker pin as an OUTPUT because we are sending signals to it.
   pinMode(SPEAKER_PIN, OUTPUT);
 }
 
+// The loop function runs continuously after setup() has finished.
 void loop() {
-  // Create a 1 kHz tone (1000 cycles per second)
-  // Period = 1 second / 1000 = 1000 microseconds
-  // Half-period (high time) = 500 microseconds
+  // To create a tone, we need to turn the speaker on and off very quickly.
+  // This on-off cycle is called a square wave.
   
+  // The "period" of a wave is the time for one full cycle.
+  // For a 1kHz tone (1000 cycles per second), the period is 1/1000 of a second,
+  // which is 1000 microseconds.
+  // We divide this by two for the HIGH part and the LOW part of the wave.
+  int halfPeriod = 500; // in microseconds
+
+  // 1. Set the pin to HIGH (5V), pushing the speaker diaphragm out.
   digitalWrite(SPEAKER_PIN, HIGH);
-  delayMicroseconds(500); // Wait 500 microseconds
+  
+  // 2. Wait for half of the period.
+  // We use delayMicroseconds() for the precise, short delays needed for audio frequencies.
+  delayMicroseconds(halfPeriod); 
+  
+  // 3. Set the pin to LOW (0V), pulling the speaker diaphragm back in.
   digitalWrite(SPEAKER_PIN, LOW);
-  delayMicroseconds(500); // Wait 500 microseconds
+  
+  // 4. Wait for the other half of the period to complete the cycle.
+  delayMicroseconds(halfPeriod);
+  
+  // The loop() function immediately repeats, creating a continuous 1kHz tone.
 }
 ```
 
 *Note: We use `delayMicroseconds()` instead of `delay()` because sound vibrations are very fast. `delay(1)` (1 millisecond) would produce a 500Hz tone, which is a relatively low pitch.*
 
-### Experiment: Making a Siren
-
-By changing the delay time inside the loop, we can change the pitch.
-
-```cpp
-const int SPEAKER_PIN = 8;
-
-void setup() {
-  pinMode(SPEAKER_PIN, OUTPUT);
-}
-
-void loop() {
-  // Rising tone
-  int i = 1000;
-  while (i > 200) {
-    digitalWrite(SPEAKER_PIN, HIGH);
-    delayMicroseconds(i);
-    digitalWrite(SPEAKER_PIN, LOW);
-    delayMicroseconds(i);
-    i--;
-  }
-  
-  // Falling tone
-  i = 200;
-  while (i < 1000) {
-    digitalWrite(SPEAKER_PIN, HIGH);
-    delayMicroseconds(i);
-    digitalWrite(SPEAKER_PIN, LOW);
-    delayMicroseconds(i);
-    i++;
-  }
-}
-```
-
-### Experiment: Making a Techno Song
-
-Now that we have loops down, we can introduce **arrays** — a way to store a list of values under one name. We'll define an array of delay values (just like in the siren) and use a `while` loop to step through and play each one.
-
-A smaller delay = higher pitch. A larger delay = lower pitch. `0` = silence.
-
-```cpp
-const int SPEAKER_PIN = 6;
-
-// Each value is the delay time in microseconds (smaller = higher pitch)
-// 0 = rest (silence)
-int bassline[] = { 900, 0, 900, 0, 700, 0, 900, 0,
-                   900, 0, 900, 0, 600, 600, 0, 0 };
-
-int noteCount = 16;
-int noteDuration = 200; // how long each note plays (milliseconds)
-
-void setup() {
-  pinMode(SPEAKER_PIN, OUTPUT);
-}
-
-void loop() {
-  int i = 0;
-  while (i < noteCount) {
-
-    if (bassline[i] == 0) {
-      delay(noteDuration); // rest
-    } else {
-      int t = 0;
-      while (t < noteDuration) {
-        digitalWrite(SPEAKER_PIN, HIGH);
-        delayMicroseconds(bassline[i]);
-        digitalWrite(SPEAKER_PIN, LOW);
-        delayMicroseconds(bassline[i]);
-        t++;
-      }
-    }
-
-    i++;
-  }
-
-  delay(50); // tiny gap between pattern repeats
-}
-```
-
-`bassline[i]` uses the index `i` to grab one value from the array at a time — `bassline[0]` is `900`, `bassline[1]` is `0`, and so on. Try swapping in different delay values to write your own bassline!
 
 ## The Easy Way: `tone()`
 
-While manual manipulation helps us understand the physics, Arduino provides a built-in function to do this for us in the background.
+While manual manipulation helps us understand the physics, Arduino provides a built-in function to do this for us in the background. This is much more convenient for playing melodies.
 
-*   `tone(pin, frequency)`: Starts playing a square wave of the specified frequency.
-*   `tone(pin, frequency, duration)`: Plays the tone for a specific duration (in milliseconds).
-*   `noTone(pin)`: Stops the tone.
+*   `tone(pin, frequency)`: Starts playing a square wave of the specified frequency on a pin. The sound will continue forever until you stop it.
+*   `tone(pin, frequency, duration)`: Plays the tone for a specific duration (in milliseconds). The Arduino will pause other code while the note plays.
+*   `noTone(pin)`: Stops the tone currently playing on a pin.
 
-### Playing a Melody
+### Code Example: Playing a Melody with `tone()`
+
+This example shows how to use the `tone()` function to play the first few notes of a major scale. Because this code is in `setup()`, it will only play once.
 
 ```cpp
+// This constant holds the pin number for our speaker.
 const int SPEAKER_PIN = 8;
 
-// Note frequencies (in Hz)
+// Define the frequencies (in Hertz) for musical notes.
+// These are standard values for the 4th octave (the one in the middle of a piano).
 const int NOTE_C4 = 262;
 const int NOTE_D4 = 294;
 const int NOTE_E4 = 330;
 const int NOTE_F4 = 349;
 const int NOTE_G4 = 392;
-const int NOTE_A4 = 440;
-const int NOTE_B4 = 494;
-const int NOTE_C5 = 523;
 
+// The setup function runs once when the Arduino is powered on or reset.
 void setup() {
-  pinMode(SPEAKER_PIN, OUTPUT);
+  // We don't need pinMode() for the speaker pin when using tone().
+  // The tone() function handles it for us.
+
+  // The `tone(pin, frequency, duration)` function plays a note and waits.
+  // However, to create a clear separation between notes, it's better to
+  // control the timing ourselves with `delay()`.
   
-  // Play a simple scale
+  // Play note C4 for 200 milliseconds
   tone(SPEAKER_PIN, NOTE_C4, 200); 
-  delay(250); // wait slightly longer than note duration to separate notes
+  delay(250); // Wait for 250ms. This creates a 50ms pause before the next note.
+  
+  // Play note D4 for 200 milliseconds
   tone(SPEAKER_PIN, NOTE_D4, 200);
   delay(250);
+  
+  // Play note E4 for 200 milliseconds
   tone(SPEAKER_PIN, NOTE_E4, 200);
   delay(250);
+  
+  // Play note F4 for 200 milliseconds
   tone(SPEAKER_PIN, NOTE_F4, 200);
   delay(250);
+  
+  // Play note G4 for 200 milliseconds
   tone(SPEAKER_PIN, NOTE_G4, 200);
   delay(250);
   
-  noTone(SPEAKER_PIN); // Stop sound if not using duration
+  // It's good practice to stop the tone, although with a duration specified,
+  // it would stop on its own.
+  noTone(SPEAKER_PIN);
 }
 
+// The loop() function is empty because we only want the melody to play once at the start.
 void loop() {
-  // Nothing here, runs once
+  // Nothing here.
 }
 ```
 
@@ -203,68 +164,80 @@ Combine what we learned in Session 02 (Buttons) with Session 03 (Sound). Create 
 **Bonus:** Can you make the pitch change based on a potentiometer (knob)? (Hint: Look up `analogRead()` and `map()`).
 
 ## In class examples
+This example creates a simple siren-like sound that sweeps down in pitch, then resets. It uses a global variable `section` to control which part of the sound is playing. This demonstrates how to create a sequence of actions without using loops, relying on the main `loop()` to repeat and check the state.
+
 ```cpp
-
+// The pin connected to the speaker.
 int speakerPin = 7;
-int speakerFreq = 15000;
 
+// This variable will hold the delay time in microseconds.
+// A smaller value creates a higher pitch, a larger value creates a lower pitch.
+// We start with a high pitch (short delay).
+int speakerPeriod = 500;
+
+// This variable acts as a "state" to remember which part of the siren we are playing.
+// 0 = first descending tone
+// 1 = second, faster descending tone
 int section = 0;
 
-// 1/440 = .0023seconds = 2.3ms = 2300 microseconds
-// 
 
+// The setup function runs once at the start.
 void setup()
 {
+  // Set the speaker pin to be an output.
   pinMode(speakerPin, OUTPUT);
 }
 
+// The loop function runs continuously.
 void loop()
 {
+  // Check if we are in the first section of the siren.
   if(section == 0) {
-
+    // Generate one cycle of the square wave.
     digitalWrite(speakerPin, HIGH);
-    delayMicroseconds(speakerFreq);
-
+    delayMicroseconds(speakerPeriod);
     digitalWrite(speakerPin, LOW);
-    delayMicroseconds(speakerFreq);
+    delayMicroseconds(speakerPeriod);
 
-    speakerFreq = speakerFreq - 500;
+    // Increase the period slightly, which lowers the pitch.
+    speakerPeriod = speakerPeriod + 10;
 
-    // make sure once it hits 0 it goes back to 15000
-    if(speakerFreq <= 5000) {
-      // set speaker frequency back to 15000
-      speakerFreq = 25000;
+    // Check if the pitch has become low enough (period is long enough).
+    if(speakerPeriod >= 1500) {
+      // Reset the period to a high pitch for the next section.
+      speakerPeriod = 500;
       
-      // change the section
+      // Change the state to the second section.
       section = 1;
       
-      delay(500);
+      // A short pause before the next section begins.
+      delay(100);
     }
   }
   
+  // Check if we are in the second section of the siren.
   if(section == 1) {
-
+    // Generate one cycle of the square wave.
     digitalWrite(speakerPin, HIGH);
-    delayMicroseconds(speakerFreq);
-
+    delayMicroseconds(speakerPeriod);
     digitalWrite(speakerPin, LOW);
-    delayMicroseconds(speakerFreq);
+    delayMicroseconds(speakerPeriod);
 
-    speakerFreq = speakerFreq - 1500;
+    // Increase the period by a larger amount, making the pitch drop faster.
+    speakerPeriod = speakerPeriod + 50;
 
-    // make sure once it hits 0 it goes back to 15000
-    if(speakerFreq <= 15000) {
+    // Check if the pitch has become low enough.
+    if(speakerPeriod >= 2500) {
       
-      // set speaker frequency back to 15000
-      speakerFreq = 15000;
+      // Reset the period back to the starting high pitch.
+      speakerPeriod = 500;
       
-      // change the section back to 0
+      // Change the state back to the first section.
       section = 0;
       
-      delay(500);
-
+      // A short pause before the whole pattern repeats.
+      delay(100);
     }
   }
-
 }
 ```
