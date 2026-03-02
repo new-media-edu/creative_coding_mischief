@@ -11,6 +11,7 @@
 + [Zimoun](http://zimoun.net/) — Swiss artist who builds large-scale kinetic sound sculptures from hundreds of DC motors, cotton balls, cardboard, and wire — simple components creating complex emergent behavior.
 + [Creating Crankshafts from Paperclips](http://www.instructables.com/id/Building-Machines-From-Paperclips/) — Instructables guide to bending ordinary paperclips into cranks, levers, and linkages to build small working mechanical sculptures for ~37 cents.
 + [Wall Plotter (Arduino Polar V Plotter)](http://www.instructables.com/id/ARDUINO-POLAR-V-PLOTTER/) — Arduino-powered hanging drawbot controlled by two stepper motors and a belt; draws SVG files on walls, windows, or whiteboards.
++ [Brachiograph: The Cheap Pen Plotter](https://www.brachiograph.art/) — Open-source, ultra-simple pen plotter made from popsicle sticks, servos, and a Raspberry Pi. Draws surprisingly elegant images with wobbly charm.
 + [BMW Museum Kinetic Sculpture](https://www.youtube.com/watch?v=hlx-M53dC7M&feature=related) — 714 metal spheres suspended on individual cables that ripple and morph into the silhouettes of BMW concept cars.
 + [Kinetic Origami](https://www.youtube.com/watch?v=NdY7owk45II) — Demonstration of how a single servo can drive folded-paper flexures to produce smooth linear and rotary motion.
 + [Transform - MIT Media Lab](https://www.youtube.com/watch?v=lCARHatJQJA) — Table surface covered in hundreds of motorized pins that dynamically rise and fall to display shapes, respond to touch, and ripple like water.
