@@ -15,27 +15,63 @@ Note that this schedule is subject to change due contingencies and the preferenc
 **Date:** Tuesday & Thursday, February 3 & 5, 2026
 - Introduction to each other
 
-### Weeks 1-2: Foundation & Arduino Basics
-**Dates:** February 10 & February 17, 2026
+### Session 01: Introduction to Arduino
+**Date:** February 10, 2026
 *Topics:*
-- Introduction to physical computing and Arduino hardware.
-- Digital and Analog I/O.
-- Reading sensors.
-- Debugging circuits and code.
+- Course overview and introduction.
+- What is electricity?
+- Introduction to Arduino hardware and pins.
+- Basic wiring and breadboards.
+- Blinking LEDs with `digitalWrite()`.
+- Basic programming concepts: variables, constants, flow control.
 
-*Deliverable:* Simple input/output device (button input, speaker output for example).
+*Deliverable:* Working LED circuit with custom blink patterns.
 
-### Weeks 3-4: Movement & Physical Feedback
-**Dates:** February 24 & March 3, 2026
+### Session 02: Inputs and Serial Communication
+**Date:** February 17, 2026
 *Topics:*
-- Motors, servos, and actuators.
-- PWM for variable control.
-- Building simple mechanical systems.
+- Conditional logic (if/else statements).
+- Reading digital inputs with buttons.
+- Understanding the floating state and pull-up/pull-down resistors.
+- Serial communication for debugging and monitoring.
+- Using the Serial Monitor to view Arduino output.
 
-*Deliverable:* Kinetic sculpture or interactive mechanical device.
+*Deliverable:* Button-controlled circuit with serial feedback.
 
-### Weeks 5-6: The Bridge — MIDI & OSC
-**Dates:** March 10 & March 17, 2026
+### Session 03: Sound and Square Waves
+**Date:** February 24, 2026
+*Topics:*
+- How speakers and buzzers work.
+- Generating square waves with `digitalWrite()`.
+- Understanding frequency and pitch.
+- Using the `tone()` function.
+- Building speaker circuits with piezo buzzers.
+
+*Deliverable:* Working sound generator with variable tones.
+
+### Session 04: Analog Input and Loops
+**Date:** March 3, 2026
+*Topics:*
+- Reading analog values with `analogRead()`.
+- Understanding potentiometers and variable resistances.
+- Mapping values from one range to another with `map()`.
+- Creating repetition with while loops.
+- Combining analog input with sound output.
+- Building interactive musical instruments.
+
+*Deliverable:* Potentiometer-controlled tone generator or simple synthesizer.
+
+### Session 05: The Bridge — MIDI & OSC
+**Date:** March 10, 2026
+*Topics:*
+- Communication protocols (MIDI, Serial, OSC).
+- Arduino as a MIDI controller.
+- Sending sensor data to DAWs or soft synths.
+
+*Deliverable:* Custom sensor-based MIDI controller or instrument.
+
+### Session 06: The Bridge — MIDI & OSC (continued)
+**Date:** March 17, 2026
 **Instructor:** Sarah Grant
 *Topics:*
 - Communication protocols (MIDI, Serial, OSC).
@@ -44,8 +80,9 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Custom sensor-based MIDI controller or instrument.
 
-### Weeks 7-8: 3D Design & Fabrication
-**Dates:** March 24 & March 31, 2026
+### Session 07: 3D Design & Fabrication
+**Date:** March 24, 2026
+**Instructor:** Sarah Grant
 *Topics:*
 - Introduction to 3D design and modeling.
 - Designing custom housings for electronics.
@@ -54,18 +91,49 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Custom 3D printed housing or component integrated with electronics.
 
-### Weeks 9-10: Visual Systems & Projection Mapping
-**Dates:** April 7 & April 14, 2026
+### Session 08: 3D Design & Fabrication (continued)
+**Date:** March 31, 2026
 *Topics:*
-- Introduction to TouchDesigner.
-- Projection mapping onto 3D objects.
+- Introduction to 3D design and modeling.
+- Designing custom housings for electronics.
+- Slicing and 3D printing workflow.
+- Integrating hardware with printed parts.
+
+*Deliverable:* Custom 3D printed housing or component integrated with electronics.
+
+### Session 09: Projection Mapping with TouchDesigner
+**Date:** April 7, 2026
+*Topics:*
+- Introduction to projection mapping fundamentals.
+- Loading and configuring TouchDesigner.
+- Using kantanMapper for spatial mapping.
+- Assigning textures and media to projection shapes.
+- Aligning projections with physical objects.
 - Receiving OSC/MIDI data to trigger visuals.
 - Creating reactive installations.
 
 *Deliverable:* Projection-mapped installation triggered by physical sensors.
 
-### Weeks 11-12: Capstone & Networked Mischief
-**Dates:** April 21 & April 28, 2026
+### Session 10: Visual Systems & Projection Mapping (continued)
+**Date:** April 14, 2026
+*Topics:*
+- Advanced projection mapping techniques.
+- Creating reactive installations with OSC/MIDI data.
+- Integrating physical sensors with visual feedback.
+
+*Deliverable:* Projection-mapped installation triggered by physical sensors.
+
+### Session 11: Capstone & Networked Mischief
+**Date:** April 21, 2026
+*Topics:*
+- Coding for the web and networked systems.
+- Bidirectional communication (Real world ↔ Internet).
+- Final project assembly and polishing.
+
+*Deliverable:* Final Project prototype.
+
+### Session 12: Capstone & Networked Mischief (continued)
+**Date:** April 28, 2026
 *Topics:*
 - Coding for the web and networked systems.
 - Bidirectional communication (Real world ↔ Internet).
