@@ -17,6 +17,14 @@ To read this, we use the analog input pins (A0, A1, A2, etc.) and the `analogRea
 
 *   `analogRead(pin)`: Reads the voltage on an analog pin and returns a number between **0** (for 0 volts) and **1023** (for 5 volts).
 
+
+<p>
+  <img src="arduino-potentiometer.png" alt="Potentiometer Circuit Diagram" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/26ic5pp939K-arduino-basic-potentiometer">Tinkercad Circuit</a></em>
+</p>
+
+
 ### Example 1: Reading the Potentiometer
 
 Let's start with the simplest possible example: reading the value from the potentiometer and printing it to the Serial Monitor so we can see what the Arduino is sensing.
