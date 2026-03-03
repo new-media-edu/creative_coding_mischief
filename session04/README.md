@@ -9,6 +9,12 @@ In this session, we'll bridge the gap between the digital and analog worlds. We'
 + Creating repetition with `while` loops
 + Project: Building a button-based keyboard
 
+<p>
+  <img src="how-pot-works.webp" alt="How potentiometers work" width="600">
+  <br>
+  <em>How potentiometers work</em>
+</p>
+
 ## Part 1: Analog Input with a Potentiometer
 
 So far, we've only used `digitalRead()` and `digitalWrite()`, which are limited to two states: HIGH and LOW. The real world is rarely that simple. An **analog** signal can be any value within a range. A potentiometer (or "pot") is a knob that provides a variable resistance, which we can read as an analog voltage.
