@@ -33,7 +33,7 @@ This code initializes serial communication and, in the main loop, continuously r
 
 ```cpp
 // Analog pin connected to the potentiometer's middle leg
-const int POT_PIN = A0;
+int POT_PIN = A0;
 
 void setup() {
   // Initialize Serial communication at 9600 bits per second.
@@ -81,9 +81,9 @@ Now let's use that value to do something more interesting, like controlling soun
 
 ```cpp
 // Pin connected to the speaker
-const int SPEAKER_PIN = 8;
+int SPEAKER_PIN = 8;
 // Analog pin connected to the potentiometer's middle leg
-const int POT_PIN = A0;
+int POT_PIN = A0;
 
 void setup() {
   // No pinMode is needed for analog inputs.
@@ -167,7 +167,7 @@ void loop() {
 Here is the siren example, implemented with blocking `while` loops. The rising tone must finish completely before the falling tone can begin. While the siren is rising, the Arduino cannot do anything else (like check for a button press).
 
 ```cpp
-const int SPEAKER_PIN = 8;
+int SPEAKER_PIN = 8;
 
 void setup() {
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -223,17 +223,17 @@ This code checks each button. If a button is pressed, it plays the corresponding
 
 ```cpp
 // Speaker Pin
-const int SPEAKER_PIN = 8;
+int SPEAKER_PIN = 8;
 
 // Button Pins
-const int BUTTON1_PIN = 2;
-const int BUTTON2_PIN = 3;
-const int BUTTON3_PIN = 4;
+int BUTTON1_PIN = 2;
+int BUTTON2_PIN = 3;
+int BUTTON3_PIN = 4;
 
 // Note Frequencies (in Hz)
-const int NOTE_C4 = 262;
-const int NOTE_D4 = 294;
-const int NOTE_E4 = 330;
+int NOTE_C4 = 262;
+int NOTE_D4 = 294;
+int NOTE_E4 = 330;
 
 void setup() {
   // Set up the button pins with the internal pull-up resistor.
