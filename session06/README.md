@@ -1,6 +1,6 @@
 # Session 06: Arduino ↔ Processing
 
-Last session, you met Processing and drew shapes on screen with code. Today, we connect the two worlds: **Arduino talks to Processing, and Processing talks back to Arduino**. By the end of this session, your physical sensors will control on-screen visuals, and your mouse will move a servo motor — all over a single USB cable.
+Last session, you met Processing and drew shapes on screen with code. Today, we connect the two worlds: Arduino talks to Processing, and Processing talks back to Arduino. By the end of this session, your physical sensors will control on-screen visuals, and your mouse will move a servo motor — all over a single USB cable.
 
 ## Agenda
 
@@ -26,7 +26,7 @@ This is straightforward — we've done this before. Read the pot, and print the 
 
 #### Circuit
 
-1.  **Potentiometer:** Outer pins → 5V and GND, Middle pin → **A0**
+1.  Potentiometer: Outer pins → 5V and GND, Middle pin → A0
 
 #### Arduino Code
 
@@ -51,11 +51,11 @@ void loop() {
 
 Upload this to your Arduino. You can verify it works by opening the Serial Monitor — you should see numbers from 0 to 1023 streaming by.
 
-> **Important:** Close the Serial Monitor before running Processing! Only one program can use the serial port at a time. If the Serial Monitor is open, Processing won't be able to connect.
+> Important: Close the Serial Monitor before running Processing! Only one program can use the serial port at a time. If the Serial Monitor is open, Processing won't be able to connect.
 
 ### Step 2: The Processing Code
 
-Now open **Processing** (not the Arduino IDE) and paste the following code into a new sketch.
+Now open Processing (not the Arduino IDE) and paste the following code into a new sketch.
 
 Processing has a built-in Serial library. We import it, open the same serial port the Arduino is connected to, and read incoming lines of text.
 
@@ -120,12 +120,12 @@ void serialEvent(Serial myPort) {
 
 ### Running It
 
-1.  **Upload** the Arduino code to your board.
-2.  **Close** the Arduino Serial Monitor.
-3.  **Run** the Processing sketch (click the Play button).
+1.  Upload the Arduino code to your board.
+2.  Close the Arduino Serial Monitor.
+3.  Run the Processing sketch (click the Play button).
 4.  Turn the potentiometer — the circle on screen should grow and shrink.
 
-> **Troubleshooting: "Port busy" or no data?**
+> Troubleshooting: "Port busy" or no data?
 > - Make sure the Arduino Serial Monitor is closed.
 > - Check the console output from `printArray(Serial.list())` and adjust the index in `Serial.list()[0]` if your Arduino isn't the first port listed.
 > - Make sure the baud rate matches (9600 on both sides).
@@ -148,7 +148,7 @@ The Arduino listens for incoming bytes on the serial port. Each byte is a number
 
 #### Circuit
 
-1.  **Servo:** Red → 5V, Brown → GND, Signal → **Pin 9**
+1.  Servo: Red → 5V, Brown → GND, Signal → Pin 9
 
 #### Arduino Code
 
@@ -225,18 +225,18 @@ void draw() {
 
 ### Running It
 
-1.  **Upload** the Arduino code.
-2.  **Close** the Serial Monitor.
-3.  **Run** the Processing sketch.
+1.  Upload the Arduino code.
+2.  Close the Serial Monitor.
+3.  Run the Processing sketch.
 4.  Move your mouse left and right across the Processing window — the servo should follow.
 
 ---
 
 ## Part 3: Two-Way Communication
 
-Now let's put it all together. The Arduino sends potentiometer data to Processing **and** receives servo commands from Processing, all over the same serial connection.
+Now let's put it all together. The Arduino sends potentiometer data to Processing and receives servo commands from Processing, all over the same serial connection.
 
-This requires a simple rule so both sides know what's a message and what's a response. We'll use a **call-and-response** (handshake) protocol:
+This requires a simple rule so both sides know what's a message and what's a response. We'll use a call-and-response (handshake) protocol:
 
 1.  Arduino sends its sensor data as a line of text.
 2.  Processing receives it, updates the visuals, and sends back a servo angle byte.
@@ -248,8 +248,8 @@ This way the two programs stay in sync and don't flood each other.
 
 #### Circuit
 
-1.  **Potentiometer:** Middle pin → **A0**, Outer pins → 5V and GND
-2.  **Servo:** Signal → **Pin 9**, Red → 5V, Brown → GND
+1.  Potentiometer: Middle pin → A0, Outer pins → 5V and GND
+2.  Servo: Signal → Pin 9, Red → 5V, Brown → GND
 
 ```cpp
 #include <Servo.h>
@@ -342,9 +342,9 @@ void serialEvent(Serial myPort) {
 
 ### Running It
 
-1.  **Upload** the Arduino code.
-2.  **Close** the Serial Monitor.
-3.  **Run** the Processing sketch.
+1.  Upload the Arduino code.
+2.  Close the Serial Monitor.
+3.  Run the Processing sketch.
 4.  Turn the potentiometer — the orange circle changes size.
 5.  Move the mouse — the servo rotates and the blue indicator line follows.
 6.  Both happen simultaneously over the same USB cable!
@@ -365,7 +365,7 @@ Arduino                          Processing
   ▼                                  ▼
 ```
 
-The Arduino only sends a new reading **after** it receives a byte from Processing. This keeps them in lockstep and prevents the serial buffer from overflowing. Without this handshake, data can pile up and cause lag or garbled values.
+The Arduino only sends a new reading after it receives a byte from Processing. This keeps them in lockstep and prevents the serial buffer from overflowing. Without this handshake, data can pile up and cause lag or garbled values.
 
 ---
 

@@ -1,6 +1,6 @@
 # Session 05: Sensors, Motors, and Introduction to Processing
 
-In this session, we move beyond knobs and buttons into **sensing the world** and **moving things in it**. We'll start with a showcase of sensors that feel like magic — detecting magnets and measuring distance through thin air — then we'll learn to control **servo motors** and **DC motors** to build a funky robot arm. In the second half, we'll switch gears and meet **Processing**, a creative coding environment that will let us connect the Arduino to visuals on a computer screen in Session 06.
+In this session, we move beyond knobs and buttons into sensing the world and moving things in it. We'll start with a showcase of sensors that feel like magic — detecting magnets and measuring distance through thin air — then we'll learn to control servo motors and DC motors to build a funky robot arm. In the second half, we'll switch gears and meet Processing, a creative coding environment that will let us connect the Arduino to visuals on a computer screen in Session 06.
 
 ## Agenda
 
@@ -15,7 +15,7 @@ In this session, we move beyond knobs and buttons into **sensing the world** and
 
 ## Part 1: Sensor Showcase
 
-So far, we've read inputs from **buttons** (digital — on/off) and **potentiometers** (analog — a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own — detecting objects, magnets, light, temperature, or motion?
+So far, we've read inputs from buttons (digital — on/off) and potentiometers (analog — a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own — detecting objects, magnets, light, temperature, or motion?
 
 That's what sensors are for. A sensor converts some physical phenomenon into an electrical signal the Arduino can read. Most sensors work with the same `digitalRead()` and `analogRead()` functions we already know. The only difference is what's being measured.
 
@@ -25,10 +25,10 @@ Let's look at two fun ones.
 
 ### Hall Effect Sensor (Detecting Magnets)
 
-A **hall effect sensor** detects the presence and strength of a magnetic field. Wave a magnet near it and the output changes. There are two common types:
+A hall effect sensor detects the presence and strength of a magnetic field. Wave a magnet near it and the output changes. There are two common types:
 
-*   **Digital hall sensor (e.g., A3144, KY-003 module):** Acts like a magnetic switch — outputs HIGH or LOW depending on whether a magnet is nearby. Reads with `digitalRead()`, just like a button.
-*   **Analog hall sensor (e.g., A1302, 49E):** Outputs a voltage proportional to the magnetic field strength. Reads with `analogRead()`, just like a potentiometer.
+*   Digital hall sensor (e.g., A3144, KY-003 module): Acts like a magnetic switch — outputs HIGH or LOW depending on whether a magnet is nearby. Reads with `digitalRead()`, just like a button.
+*   Analog hall sensor (e.g., A1302, 49E): Outputs a voltage proportional to the magnetic field strength. Reads with `analogRead()`, just like a potentiometer.
 
 These are used everywhere: bicycle speedometers, phone flip cases that auto-lock, security systems, and detecting whether a door is open or closed.
 
@@ -36,9 +36,9 @@ These are used everywhere: bicycle speedometers, phone flip cases that auto-lock
 
 Most hall sensor modules (like the KY-003) have three pins:
 
-1.  **VCC** → **5V**
-2.  **GND** → **GND**
-3.  **Signal** → **Pin 2**
+1.  VCC → 5V
+2.  GND → GND
+3.  Signal → Pin 2
 
 > Some modules have a built-in pull-up resistor. If you're using a bare A3144 sensor, you'll need a 10kΩ pull-up resistor between the signal pin and 5V.
 
@@ -75,26 +75,26 @@ void loop() {
 
 ### Ultrasonic Distance Sensor (HC-SR04)
 
-The **HC-SR04** is an ultrasonic rangefinder — it works like a bat's echolocation. It sends out a burst of high-frequency sound (way above human hearing), waits for the echo to bounce back, and measures how long it took. From that time, we can calculate the distance to whatever object reflected the sound.
+The HC-SR04 is an ultrasonic rangefinder — it works like a bat's echolocation. It sends out a burst of high-frequency sound (way above human hearing), waits for the echo to bounce back, and measures how long it took. From that time, we can calculate the distance to whatever object reflected the sound.
 
-It can measure distances from about **2 cm to 400 cm** (roughly 1 inch to 13 feet).
+It can measure distances from about 2 cm to 400 cm (roughly 1 inch to 13 feet).
 
 #### How It Works
 
-1.  Arduino sends a short pulse on the **Trigger** pin.
+1.  Arduino sends a short pulse on the Trigger pin.
 2.  The sensor emits an ultrasonic burst.
 3.  The sound bounces off an object and returns.
-4.  The sensor sets the **Echo** pin HIGH for the duration of the round trip.
+4.  The sensor sets the Echo pin HIGH for the duration of the round trip.
 5.  We measure that duration with `pulseIn()` and convert it to centimeters.
 
 #### Circuit
 
 The HC-SR04 has four pins:
 
-1.  **VCC** → **5V**
-2.  **GND** → **GND**
-3.  **Trig** → **Pin 7**
-4.  **Echo** → **Pin 8**
+1.  VCC → 5V
+2.  GND → GND
+3.  Trig → Pin 7
+4.  Echo → Pin 8
 
 #### Code: Distance Measurement
 
@@ -141,7 +141,7 @@ void loop() {
 
 Let's combine the distance sensor with an LED to make something interactive. The closer your hand gets, the brighter the LED glows — like a proximity lamp.
 
-**Circuit:** Same HC-SR04 as above, plus an LED (with 220Ω resistor) on **Pin 9** (PWM).
+Circuit: Same HC-SR04 as above, plus an LED (with 220Ω resistor) on Pin 9 (PWM).
 
 ```cpp
 int TRIG_PIN = 7;
@@ -183,13 +183,13 @@ void loop() {
 
 *Hold your hand over the sensor and move it up and down. The LED responds to your gesture — no touching required. This is the basis of many interactive art installations.*
 
-> **Note:** We use `constrain(distanceCm, 5, 50)` to clamp the distance value before mapping. Without it, readings outside the 5–50 range would produce brightness values outside 0–255, which `analogWrite()` can't handle properly.
+> Note: We use `constrain(distanceCm, 5, 50)` to clamp the distance value before mapping. Without it, readings outside the 5–50 range would produce brightness values outside 0–255, which `analogWrite()` can't handle properly.
 
 ---
 
 ## Part 2: Servo Motors
 
-A **servo motor** is a special kind of motor that can be told to move to a specific angle (usually between 0° and 180°). Inside, it has a small DC motor, a set of gears, and a position sensor. You send it a signal, and it moves to that position and holds there. This makes servos perfect for things like robot arms, steering mechanisms, and animatronics.
+A servo motor is a special kind of motor that can be told to move to a specific angle (usually between 0° and 180°). Inside, it has a small DC motor, a set of gears, and a position sensor. You send it a signal, and it moves to that position and holds there. This makes servos perfect for things like robot arms, steering mechanisms, and animatronics.
 
 <p>
   <img src="servo-internals.png" alt="Servo motor internals" width="400">
@@ -200,11 +200,11 @@ A **servo motor** is a special kind of motor that can be told to move to a speci
 ### Wiring a Servo
 
 Servo motors have three wires:
-*   **Red:** Power (5V)
-*   **Brown or Black:** Ground (GND)
-*   **Orange or Yellow:** Signal (connects to a digital pin on the Arduino)
+*   Red: Power (5V)
+*   Brown or Black: Ground (GND)
+*   Orange or Yellow: Signal (connects to a digital pin on the Arduino)
 
-> **Important:** Small hobby servos (like the SG90) can be powered directly from the Arduino's 5V pin for simple experiments. If your servo jitters or the Arduino resets, it means the servo is drawing too much current. In that case, you'll need an external power supply for the servo (just make sure to connect the grounds together).
+> Important: Small hobby servos (like the SG90) can be powered directly from the Arduino's 5V pin for simple experiments. If your servo jitters or the Arduino resets, it means the servo is drawing too much current. In that case, you'll need an external power supply for the servo (just make sure to connect the grounds together).
 
 ### The Servo Library
 
@@ -221,10 +221,10 @@ The simplest servo example: sweep back and forth from 0° to 180° using a `for`
 
 #### Circuit
 
-1.  **Servo:**
-    *   Red wire → **5V**
-    *   Brown/Black wire → **GND**
-    *   Orange/Yellow wire → **Pin 9**
+1.  Servo:
+    *   Red wire → 5V
+    *   Brown/Black wire → GND
+    *   Orange/Yellow wire → Pin 9
 
 #### Code
 
@@ -268,8 +268,8 @@ Now let's add a potentiometer so you can control the servo's position with a kno
 
 #### Circuit
 
-1.  **Servo:** Red → 5V, Brown → GND, Signal → **Pin 9**
-2.  **Potentiometer:** Outer pins → 5V and GND, Middle pin → **A0**
+1.  Servo: Red → 5V, Brown → GND, Signal → Pin 9
+2.  Potentiometer: Outer pins → 5V and GND, Middle pin → A0
 
 #### Code
 
@@ -309,13 +309,13 @@ void loop() {
 
 ## Part 3: DC Motors
 
-A **DC motor** is the classic spinning motor. Unlike a servo, it doesn't go to a specific angle — it just spins continuously. You control its **speed** (by varying the voltage) and its **direction** (by swapping the polarity).
+A DC motor is the classic spinning motor. Unlike a servo, it doesn't go to a specific angle — it just spins continuously. You control its speed (by varying the voltage) and its direction (by swapping the polarity).
 
 ### Why We Need a Transistor
 
-There's a catch: DC motors draw much more current than an Arduino pin can provide. An Arduino pin can output about 20mA, but even a small DC motor can draw 200mA or more. If you connect a motor directly to an Arduino pin, **you could damage the Arduino**.
+There's a catch: DC motors draw much more current than an Arduino pin can provide. An Arduino pin can output about 20mA, but even a small DC motor can draw 200mA or more. If you connect a motor directly to an Arduino pin, you could damage the Arduino.
 
-The solution is to use a **transistor** (or MOSFET) as a switch. The Arduino sends a small signal to the transistor, and the transistor acts as a gate that allows a larger current from a separate power source to flow through the motor.
+The solution is to use a transistor (or MOSFET) as a switch. The Arduino sends a small signal to the transistor, and the transistor acts as a gate that allows a larger current from a separate power source to flow through the motor.
 
 Think of it like a light switch on a wall: your finger uses very little force to flip the switch, but the switch controls a much larger flow of electricity to the ceiling light.
 
@@ -329,15 +329,15 @@ Think of it like a light switch on a wall: your finger uses very little force to
 
 We'll use a TIP120 transistor (or similar NPN transistor/MOSFET):
 
-1.  **Motor:** One wire to the **external power supply positive** (e.g., a battery pack), the other wire to the **collector** pin of the transistor.
-2.  **Transistor (TIP120):**
-    *   **Base** → Arduino **Pin 9** (through a 1kΩ resistor)
-    *   **Collector** → Motor's negative wire
-    *   **Emitter** → GND
-3.  **Diode (1N4001):** Place across the motor terminals (cathode stripe toward power). This protects against voltage spikes when the motor turns off.
-4.  **Power:** Connect the external power supply's GND to the Arduino's GND (common ground).
+1.  Motor: One wire to the external power supply positive (e.g., a battery pack), the other wire to the collector pin of the transistor.
+2.  Transistor (TIP120):
+    *   Base → Arduino Pin 9 (through a 1kΩ resistor)
+    *   Collector → Motor's negative wire
+    *   Emitter → GND
+3.  Diode (1N4001): Place across the motor terminals (cathode stripe toward power). This protects against voltage spikes when the motor turns off.
+4.  Power: Connect the external power supply's GND to the Arduino's GND (common ground).
 
-> **Why a diode?** Motors are "inductive loads." When you suddenly cut power, the motor's magnetic field collapses and creates a brief voltage spike that can damage your transistor or Arduino. The diode absorbs this spike. Always use one with motors!
+> Why a diode? Motors are "inductive loads." When you suddenly cut power, the motor's magnetic field collapses and creates a brief voltage spike that can damage your transistor or Arduino. The diode absorbs this spike. Always use one with motors!
 
 ---
 
@@ -414,25 +414,25 @@ void loop() {
 
 ## Part 4: Project — 2-DOF Robot Arm
 
-Now for the fun part. We'll combine **two servos** and **two potentiometers** to build a simple **2 Degrees of Freedom (DOF) robot arm**. One servo controls the base rotation, and the other controls the arm's elevation. Each potentiometer controls one servo — so you have full manual control of the arm with your hands.
+Now for the fun part. We'll combine two servos and two potentiometers to build a simple 2 Degrees of Freedom (DOF) robot arm. One servo controls the base rotation, and the other controls the arm's elevation. Each potentiometer controls one servo — so you have full manual control of the arm with your hands.
 
 This is the same principle behind the joystick-controlled arms used in everything from toy cranes to surgical robots.
 
 ### Circuit
 
-1.  **Servo 1 (Base):** Signal → **Pin 9**, Red → 5V, Brown → GND
-2.  **Servo 2 (Arm):** Signal → **Pin 10**, Red → 5V, Brown → GND
-3.  **Potentiometer 1 (Base control):** Middle pin → **A0**, Outer pins → 5V and GND
-4.  **Potentiometer 2 (Arm control):** Middle pin → **A1**, Outer pins → 5V and GND
+1.  Servo 1 (Base): Signal → Pin 9, Red → 5V, Brown → GND
+2.  Servo 2 (Arm): Signal → Pin 10, Red → 5V, Brown → GND
+3.  Potentiometer 1 (Base control): Middle pin → A0, Outer pins → 5V and GND
+4.  Potentiometer 2 (Arm control): Middle pin → A1, Outer pins → 5V and GND
 
-> **Tip:** If two servos are drawing too much current from the Arduino's 5V pin (you'll notice jittering or the Arduino resetting), use an external 5V power source for the servos and connect the grounds together.
+> Tip: If two servos are drawing too much current from the Arduino's 5V pin (you'll notice jittering or the Arduino resetting), use an external 5V power source for the servos and connect the grounds together.
 
 ### Physical Assembly
 
 You can build the arm structure from:
-*   **Popsicle sticks or craft sticks** — hot-glue them to the servo horns
-*   **Cardboard** — cut simple arm segments and attach with hot glue
-*   **3D printed parts** — if you're feeling ambitious (we'll cover this in Session 07!)
+*   Popsicle sticks or craft sticks — hot-glue them to the servo horns
+*   Cardboard — cut simple arm segments and attach with hot glue
+*   3D printed parts — if you're feeling ambitious (we'll cover this in Session 07!)
 
 Mount one servo flat on the table (base rotation). Attach the second servo to the horn of the first (so it tilts up and down as the base rotates), and glue a stick or gripper to the second servo's horn.
 
@@ -491,18 +491,18 @@ Here are some other motor projects to try on your own or for inspiration:
 
 | Project | Motor Type | Description |
 |---|---|---|
-| **Useless Machine** | Servo | A box with a switch. Flip it on, and a servo arm reaches out and flips it back off. [Classic example →](https://www.youtube.com/results?search_query=useless+machine+arduino) |
-| **Zoetrope** | DC Motor | A spinning drum with animation frames inside. Control the speed with a pot until the animation "locks in." Pre-cinema magic! |
-| **Scribble Bot** | DC Motor | Tape markers to a cup, attach a DC motor with an offset weight inside. Turn it on and it draws chaotic patterns on paper. |
-| **Animatronic Eyes** | 2 Servos | Mount two servos for X/Y eyeball movement. Build a goofy face around them with craft supplies. Control with pots or a joystick. |
-| **Laser Cat Toy** | Servo | Mount a laser pointer on a servo and sweep it across the floor in random patterns. Add a second servo for 2D movement. |
-| **Motorized Turntable** | DC Motor | A slow-spinning display platform for objects or small sculptures. |
+| Useless Machine | Servo | A box with a switch. Flip it on, and a servo arm reaches out and flips it back off. [Classic example →](https://www.youtube.com/results?search_query=useless+machine+arduino) |
+| Zoetrope | DC Motor | A spinning drum with animation frames inside. Control the speed with a pot until the animation "locks in." Pre-cinema magic! |
+| Scribble Bot | DC Motor | Tape markers to a cup, attach a DC motor with an offset weight inside. Turn it on and it draws chaotic patterns on paper. |
+| Animatronic Eyes | 2 Servos | Mount two servos for X/Y eyeball movement. Build a goofy face around them with craft supplies. Control with pots or a joystick. |
+| Laser Cat Toy | Servo | Mount a laser pointer on a servo and sweep it across the floor in random patterns. Add a second servo for 2D movement. |
+| Motorized Turntable | DC Motor | A slow-spinning display platform for objects or small sculptures. |
 
 ---
 
 ## Part 5: Introduction to Processing
 
-Now that we have sensors reading the world and motors acting on it, there's one more piece of the puzzle: **what if the Arduino could talk to software on your computer?** Imagine your potentiometer controlling a visual on screen, or a mouse click triggering a motor. That's exactly what we'll build in Session 06. But first, let's get familiar with the tool we'll use: **Processing**.
+Now that we have sensors reading the world and motors acting on it, there's one more piece of the puzzle: what if the Arduino could talk to software on your computer? Imagine your potentiometer controlling a visual on screen, or a mouse click triggering a motor. That's exactly what we'll build in Session 06. But first, let's get familiar with the tool we'll use: Processing.
 
 ### What is Processing?
 
@@ -517,7 +517,7 @@ If you've used the Arduino IDE, Processing will feel immediately familiar — th
 | `Serial.println()` sends data out | Can receive serial data |
 | Talks to hardware | Draws to a screen |
 
-**Download and install Processing now:** [processing.org/download](https://processing.org/download/)
+Download and install Processing now: [processing.org/download](https://processing.org/download/)
 
 ### Your First Sketch: Drawing Shapes
 
