@@ -61,24 +61,27 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Potentiometer-controlled tone generator or simple synthesizer.
 
-### Session 05: The Bridge — MIDI & OSC
+### Session 05: Sensors, Motors, and Introduction to Processing
 **Date:** March 10, 2026
 *Topics:*
-- Communication protocols (MIDI, Serial, OSC).
-- Arduino as a MIDI controller.
-- Sending sensor data to DAWs or soft synths.
+- Sensor showcase: hall effect sensors and ultrasonic distance sensors.
+- Introduction to servo motors and the Servo library.
+- DC motors and transistor-based speed control.
+- Building a 2-DOF robot arm.
+- Introduction to Processing: installation and first sketch.
 
-*Deliverable:* Custom sensor-based MIDI controller or instrument.
+*Deliverable:* 2-DOF robot arm; Processing installed with basic sketch running.
 
-### Session 06: The Bridge — MIDI & OSC (continued)
+### Session 06: Arduino ↔ Processing
 **Date:** March 17, 2026
 **Instructor:** Sarah Grant
 *Topics:*
-- Communication protocols (MIDI, Serial, OSC).
-- Arduino as a MIDI controller.
-- Sending sensor data to DAWs or soft synths.
+- Serial communication between Arduino and Processing.
+- Sending sensor data to control on-screen visuals (potentiometer → circle size).
+- Sending screen data to control hardware (mouse → servo angle).
+- Two-way communication with a call-and-response handshake.
 
-*Deliverable:* Custom sensor-based MIDI controller or instrument.
+*Deliverable:* Two-way Arduino/Processing sketch (pot → circle size, mouse → servo).
 
 ### Session 07: 3D Design & Fabrication
 **Date:** March 24, 2026
