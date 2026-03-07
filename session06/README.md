@@ -1,6 +1,6 @@
 # Session 06: Arduino ↔ Processing
 
-Last session, you met Processing and drew shapes on screen with code. Today, we connect the two worlds: Arduino talks to Processing, and Processing talks back to Arduino. By the end of this session, your physical sensors will control on-screen visuals, and your mouse will move a servo motor — all over a single USB cable.
+Last session, you met Processing and drew shapes on screen with code. Today, we connect the two worlds: Arduino talks to Processing, and Processing talks back to Arduino. By the end of this session, your physical sensors will control on-screen visuals, and your mouse will move a servo motor, all over a single USB cable.
 
 ## Agenda
 
@@ -8,7 +8,6 @@ Last session, you met Processing and drew shapes on screen with code. Today, we 
 + Sending data from Processing to Arduino (mouse position → servo angle)
 + Combining both directions: full two-way communication
 
----
 
 ## Part 1: Arduino → Processing (Potentiometer Controls Circle Size)
 
@@ -22,7 +21,7 @@ In this first example, we'll read a potentiometer on the Arduino and send its va
 
 ### Step 1: The Arduino Code
 
-This is straightforward — we've done this before. Read the pot, and print the value to Serial. The only thing that's new is that we're being more deliberate about the format: we send one number per line with `Serial.println()`, because Processing will read one line at a time.
+This is straightforward. We've done this before. Read the pot, and print the value to Serial. The only thing that's new is that we're being more deliberate about the format: we send one number per line with `Serial.println()`, because Processing will read one line at a time.
 
 #### Circuit
 
@@ -49,7 +48,7 @@ void loop() {
 }
 ```
 
-Upload this to your Arduino. You can verify it works by opening the Serial Monitor — you should see numbers from 0 to 1023 streaming by.
+Upload this to your Arduino. You can verify it works by opening the Serial Monitor. You should see numbers from 0 to 1023 streaming by.
 
 > Important: Close the Serial Monitor before running Processing! Only one program can use the serial port at a time. If the Serial Monitor is open, Processing won't be able to connect.
 
@@ -123,14 +122,13 @@ void serialEvent(Serial myPort) {
 1.  Upload the Arduino code to your board.
 2.  Close the Arduino Serial Monitor.
 3.  Run the Processing sketch (click the Play button).
-4.  Turn the potentiometer — the circle on screen should grow and shrink.
+4.  Turn the potentiometer. The circle on screen should grow and shrink.
 
 > Troubleshooting: "Port busy" or no data?
 > - Make sure the Arduino Serial Monitor is closed.
 > - Check the console output from `printArray(Serial.list())` and adjust the index in `Serial.list()[0]` if your Arduino isn't the first port listed.
 > - Make sure the baud rate matches (9600 on both sides).
 
----
 
 ## Part 2: Processing → Arduino (Mouse Position Controls Servo)
 
@@ -228,9 +226,8 @@ void draw() {
 1.  Upload the Arduino code.
 2.  Close the Serial Monitor.
 3.  Run the Processing sketch.
-4.  Move your mouse left and right across the Processing window — the servo should follow.
+4.  Move your mouse left and right across the Processing window. The servo should follow.
 
----
 
 ## Part 3: Two-Way Communication
 
@@ -345,11 +342,10 @@ void serialEvent(Serial myPort) {
 1.  Upload the Arduino code.
 2.  Close the Serial Monitor.
 3.  Run the Processing sketch.
-4.  Turn the potentiometer — the orange circle changes size.
-5.  Move the mouse — the servo rotates and the blue indicator line follows.
+4.  Turn the potentiometer. The orange circle changes size.
+5.  Move the mouse. The servo rotates and the blue indicator line follows.
 6.  Both happen simultaneously over the same USB cable!
 
----
 
 ## How the Handshake Works
 
@@ -367,7 +363,6 @@ Arduino                          Processing
 
 The Arduino only sends a new reading after it receives a byte from Processing. This keeps them in lockstep and prevents the serial buffer from overflowing. Without this handshake, data can pile up and cause lag or garbled values.
 
----
 
 ## Troubleshooting Guide
 
@@ -380,7 +375,6 @@ The Arduino only sends a new reading after it receives a byte from Processing. T
 | Values are delayed / laggy | Serial buffer filling up | Reduce `delay()` in Arduino code, or use the handshake |
 | Processing sketch is blank | Processing can't find the port | Run as administrator, or check USB cable |
 
----
 
 ## Key Concepts Summary
 

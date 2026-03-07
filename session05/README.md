@@ -1,81 +1,26 @@
 # Session 05: Sensors, Motors, and Introduction to Processing
 
-In this session, we move beyond knobs and buttons into sensing the world and moving things in it. We'll start with a showcase of sensors that feel like magic — detecting magnets and measuring distance through thin air — then we'll learn to control servo motors and DC motors to build a funky robot arm. In the second half, we'll switch gears and meet Processing, a creative coding environment that will let us connect the Arduino to visuals on a computer screen in Session 06.
+In this session, we move beyond knobs and buttons into sensing the world and moving things in it. We'll start with a distance sensor that feels like magic, then we'll learn to control servo motors and DC motors to build a funky robot arm. In the second half, we'll switch gears and meet Processing, a creative coding environment that will let us connect the Arduino to visuals on a computer screen in Session 06.
 
 ## Agenda
 
-+ Sensor showcase: Hall effect sensors and ultrasonic distance sensors
++ Sensor showcase: Ultrasonic distance sensor
 + Introduction to servo motors and the `Servo` library
 + Controlling a servo with a potentiometer
-+ Introduction to DC motors and transistor-based speed control
 + Project: Building a 2-DOF robot arm
 + Introduction to Processing: installation and first sketch
 
----
 
 ## Part 1: Sensor Showcase
 
-So far, we've read inputs from buttons (digital — on/off) and potentiometers (analog — a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own — detecting objects, magnets, light, temperature, or motion?
+So far, we've read inputs from buttons (digital, on/off) and potentiometers (analog, a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own, detecting objects, light, temperature, or motion?
 
 That's what sensors are for. A sensor converts some physical phenomenon into an electrical signal the Arduino can read. Most sensors work with the same `digitalRead()` and `analogRead()` functions we already know. The only difference is what's being measured.
 
-Let's look at two fun ones.
-
----
-
-### Hall Effect Sensor (Detecting Magnets)
-
-A hall effect sensor detects the presence and strength of a magnetic field. Wave a magnet near it and the output changes. There are two common types:
-
-*   Digital hall sensor (e.g., A3144, KY-003 module): Acts like a magnetic switch — outputs HIGH or LOW depending on whether a magnet is nearby. Reads with `digitalRead()`, just like a button.
-*   Analog hall sensor (e.g., A1302, 49E): Outputs a voltage proportional to the magnetic field strength. Reads with `analogRead()`, just like a potentiometer.
-
-These are used everywhere: bicycle speedometers, phone flip cases that auto-lock, security systems, and detecting whether a door is open or closed.
-
-#### Circuit: Digital Hall Sensor
-
-Most hall sensor modules (like the KY-003) have three pins:
-
-1.  VCC → 5V
-2.  GND → GND
-3.  Signal → Pin 2
-
-> Some modules have a built-in pull-up resistor. If you're using a bare A3144 sensor, you'll need a 10kΩ pull-up resistor between the signal pin and 5V.
-
-#### Code: Magnetic Switch
-
-```cpp
-int HALL_PIN = 2;
-int LED_PIN = 13;  // Built-in LED
-
-void setup() {
-  pinMode(HALL_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-  Serial.begin(9600);
-}
-
-void loop() {
-  int magnetDetected = digitalRead(HALL_PIN);
-
-  if (magnetDetected == LOW) {  // Most digital hall sensors go LOW when a magnet is near
-    digitalWrite(LED_PIN, HIGH);
-    Serial.println("MAGNET DETECTED!");
-  } else {
-    digitalWrite(LED_PIN, LOW);
-    Serial.println("No magnet.");
-  }
-
-  delay(100);
-}
-```
-
-*Wave a magnet near the sensor and watch the LED light up. Try flipping the magnet — most hall sensors only respond to one magnetic pole (south). This is how "smart" phone cases know when they're closed.*
-
----
 
 ### Ultrasonic Distance Sensor (HC-SR04)
 
-The HC-SR04 is an ultrasonic rangefinder — it works like a bat's echolocation. It sends out a burst of high-frequency sound (way above human hearing), waits for the echo to bounce back, and measures how long it took. From that time, we can calculate the distance to whatever object reflected the sound.
+The HC-SR04 is an ultrasonic rangefinder. It works like a bat's echolocation. It sends out a burst of high-frequency sound (way above human hearing), waits for the echo to bounce back, and measures how long it took. From that time, we can calculate the distance to whatever object reflected the sound.
 
 It can measure distances from about 2 cm to 400 cm (roughly 1 inch to 13 feet).
 
@@ -133,13 +78,12 @@ void loop() {
 }
 ```
 
-*Point the sensor at a wall or your hand and watch the distance change in the Serial Monitor. Move your hand closer and farther away — it's oddly satisfying.*
+*Point the sensor at a wall or your hand and watch the distance change in the Serial Monitor. Move your hand closer and farther away.*
 
----
 
 ### Example: Distance-Controlled LED Brightness
 
-Let's combine the distance sensor with an LED to make something interactive. The closer your hand gets, the brighter the LED glows — like a proximity lamp.
+Let's combine the distance sensor with an LED to make something interactive. The closer your hand gets, the brighter the LED glows, like a proximity lamp.
 
 Circuit: Same HC-SR04 as above, plus an LED (with 220Ω resistor) on Pin 9 (PWM).
 
@@ -181,11 +125,10 @@ void loop() {
 }
 ```
 
-*Hold your hand over the sensor and move it up and down. The LED responds to your gesture — no touching required. This is the basis of many interactive art installations.*
+*Hold your hand over the sensor and move it up and down. The LED responds to your gesture, no touching required. This is the basis of many interactive art installations.*
 
 > Note: We use `constrain(distanceCm, 5, 50)` to clamp the distance value before mapping. Without it, readings outside the 5–50 range would produce brightness values outside 0–255, which `analogWrite()` can't handle properly.
 
----
 
 ## Part 2: Servo Motors
 
@@ -213,7 +156,6 @@ Arduino has a built-in library for controlling servos. To use it, we add `#inclu
 *   `myServo.attach(pin)`: Tells the library which pin the servo's signal wire is connected to.
 *   `myServo.write(angle)`: Moves the servo to a specific angle (0–180).
 
----
 
 ### Example 1: Servo Sweep
 
@@ -260,7 +202,6 @@ void loop() {
 
 *Upload this and watch the servo arm sweep back and forth. Try changing the delay to make it faster or slower.*
 
----
 
 ### Example 2: Potentiometer-Controlled Servo
 
@@ -305,116 +246,10 @@ void loop() {
 
 *Turn the knob slowly and watch the servo follow your hand. This is essentially a manual remote control!*
 
----
 
-## Part 3: DC Motors
+## Part 3: 2-DOF Robot Arm
 
-A DC motor is the classic spinning motor. Unlike a servo, it doesn't go to a specific angle — it just spins continuously. You control its speed (by varying the voltage) and its direction (by swapping the polarity).
-
-### Why We Need a Transistor
-
-There's a catch: DC motors draw much more current than an Arduino pin can provide. An Arduino pin can output about 20mA, but even a small DC motor can draw 200mA or more. If you connect a motor directly to an Arduino pin, you could damage the Arduino.
-
-The solution is to use a transistor (or MOSFET) as a switch. The Arduino sends a small signal to the transistor, and the transistor acts as a gate that allows a larger current from a separate power source to flow through the motor.
-
-Think of it like a light switch on a wall: your finger uses very little force to flip the switch, but the switch controls a much larger flow of electricity to the ceiling light.
-
-<p>
-  <img src="transistor-motor-circuit.png" alt="DC motor with transistor" width="600">
-  <br>
-  <em>DC motor controlled through a transistor. The Arduino controls the transistor, and the transistor controls the motor.</em>
-</p>
-
-### Circuit: DC Motor with a Transistor
-
-We'll use a TIP120 transistor (or similar NPN transistor/MOSFET):
-
-1.  Motor: One wire to the external power supply positive (e.g., a battery pack), the other wire to the collector pin of the transistor.
-2.  Transistor (TIP120):
-    *   Base → Arduino Pin 9 (through a 1kΩ resistor)
-    *   Collector → Motor's negative wire
-    *   Emitter → GND
-3.  Diode (1N4001): Place across the motor terminals (cathode stripe toward power). This protects against voltage spikes when the motor turns off.
-4.  Power: Connect the external power supply's GND to the Arduino's GND (common ground).
-
-> Why a diode? Motors are "inductive loads." When you suddenly cut power, the motor's magnetic field collapses and creates a brief voltage spike that can damage your transistor or Arduino. The diode absorbs this spike. Always use one with motors!
-
----
-
-### Example 3: Speed Control with PWM
-
-Since the motor is connected to a PWM-capable pin (~), we can use `analogWrite()` to control the speed, just like we used it to fade an LED. The value 0–255 controls how much power reaches the motor.
-
-#### Code
-
-```cpp
-int MOTOR_PIN = 9;  // Must be a PWM pin (~)
-int POT_PIN = A0;
-
-void setup() {
-  pinMode(MOTOR_PIN, OUTPUT);
-  Serial.begin(9600);
-}
-
-void loop() {
-  // 1. Read the potentiometer
-  int potValue = analogRead(POT_PIN);
-
-  // 2. Map it to the PWM range (0–255)
-  int motorSpeed = map(potValue, 0, 1023, 0, 255);
-
-  // 3. Set the motor speed
-  analogWrite(MOTOR_PIN, motorSpeed);
-
-  // 4. Print to Serial Monitor
-  Serial.print("Speed: ");
-  Serial.println(motorSpeed);
-
-  delay(10);
-}
-```
-
-*Turn the pot and watch the motor speed up and slow down. Note: most DC motors need a minimum voltage to start spinning, so the motor may not move at very low PWM values.*
-
----
-
-### Example 4: Motor Ramp-Up with a While Loop
-
-This example uses a `while` loop to gradually ramp the motor up to full speed and then back down — a satisfying kinetic effect, and a review of `while` loops from Session 04.
-
-```cpp
-int MOTOR_PIN = 9;
-
-void setup() {
-  pinMode(MOTOR_PIN, OUTPUT);
-}
-
-void loop() {
-  // --- Ramp up ---
-  int speed = 0;
-  while (speed <= 255) {
-    analogWrite(MOTOR_PIN, speed);
-    speed = speed + 5;
-    delay(30);
-  }
-
-  // --- Ramp down ---
-  speed = 255;
-  while (speed >= 0) {
-    analogWrite(MOTOR_PIN, speed);
-    speed = speed - 5;
-    delay(30);
-  }
-
-  delay(500); // Pause before repeating
-}
-```
-
----
-
-## Part 4: Project — 2-DOF Robot Arm
-
-Now for the fun part. We'll combine two servos and two potentiometers to build a simple 2 Degrees of Freedom (DOF) robot arm. One servo controls the base rotation, and the other controls the arm's elevation. Each potentiometer controls one servo — so you have full manual control of the arm with your hands.
+Now for the fun part. We'll combine two servos and two potentiometers to build a simple 2 Degrees of Freedom (DOF) robot arm. One servo controls the base rotation, and the other controls the arm's elevation. Each potentiometer controls one servo, so you have full manual control of the arm with your hands.
 
 This is the same principle behind the joystick-controlled arms used in everything from toy cranes to surgical robots.
 
@@ -430,9 +265,9 @@ This is the same principle behind the joystick-controlled arms used in everythin
 ### Physical Assembly
 
 You can build the arm structure from:
-*   Popsicle sticks or craft sticks — hot-glue them to the servo horns
-*   Cardboard — cut simple arm segments and attach with hot glue
-*   3D printed parts — if you're feeling ambitious (we'll cover this in Session 07!)
+*   Popsicle sticks or craft sticks. Hot-glue them to the servo horns.
+*   Cardboard. Cut simple arm segments and attach with hot glue.
+*   3D printed parts, if you're feeling ambitious (we'll cover this in Session 07!).
 
 Mount one servo flat on the table (base rotation). Attach the second servo to the horn of the first (so it tilts up and down as the base rotates), and glue a stick or gripper to the second servo's horn.
 
@@ -441,7 +276,7 @@ Mount one servo flat on the table (base rotation). Attach the second servo to th
 ```cpp
 #include <Servo.h>
 
-// Create two Servo objects — one for each joint.
+// Create two Servo objects, one for each joint.
 Servo baseServo;
 Servo armServo;
 
@@ -481,26 +316,21 @@ void loop() {
 }
 ```
 
-*Build the arm, upload the code, and try to pick up a small object (like a crumpled piece of paper) by coordinating both knobs. It's surprisingly tricky — and surprisingly fun.*
+*Build the arm, upload the code, and try to pick up a small object (like a crumpled piece of paper) by coordinating both knobs. It's surprisingly tricky, and surprisingly fun.*
 
----
 
 ## More Project Ideas
 
 Here are some other motor projects to try on your own or for inspiration:
 
-| Project | Motor Type | Description |
-|---|---|---|
-| Useless Machine | Servo | A box with a switch. Flip it on, and a servo arm reaches out and flips it back off. [Classic example →](https://www.youtube.com/results?search_query=useless+machine+arduino) |
-| Zoetrope | DC Motor | A spinning drum with animation frames inside. Control the speed with a pot until the animation "locks in." Pre-cinema magic! |
-| Scribble Bot | DC Motor | Tape markers to a cup, attach a DC motor with an offset weight inside. Turn it on and it draws chaotic patterns on paper. |
-| Animatronic Eyes | 2 Servos | Mount two servos for X/Y eyeball movement. Build a goofy face around them with craft supplies. Control with pots or a joystick. |
-| Laser Cat Toy | Servo | Mount a laser pointer on a servo and sweep it across the floor in random patterns. Add a second servo for 2D movement. |
-| Motorized Turntable | DC Motor | A slow-spinning display platform for objects or small sculptures. |
+| Project | Description |
+|---|---|
+| Useless Machine | A box with a switch. Flip it on, and a servo arm reaches out and flips it back off. [Classic example →](https://www.youtube.com/results?search_query=useless+machine+arduino) |
+| Animatronic Eyes | Mount two servos for X/Y eyeball movement. Build a goofy face around them with craft supplies. Control with pots or a joystick. |
+| Laser Cat Toy | Mount a laser pointer on a servo and sweep it across the floor in random patterns. Add a second servo for 2D movement. |
 
----
 
-## Part 5: Introduction to Processing
+## Part 4: Introduction to Processing
 
 Now that we have sensors reading the world and motors acting on it, there's one more piece of the puzzle: what if the Arduino could talk to software on your computer? Imagine your potentiometer controlling a visual on screen, or a mouse click triggering a motor. That's exactly what we'll build in Session 06. But first, let's get familiar with the tool we'll use: Processing.
 
@@ -508,7 +338,7 @@ Now that we have sensors reading the world and motors acting on it, there's one 
 
 [Processing](https://processing.org/) is a free, open-source programming environment designed for artists and designers. It creates a window on your computer where you can draw shapes, images, and animations with code.
 
-If you've used the Arduino IDE, Processing will feel immediately familiar — the structure is almost identical:
+If you've used the Arduino IDE, Processing will feel immediately familiar. The structure is almost identical:
 
 | Arduino | Processing |
 |---|---|
@@ -542,7 +372,7 @@ void draw() {
 }
 ```
 
-*You should see a window with an orange circle and a blue rectangle on a dark background. Not very exciting yet — but notice how similar the code structure is to Arduino.*
+*You should see a window with an orange circle and a blue rectangle on a dark background. Not very exciting yet, but notice how similar the code structure is to Arduino.*
 
 ### Making It Interactive: Mouse Input
 
@@ -568,9 +398,9 @@ void draw() {
 }
 ```
 
-*Move your mouse around the window. The circle follows. `mouseX` and `mouseY` work like built-in sensor readings — Processing updates them for you every frame, just like `analogRead()` gives you a fresh value every time you call it.*
+*Move your mouse around the window. The circle follows. `mouseX` and `mouseY` work like built-in sensor readings. Processing updates them for you every frame, just like `analogRead()` gives you a fresh value every time you call it.*
 
-### The `map()` Function — Same Idea, Same Name
+### The `map()` Function
 
 Processing has a `map()` function that works exactly like Arduino's:
 
@@ -598,7 +428,7 @@ void draw() {
 }
 ```
 
-*Move the mouse left/right to change the size, up/down to change the color. Same `map()` function you've been using all semester — just a different context.*
+*Move the mouse left/right to change the size, up/down to change the color. Same `map()` function you've been using all semester, just a different context.*
 
 ### 🏠 Homework: Install Processing and Experiment
 
@@ -607,15 +437,13 @@ Before Session 06, make sure Processing is installed and working on your laptop.
 - Add more shapes that respond to the mouse.
 - What happens if you remove the `background(30)` line from `draw()`?
 
-In Session 06, Sarah will show you how to connect Arduino to Processing over serial — so your physical sensors will control on-screen visuals, and your mouse will control motors and LEDs. Bring your Arduino and a USB cable!
+In Session 06, Sarah will show you how to connect Arduino to Processing over serial, so your physical sensors will control on-screen visuals, and your mouse will control motors and LEDs. Bring your Arduino and a USB cable!
 
----
 
 ## Key Concepts Summary
 
 | Concept | What It Does |
 |---|---|
-| Hall effect sensor | Detects magnetic fields (digital or analog) |
 | `pulseIn(pin, HIGH)` | Measures how long a pin stays HIGH (in µs) |
 | HC-SR04 | Ultrasonic distance sensor (2–400 cm range) |
 | `constrain(val, min, max)` | Clamps a value to a range |
@@ -623,9 +451,14 @@ In Session 06, Sarah will show you how to connect Arduino to Processing over ser
 | `Servo myServo` | Creates a Servo object |
 | `myServo.attach(pin)` | Assigns a pin to the servo |
 | `myServo.write(angle)` | Moves servo to an angle (0–180°) |
-| `analogWrite(pin, value)` | PWM output (0–255) for speed control |
-| Transistor / MOSFET | Lets Arduino control high-current devices like DC motors |
-| Flyback diode | Protects circuit from motor voltage spikes |
 | Processing | Creative coding environment for drawing visuals with code |
 | `setup()` / `draw()` | Processing equivalents of Arduino's `setup()` / `loop()` |
 | `mouseX` / `mouseY` | Built-in variables tracking mouse position in Processing |
+
+## Supplemental Videos
+
+These videos from [Rachel de Barros](https://www.youtube.com/@racheldebarroslive) cover topics from this session.
+
+* [Get Started with Ultrasonic Sensors and Arduino](https://www.youtube.com/watch?v=ZqQgxgnH9wg)
+* [How to Control a Servo with an Ultrasonic Sensor and Arduino](https://www.youtube.com/watch?v=ybhMIy9LWFg)
+* [Control 2 Servos with a Joystick and Arduino](https://www.youtube.com/watch?v=fHxZaHJgW34)
