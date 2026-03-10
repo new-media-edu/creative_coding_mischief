@@ -14,7 +14,6 @@
     * Basic wiring and electronics
     * Basic programming: flow, variables, constants, comments, etc.
 
----
 
 ## Arduino and Electronics
 

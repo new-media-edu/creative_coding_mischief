@@ -1,6 +1,6 @@
 # Session 07: Mid-Semester Build Day
 
-Today is yours. You've spent the last six sessions learning the building blocks — LEDs, buttons, sensors, sound, motors, serial communication, and Processing. Now it's time to put them together into something of your own.
+Today is yours. You've spent the last six sessions learning the building blocks: LEDs, buttons, sensors, sound, motors, serial communication, and Processing. Now it's time to put them together into something of your own.
 
 ## The Plan
 
@@ -33,7 +33,7 @@ Using motors (servo or DC) and possibly a laser pointer module, build an automat
 
 Requirements:
 - Uses at least 1 motor (servo or DC) to create movement
-- Has some element of unpredictability — a cat loses interest in a pattern it can predict. Consider using `random()` to vary timing, direction, or speed
+- Has some element of unpredictability. A cat loses interest in a pattern it can predict. Consider using `random()` to vary timing, direction, or speed
 - Has an on/off switch or button to start and stop the toy
 
 Possible approaches:

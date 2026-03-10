@@ -71,7 +71,6 @@ void loop() {
 ```
 *After uploading this code, open the Serial Monitor and turn the knob. You should see the numbers change from 0 to 1023.*
 
----
 
 ### Example 2: Controlling Pitch with a Knob
 
@@ -122,7 +121,6 @@ void loop() {
 }
 ```
 
----
 
 ## Part 2: `while` Loops
 
@@ -217,7 +215,6 @@ void loop() {
 }
 ```
 
----
 
 ## Part 3: Project: A Musical Keyboard
 

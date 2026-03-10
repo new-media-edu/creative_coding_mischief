@@ -61,12 +61,11 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Potentiometer-controlled tone generator or simple synthesizer.
 
-### Session 05: Sensors, Motors, and Introduction to Processing
+### Session 05: Sensors, Servos, and Introduction to Processing
 **Date:** March 10, 2026
 *Topics:*
-- Sensor showcase: hall effect sensors and ultrasonic distance sensors.
+- Sensor showcase: ultrasonic distance sensor.
 - Introduction to servo motors and the Servo library.
-- DC motors and transistor-based speed control.
 - Building a 2-DOF robot arm.
 - Introduction to Processing: installation and first sketch.
 
@@ -126,23 +125,23 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Projection-mapped installation triggered by physical sensors.
 
-### Session 11: Capstone & Networked Mischief
+### Session 11: Final Project Workshop
 **Date:** April 21, 2026
 *Topics:*
-- Coding for the web and networked systems.
-- Bidirectional communication (Real world ↔ Internet).
-- Final project assembly and polishing.
+- Final project development and assembly.
+- Individual and group troubleshooting.
+- Instructor check-ins and feedback.
 
 *Deliverable:* Final Project prototype.
 
-### Session 12: Capstone & Networked Mischief (continued)
+### Session 12: Final Project Workshop (continued)
 **Date:** April 28, 2026
 *Topics:*
-- Coding for the web and networked systems.
-- Bidirectional communication (Real world ↔ Internet).
-- Final project assembly and polishing.
+- Final project polishing and testing.
+- Documentation and presentation prep.
+- Instructor check-ins and feedback.
 
-*Deliverable:* Final Project prototype.
+*Deliverable:* Completed Final Project, ready for exhibition.
 
 ### Final Exhibition & Wrap-up
 **Date:** Tuesday, May 5, 2026
