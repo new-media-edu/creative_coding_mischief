@@ -63,57 +63,30 @@ Processing has a built-in Serial library. We import it, open the same serial por
 ```java
 import processing.serial.*;
 
-Serial myPort;      // The serial port object
-int circleSize = 0; // This will be controlled by the Arduino
+Serial port;
+int circleSize;
 
 void setup() {
-  size(600, 600);  // Create a 600×600 pixel window
-
-  // Print available serial ports to the console.
-  // Look for the one that matches your Arduino (e.g., /dev/ttyUSB0, /dev/ttyACM0, COM3).
+  size(600,600);
   printArray(Serial.list());
 
-  // Open the serial port. Change the index [0] to match your Arduino's port.
-  // On Linux it's often /dev/ttyUSB0 or /dev/ttyACM0.
-  // On Mac it's often /dev/cu.usbmodem... 
-  // On Windows it's often COM3 or COM4.
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
-
-  // Tell Processing to buffer incoming data until it sees a newline character.
-  // This way, serialEvent() will only fire when a complete line has arrived.
-  myPort.bufferUntil('\n');
+  port = new Serial(this, Serial.list()[3], 9600);
+  port.bufferUntil('\n');   // critical
 }
 
 void draw() {
-  background(30);  // Dark background, redrawn every frame
-
-  // Draw a circle in the center of the window.
-  // The size is controlled by the Arduino's potentiometer.
-  fill(255, 150, 0);  // Orange
-  noStroke();
-  ellipse(width / 2, height / 2, circleSize, circleSize);
-
-  // Display the current value as text
-  fill(255);
-  textSize(16);
-  text("Value: " + circleSize, 10, 30);
+  background(30);
+  ellipse(width/2, height/2, circleSize, circleSize);
 }
 
-// This function is called automatically whenever a complete line arrives on the serial port.
-void serialEvent(Serial myPort) {
-  // Read the incoming line and trim any whitespace/newline characters.
-  String inString = myPort.readStringUntil('\n');
+void serialEvent(Serial p) {
+  String s = p.readStringUntil('\n');
+  if (s == null) return;
 
-  if (inString != null) {
-    inString = trim(inString);
+  int v = int(trim(s));
+  println(v);
 
-    // Convert the string to an integer.
-    int value = int(inString);
-
-    // Map the Arduino's 0–1023 range to a circle diameter (10–500 pixels).
-    circleSize = (int) map(value, 0, 1023, 10, 500);
-  }
+  circleSize = int(map(v, 0, 1023, 10, 500));
 }
 ```
 
