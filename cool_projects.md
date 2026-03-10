@@ -15,3 +15,6 @@
 + [BMW Museum Kinetic Sculpture](https://www.youtube.com/watch?v=hlx-M53dC7M&feature=related) — 714 metal spheres suspended on individual cables that ripple and morph into the silhouettes of BMW concept cars.
 + [Kinetic Origami](https://www.youtube.com/watch?v=NdY7owk45II) — Demonstration of how a single servo can drive folded-paper flexures to produce smooth linear and rotary motion.
 + [Transform - MIT Media Lab](https://www.youtube.com/watch?v=lCARHatJQJA) — Table surface covered in hundreds of motorized pins that dynamically rise and fall to display shapes, respond to touch, and ripple like water.
++ [Arduino Animatronic Eyes](https://www.instructables.com/Arduino-Animatronic-Eyes/) — 3D printed, servo-driven eyeball mechanism controlled by an Arduino and joystick.
++ [Arduino Cat Laser Toy DIY](https://www.hackster.io/Seafox_C/arduino-cat-laser-toy-diy-566ed9) — Automated laser pointer cat toy using two servos to sweep a laser in random patterns.
++ [Brachiograph](https://www.brachiograph.art/) — Ultra-cheap pen plotter made from popsicle sticks, servos, and a Raspberry Pi.

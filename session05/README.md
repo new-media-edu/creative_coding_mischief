@@ -11,8 +11,6 @@ In this session, we move beyond knobs and buttons into sensing the world and mov
 + Project: Building a 2-DOF robot arm
 + Introduction to Processing: installation and first sketch
 
----
-
 ## Part 1: Sensor Showcase
 
 So far, we've read inputs from buttons (digital — on/off) and potentiometers (analog — a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own — detecting objects, magnets, light, temperature, or motion?
@@ -20,8 +18,6 @@ So far, we've read inputs from buttons (digital — on/off) and potentiometers (
 That's what sensors are for. A sensor converts some physical phenomenon into an electrical signal the Arduino can read. Most sensors work with the same `digitalRead()` and `analogRead()` functions we already know. The only difference is what's being measured.
 
 Let's look at two fun ones.
-
----
 
 ### Hall Effect Sensor (Detecting Magnets)
 
@@ -225,6 +221,12 @@ The simplest servo example: sweep back and forth from 0° to 180° using a `for`
     *   Red wire → 5V
     *   Brown/Black wire → GND
     *   Orange/Yellow wire → Pin 9
+
+<p>
+  <img src="simple-servo.png" alt="Simple servo circuit" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/5eqLU8GqwsP-servo-basic">Tinkercad Circuit</a></em>
+</p>
 
 #### Code
 
