@@ -8,10 +8,7 @@ Last session, you met Processing and drew shapes on screen with code. Today, we 
 + Sending data from Processing to Arduino (mouse position → servo angle)
 + Combining both directions: full two-way communication
 
-<<<<<<< HEAD
-=======
 
->>>>>>> d29733e53fce28eabff74e9d2bc580567774407e
 ## Part 1: Arduino → Processing (Potentiometer Controls Circle Size)
 
 In this first example, we'll read a potentiometer on the Arduino and send its value to Processing over the serial port. Processing will use that value to control the size of a circle on screen.

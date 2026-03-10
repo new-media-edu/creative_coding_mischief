@@ -10,70 +10,13 @@ In this session, we move beyond knobs and buttons into sensing the world and mov
 + Project: Building a 2-DOF robot arm
 + Introduction to Processing: installation and first sketch
 
-<<<<<<< HEAD
-=======
 
->>>>>>> d29733e53fce28eabff74e9d2bc580567774407e
 ## Part 1: Sensor Showcase
 
 So far, we've read inputs from buttons (digital, on/off) and potentiometers (analog, a range of values). But these require someone to physically touch them. What if we want the Arduino to sense the world on its own, detecting objects, light, temperature, or motion?
 
 That's what sensors are for. A sensor converts some physical phenomenon into an electrical signal the Arduino can read. Most sensors work with the same `digitalRead()` and `analogRead()` functions we already know. The only difference is what's being measured.
 
-<<<<<<< HEAD
-Let's look at two fun ones.
-
-### Hall Effect Sensor (Detecting Magnets)
-
-A hall effect sensor detects the presence and strength of a magnetic field. Wave a magnet near it and the output changes. There are two common types:
-
-*   Digital hall sensor (e.g., A3144, KY-003 module): Acts like a magnetic switch — outputs HIGH or LOW depending on whether a magnet is nearby. Reads with `digitalRead()`, just like a button.
-*   Analog hall sensor (e.g., A1302, 49E): Outputs a voltage proportional to the magnetic field strength. Reads with `analogRead()`, just like a potentiometer.
-
-These are used everywhere: bicycle speedometers, phone flip cases that auto-lock, security systems, and detecting whether a door is open or closed.
-
-#### Circuit: Digital Hall Sensor
-
-Most hall sensor modules (like the KY-003) have three pins:
-
-1.  VCC → 5V
-2.  GND → GND
-3.  Signal → Pin 2
-
-> Some modules have a built-in pull-up resistor. If you're using a bare A3144 sensor, you'll need a 10kΩ pull-up resistor between the signal pin and 5V.
-
-#### Code: Magnetic Switch
-
-```cpp
-int HALL_PIN = 2;
-int LED_PIN = 13;  // Built-in LED
-
-void setup() {
-  pinMode(HALL_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-  Serial.begin(9600);
-}
-
-void loop() {
-  int magnetDetected = digitalRead(HALL_PIN);
-
-  if (magnetDetected == LOW) {  // Most digital hall sensors go LOW when a magnet is near
-    digitalWrite(LED_PIN, HIGH);
-    Serial.println("MAGNET DETECTED!");
-  } else {
-    digitalWrite(LED_PIN, LOW);
-    Serial.println("No magnet.");
-  }
-
-  delay(100);
-}
-```
-
-*Wave a magnet near the sensor and watch the LED light up. Try flipping the magnet — most hall sensors only respond to one magnetic pole (south). This is how "smart" phone cases know when they're closed.*
-
----
-=======
->>>>>>> d29733e53fce28eabff74e9d2bc580567774407e
 
 ### Ultrasonic Distance Sensor (HC-SR04)
 
