@@ -1,17 +1,35 @@
-# Session 06: Arduino ↔ Processing
+# Session 06: Arduino → Processing
 
-Last session, you met Processing and drew shapes on screen with code. Today, we connect the two worlds: Arduino talks to Processing, and Processing talks back to Arduino. By the end of this session, your physical sensors will control on-screen visuals, and your mouse will move a servo motor, all over a single USB cable.
+Today we introduce Processing and use it to visualize data coming from the Arduino. We'll start simple, growing a circle with a potentiometer, then build an Etch A Sketch using two potentiometers to draw on screen.
 
 ## Agenda
 
-+ Sending data from Arduino to Processing (potentiometer → circle size)
-+ Sending data from Processing to Arduino (mouse position → servo angle)
-+ Combining both directions: full two-way communication
++ What is Processing?
++ Growing a circle with a potentiometer
++ Etch A Sketch with two potentiometers
 
+---
 
-## Part 1: Arduino → Processing (Potentiometer Controls Circle Size)
+## What is Processing?
 
-In this first example, we'll read a potentiometer on the Arduino and send its value to Processing over the serial port. Processing will use that value to control the size of a circle on screen.
+[Processing](https://processing.org/) is a free, open-source programming environment designed for artists and designers. It creates a window on your computer where you can draw shapes, images, and animations with code. Download it here: [processing.org/download](https://processing.org/download/)
+
+If you've used the Arduino IDE, Processing will feel immediately familiar:
+
+| Arduino | Processing |
+|---|---|
+| `setup()` runs once | `setup()` runs once |
+| `loop()` runs forever | `draw()` runs forever (~60 times/sec) |
+| `Serial.println()` sends data out | Can receive serial data |
+| Talks to hardware | Draws to a screen |
+
+That's all you need to know for now. We'll learn Processing by using it.
+
+---
+
+## Part 1: Growing a Circle (1 Potentiometer)
+
+We'll read a potentiometer on the Arduino and send its value to Processing over the serial port. Processing will use that value to control the size of a circle on screen.
 
 ### The Plan
 
@@ -19,9 +37,9 @@ In this first example, we'll read a potentiometer on the Arduino and send its va
 [ Potentiometer ] → analogRead() → Serial.println() → USB cable → Processing serial.read() → circle size
 ```
 
-### Step 1: The Arduino Code
+### The Arduino Code
 
-This is straightforward. We've done this before. Read the pot, and print the value to Serial. The only thing that's new is that we're being more deliberate about the format: we send one number per line with `Serial.println()`, because Processing will read one line at a time.
+Read the pot, print the value to Serial. We send one number per line with `Serial.println()`, because Processing will read one line at a time.
 
 #### Circuit
 
@@ -38,27 +56,18 @@ void setup() {
 
 void loop() {
   int potValue = analogRead(POT_PIN);
-
-  // Send the value as a line of text.
-  // println() adds a newline character at the end,
-  // which Processing will use to know when a complete value has arrived.
   Serial.println(potValue);
-
-  delay(50); // Send ~20 values per second. Don't flood the serial port!
+  delay(50);
 }
 ```
 
 Upload this to your Arduino. You can verify it works by opening the Serial Monitor. You should see numbers from 0 to 1023 streaming by.
 
-> Important: Close the Serial Monitor before running Processing! Only one program can use the serial port at a time. If the Serial Monitor is open, Processing won't be able to connect.
+> Important: Close the Serial Monitor before running Processing! Only one program can use the serial port at a time.
 
-### Step 2: The Processing Code
+### The Processing Code
 
-Now open Processing (not the Arduino IDE) and paste the following code into a new sketch.
-
-Processing has a built-in Serial library. We import it, open the same serial port the Arduino is connected to, and read incoming lines of text.
-
-#### Processing Code
+Open Processing (not the Arduino IDE) and paste the following code into a new sketch.
 
 ```java
 import processing.serial.*;
@@ -67,16 +76,19 @@ Serial port;
 int circleSize;
 
 void setup() {
-  size(600,600);
+  size(600, 600);
   printArray(Serial.list());
 
+  // Change the index to match your Arduino's port
   port = new Serial(this, Serial.list()[3], 9600);
-  port.bufferUntil('\n');   // critical
+  port.bufferUntil('\n');
 }
 
 void draw() {
   background(30);
-  ellipse(width/2, height/2, circleSize, circleSize);
+  fill(255, 150, 0);
+  noStroke();
+  ellipse(width / 2, height / 2, circleSize, circleSize);
 }
 
 void serialEvent(Serial p) {
@@ -84,8 +96,6 @@ void serialEvent(Serial p) {
   if (s == null) return;
 
   int v = int(trim(s));
-  println(v);
-
   circleSize = int(map(v, 0, 1023, 10, 500));
 }
 ```
@@ -99,98 +109,98 @@ void serialEvent(Serial p) {
 
 > Troubleshooting: "Port busy" or no data?
 > - Make sure the Arduino Serial Monitor is closed.
-> - Check the console output from `printArray(Serial.list())` and adjust the index in `Serial.list()[0]` if your Arduino isn't the first port listed.
+> - Check the console output from `printArray(Serial.list())` and adjust the index if your Arduino isn't the first port listed.
 > - Make sure the baud rate matches (9600 on both sides).
 
+---
 
-## Part 2: Processing → Arduino (Mouse Position Controls Servo)
+## Part 2: Etch A Sketch (2 Potentiometers)
 
-Now let's go the other direction. Processing will read the mouse's X position and send it to the Arduino, which will use it to rotate a servo motor. Move the mouse left → servo goes to 0°. Move right → servo goes to 180°.
+Now let's use two potentiometers to draw on screen, like an Etch A Sketch. One pot controls the X position of a pen, the other controls the Y position. As you turn the knobs, the pen leaves a trail.
 
 ### The Plan
 
 ```
-[ Mouse X ] → map() → myPort.write() → USB cable → Serial.read() → Servo.write()
+[ Pot 1 (X) ] → analogRead(A0) ─┐
+                                 ├→ Serial.println("x,y") → USB → Processing draws a dot
+[ Pot 2 (Y) ] → analogRead(A1) ─┘
 ```
 
-### Step 1: The Arduino Code
+### The Arduino Code
 
-The Arduino listens for incoming bytes on the serial port. Each byte is a number from 0–180 representing the desired angle.
+We read both potentiometers and send them as a comma-separated pair on each line.
 
 #### Circuit
 
-1.  Servo: Red → 5V, Brown → GND, Signal → Pin 9
+1.  Potentiometer 1 (X): Outer pins → 5V and GND, Middle pin → A0
+2.  Potentiometer 2 (Y): Outer pins → 5V and GND, Middle pin → A1
 
 #### Arduino Code
 
 ```cpp
-#include <Servo.h>
-
-Servo myServo;
+int POT_X = A0;
+int POT_Y = A1;
 
 void setup() {
-  myServo.attach(9);
   Serial.begin(9600);
 }
 
 void loop() {
-  // Check if data is available on the serial port
-  if (Serial.available() > 0) {
-    // Read one byte. This will be a number 0–180.
-    int angle = Serial.read();
+  int x = analogRead(POT_X);
+  int y = analogRead(POT_Y);
 
-    // Move the servo to that angle
-    myServo.write(angle);
-  }
+  // Send both values separated by a comma
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(y);
+
+  delay(20);
 }
 ```
 
-### Step 2: The Processing Code
+### The Processing Code
 
-Processing reads the mouse X position, maps it to 0–180, and sends it to the Arduino as a single byte.
-
-#### Processing Code
+Processing reads the comma-separated values, maps them to screen coordinates, and draws a small circle at that position. Because we don't clear the background each frame, the dots accumulate into a drawing.
 
 ```java
 import processing.serial.*;
 
-Serial myPort;
+Serial port;
+float penX, penY;
 
 void setup() {
-  size(600, 600);
+  size(800, 800);
+  background(255);
 
   printArray(Serial.list());
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
+  port = new Serial(this, Serial.list()[3], 9600);
+  port.bufferUntil('\n');
 }
 
 void draw() {
-  background(30);
+  // Drawing happens in serialEvent, not here.
+  // We leave draw() mostly empty so the background doesn't get cleared.
+}
 
-  // Map the mouse X position (0 to window width) to a servo angle (0–180)
-  int angle = (int) map(mouseX, 0, width, 0, 180);
+void serialEvent(Serial p) {
+  String s = p.readStringUntil('\n');
+  if (s == null) return;
+  s = trim(s);
 
-  // Constrain to make sure we stay in the valid range
-  angle = constrain(angle, 0, 180);
+  // Split the comma-separated values
+  String[] values = split(s, ',');
+  if (values.length < 2) return;
 
-  // Send the angle to the Arduino as a single byte
-  myPort.write(angle);
+  float newX = map(int(values[0]), 0, 1023, 0, width);
+  float newY = map(int(values[1]), 0, 1023, 0, height);
 
-  // Draw a visual indicator on screen
-  // A line that rotates to match the servo angle
-  stroke(255, 150, 0);
-  strokeWeight(4);
-  float radians = radians(angle - 90); // Offset so 90° points up
-  float lineX = width / 2 + cos(radians) * 150;
-  float lineY = height / 2 + sin(radians) * 150;
-  line(width / 2, height / 2, lineX, lineY);
+  // Draw a line from the previous position to the new one
+  stroke(0);
+  strokeWeight(3);
+  line(penX, penY, newX, newY);
 
-  // Display the angle
-  fill(255);
-  noStroke();
-  textSize(16);
-  text("Angle: " + angle + "°", 10, 30);
-  text("Move mouse left/right", 10, 55);
+  penX = newX;
+  penY = newY;
 }
 ```
 
@@ -199,166 +209,89 @@ void draw() {
 1.  Upload the Arduino code.
 2.  Close the Serial Monitor.
 3.  Run the Processing sketch.
-4.  Move your mouse left and right across the Processing window. The servo should follow.
+4.  Turn the two potentiometers to draw on screen. One controls left/right, the other controls up/down.
 
+### Bonus: Add a Clear Button
 
-## Part 3: Two-Way Communication
+If you're feeling good about things, add a button to clear the screen and start a fresh drawing.
 
-Now let's put it all together. The Arduino sends potentiometer data to Processing and receives servo commands from Processing, all over the same serial connection.
+#### Updated Arduino Code
 
-This requires a simple rule so both sides know what's a message and what's a response. We'll use a call-and-response (handshake) protocol:
-
-1.  Arduino sends its sensor data as a line of text.
-2.  Processing receives it, updates the visuals, and sends back a servo angle byte.
-3.  Arduino receives the byte, moves the servo, and sends the next sensor reading.
-
-This way the two programs stay in sync and don't flood each other.
-
-### Arduino Code (Two-Way)
-
-#### Circuit
-
-1.  Potentiometer: Middle pin → A0, Outer pins → 5V and GND
-2.  Servo: Signal → Pin 9, Red → 5V, Brown → GND
+Add a button on pin 2 (with a pull-up resistor, or use `INPUT_PULLUP`). When pressed, send a special message so Processing knows to clear.
 
 ```cpp
-#include <Servo.h>
-
-Servo myServo;
-int POT_PIN = A0;
+int POT_X = A0;
+int POT_Y = A1;
+int BUTTON_PIN = 2;
 
 void setup() {
-  myServo.attach(9);
   Serial.begin(9600);
-
-  // Send a starting value so Processing knows we're ready
-  Serial.println(analogRead(POT_PIN));
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
 void loop() {
-  // Check if Processing has sent us a servo angle
-  if (Serial.available() > 0) {
-    // Read the angle byte from Processing
-    int angle = Serial.read();
-    myServo.write(angle);
-
-    // Now send back the current potentiometer reading
-    int potValue = analogRead(POT_PIN);
-    Serial.println(potValue);
+  // Check if the button is pressed
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    Serial.println("CLEAR");
+    delay(300);  // Simple debounce
+    return;
   }
+
+  int x = analogRead(POT_X);
+  int y = analogRead(POT_Y);
+
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(y);
+
+  delay(20);
 }
 ```
 
-### Processing Code (Two-Way)
+#### Updated Processing Code
+
+Check for the "CLEAR" message and reset the background when it arrives.
 
 ```java
 import processing.serial.*;
 
-Serial myPort;
-int circleSize = 0;  // Controlled by Arduino's pot
+Serial port;
+float penX, penY;
 
 void setup() {
-  size(600, 600);
+  size(800, 800);
+  background(255);
 
   printArray(Serial.list());
-  String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
-  myPort.bufferUntil('\n');
+  port = new Serial(this, Serial.list()[3], 9600);
+  port.bufferUntil('\n');
 }
 
 void draw() {
-  background(30);
-
-  // --- Draw the pot-controlled circle ---
-  fill(255, 150, 0);
-  noStroke();
-  ellipse(width / 2, height / 2, circleSize, circleSize);
-
-  // --- Draw the servo angle indicator ---
-  int angle = (int) map(mouseX, 0, width, 0, 180);
-  angle = constrain(angle, 0, 180);
-
-  stroke(100, 200, 255);
-  strokeWeight(3);
-  float rad = radians(angle - 90);
-  float lx = width / 2 + cos(rad) * 150;
-  float ly = height / 2 + sin(rad) * 150;
-  line(width / 2, height / 2, lx, ly);
-
-  // --- Display info ---
-  fill(255);
-  noStroke();
-  textSize(16);
-  text("Pot → Circle: " + circleSize, 10, 30);
-  text("Mouse → Servo: " + angle + "°", 10, 55);
 }
 
-void serialEvent(Serial myPort) {
-  String inString = myPort.readStringUntil('\n');
+void serialEvent(Serial p) {
+  String s = p.readStringUntil('\n');
+  if (s == null) return;
+  s = trim(s);
 
-  if (inString != null) {
-    inString = trim(inString);
-    int value = int(inString);
-    circleSize = (int) map(value, 0, 1023, 10, 500);
-
-    // Now send the mouse-based servo angle back to Arduino.
-    // This completes the "call and response" handshake.
-    int angle = (int) map(mouseX, 0, width, 0, 180);
-    angle = constrain(angle, 0, 180);
-    myPort.write(angle);
+  // Check for the clear command
+  if (s.equals("CLEAR")) {
+    background(255);
+    return;
   }
+
+  String[] values = split(s, ',');
+  if (values.length < 2) return;
+
+  float newX = map(int(values[0]), 0, 1023, 0, width);
+  float newY = map(int(values[1]), 0, 1023, 0, height);
+
+  stroke(0);
+  strokeWeight(3);
+  line(penX, penY, newX, newY);
+
+  penX = newX;
+  penY = newY;
 }
 ```
-
-### Running It
-
-1.  Upload the Arduino code.
-2.  Close the Serial Monitor.
-3.  Run the Processing sketch.
-4.  Turn the potentiometer. The orange circle changes size.
-5.  Move the mouse. The servo rotates and the blue indicator line follows.
-6.  Both happen simultaneously over the same USB cable!
-
-
-## How the Handshake Works
-
-```
-Arduino                          Processing
-  │                                  │
-  ├── println(potValue) ──────────►  │  serialEvent() fires
-  │                                  │  updates circle size
-  │  ◄──────────── write(angle) ────┤  sends servo command
-  │  moves servo                     │
-  ├── println(potValue) ──────────►  │  serialEvent() fires again
-  │                                  │  ...
-  ▼                                  ▼
-```
-
-The Arduino only sends a new reading after it receives a byte from Processing. This keeps them in lockstep and prevents the serial buffer from overflowing. Without this handshake, data can pile up and cause lag or garbled values.
-
-
-## Troubleshooting Guide
-
-| Problem | Likely Cause | Fix |
-|---|---|---|
-| "Port busy" error in Processing | Arduino Serial Monitor is still open | Close the Serial Monitor |
-| No data / circle doesn't move | Wrong serial port selected | Check `printArray(Serial.list())` output and adjust the index |
-| Garbled numbers or weird values | Baud rate mismatch | Make sure both sides use `9600` |
-| Servo jitters wildly | Processing sending data too fast | Use the handshake approach (Part 3) instead of sending every frame |
-| Values are delayed / laggy | Serial buffer filling up | Reduce `delay()` in Arduino code, or use the handshake |
-| Processing sketch is blank | Processing can't find the port | Run as administrator, or check USB cable |
-
-
-## Key Concepts Summary
-
-| Concept | What It Does |
-|---|---|
-| `Serial.println(value)` | Arduino sends a value as a line of text |
-| `Serial.read()` | Arduino reads one byte from the serial port |
-| `Serial.available()` | Checks if data is waiting to be read |
-| `import processing.serial.*` | Loads Processing's serial library |
-| `new Serial(this, port, baud)` | Opens a serial connection in Processing |
-| `myPort.bufferUntil('\n')` | Tells Processing to wait for a full line |
-| `serialEvent()` | Called automatically when a line arrives |
-| `myPort.write(value)` | Processing sends a byte to Arduino |
-| Call-and-response handshake | Keeps Arduino and Processing in sync |

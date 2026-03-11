@@ -1,13 +1,12 @@
 # Session 05: Sensors, Motors, and Introduction to Processing
 
-In this session, we move beyond knobs and buttons into moving things in the world. We'll learn to control servo motors and DC motors to build a funky robot arm. In the second half, we'll switch gears and meet Processing, a creative coding environment that will let us connect the Arduino to visuals on a computer screen in Session 06.
+In this session, we move beyond knobs and buttons into moving things in the world. We'll learn to control servo motors and DC motors to build a funky robot arm.
 
 ## Agenda
 
 + Introduction to servo motors and the `Servo` library
 + Controlling a servo with a potentiometer
 + Project: Building a 2-DOF robot arm
-+ Introduction to Processing: installation and first sketch
 
 
 ## Part 1: Servo Motors
@@ -146,6 +145,12 @@ This is the same principle behind the joystick-controlled arms used in everythin
 3.  Potentiometer 1 (Base control): Middle pin → A0, Outer pins → 5V and GND
 4.  Potentiometer 2 (Arm control): Middle pin → A1, Outer pins → 5V and GND
 
+<p>
+  <img src="2pot-2servo.png" alt="2 potentiometer 2 servo circuit" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/3q7nDz11QsR-2-potentiometer-2-servo">Tinkercad Circuit</a></em>
+</p>
+
 > Tip: If two servos are drawing too much current from the Arduino's 5V pin (you'll notice jittering or the Arduino resetting), use an external 5V power source for the servos and connect the grounds together.
 
 ### Physical Assembly
@@ -216,130 +221,15 @@ Here are some other motor projects to try on your own or for inspiration:
 | Laser Cat Toy | Mount a laser pointer on a servo and sweep it across the floor in random patterns. Add a second servo for 2D movement. |
 
 
-## Part 3: Introduction to Processing
-
-Now that we have sensors reading the world and motors acting on it, there's one more piece of the puzzle: what if the Arduino could talk to software on your computer? Imagine your potentiometer controlling a visual on screen, or a mouse click triggering a motor. That's exactly what we'll build in Session 06. But first, let's get familiar with the tool we'll use: Processing.
-
-### What is Processing?
-
-[Processing](https://processing.org/) is a free, open-source programming environment designed for artists and designers. It creates a window on your computer where you can draw shapes, images, and animations with code.
-
-If you've used the Arduino IDE, Processing will feel immediately familiar. The structure is almost identical:
-
-| Arduino | Processing |
-|---|---|
-| `setup()` runs once | `setup()` runs once |
-| `loop()` runs forever | `draw()` runs forever (~60 times/sec) |
-| `Serial.println()` sends data out | Can receive serial data |
-| Talks to hardware | Draws to a screen |
-
-Download and install Processing now: [processing.org/download](https://processing.org/download/)
-
-### Your First Sketch: Drawing Shapes
-
-Open Processing (not the Arduino IDE!) and paste this code into a new sketch. Press the Play button to run it.
-
-```java
-void setup() {
-  size(600, 600);  // Create a 600×600 pixel window
-}
-
-void draw() {
-  background(30);  // Dark gray background, redrawn every frame
-
-  // Draw an orange circle in the center
-  fill(255, 150, 0);  // RGB color: orange
-  noStroke();          // No outline
-  ellipse(300, 300, 200, 200);  // x, y, width, height
-
-  // Draw a blue rectangle
-  fill(100, 200, 255);
-  rect(50, 50, 100, 80);  // x, y, width, height
-}
-```
-
-*You should see a window with an orange circle and a blue rectangle on a dark background. Not very exciting yet, but notice how similar the code structure is to Arduino.*
-
-### Making It Interactive: Mouse Input
-
-Processing can read your mouse and keyboard. Let's make the circle follow the mouse:
-
-```java
-void setup() {
-  size(600, 600);
-}
-
-void draw() {
-  background(30);
-
-  // mouseX and mouseY are built-in variables that track the mouse position.
-  fill(255, 150, 0);
-  noStroke();
-  ellipse(mouseX, mouseY, 100, 100);
-
-  // Display the coordinates
-  fill(255);
-  textSize(16);
-  text("X: " + mouseX + "  Y: " + mouseY, 10, 30);
-}
-```
-
-*Move your mouse around the window. The circle follows. `mouseX` and `mouseY` work like built-in sensor readings. Processing updates them for you every frame, just like `analogRead()` gives you a fresh value every time you call it.*
-
-### The `map()` Function
-
-Processing has a `map()` function that works exactly like Arduino's:
-
-```java
-void setup() {
-  size(600, 600);
-}
-
-void draw() {
-  background(30);
-
-  // Map mouse X (0–600) to a circle size (10–400)
-  float circleSize = map(mouseX, 0, width, 10, 400);
-
-  // Map mouse Y (0–600) to a color component (0–255)
-  float redness = map(mouseY, 0, height, 0, 255);
-
-  fill(redness, 150, 0);
-  noStroke();
-  ellipse(width / 2, height / 2, circleSize, circleSize);
-
-  fill(255);
-  textSize(16);
-  text("Size: " + (int) circleSize, 10, 30);
-}
-```
-
-*Move the mouse left/right to change the size, up/down to change the color. Same `map()` function you've been using all semester, just a different context.*
-
-### 🏠 Homework: Install Processing and Experiment
-
-Before Session 06, make sure Processing is installed and working on your laptop. Try modifying the examples above:
-- Change the colors or shapes.
-- Add more shapes that respond to the mouse.
-- What happens if you remove the `background(30)` line from `draw()`?
-
-In Session 06, Sarah will show you how to connect Arduino to Processing over serial, so your physical sensors will control on-screen visuals, and your mouse will control motors and LEDs. Bring your Arduino and a USB cable!
-
-
 ## Key Concepts Summary
 
 | Concept | What It Does |
 |---|---|
-| `pulseIn(pin, HIGH)` | Measures how long a pin stays HIGH (in µs) |
-| HC-SR04 | Ultrasonic distance sensor (2–400 cm range) |
-| `constrain(val, min, max)` | Clamps a value to a range |
 | `#include <Servo.h>` | Loads the Servo library |
 | `Servo myServo` | Creates a Servo object |
 | `myServo.attach(pin)` | Assigns a pin to the servo |
 | `myServo.write(angle)` | Moves servo to an angle (0–180°) |
-| Processing | Creative coding environment for drawing visuals with code |
-| `setup()` / `draw()` | Processing equivalents of Arduino's `setup()` / `loop()` |
-| `mouseX` / `mouseY` | Built-in variables tracking mouse position in Processing |
+| `constrain(val, min, max)` | Clamps a value to a range |
 
 ## Supplemental Videos
 
