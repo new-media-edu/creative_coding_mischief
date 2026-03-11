@@ -70,32 +70,59 @@ Upload this to your Arduino. You can verify it works by opening the Serial Monit
 Open Processing (not the Arduino IDE) and paste the following code into a new sketch.
 
 ```java
+// This line loads the serial library so Processing can talk to the Arduino.
 import processing.serial.*;
 
+// A variable to hold our serial connection.
 Serial port;
+
+// This will store the circle diameter. It starts at 0.
 int circleSize;
 
 void setup() {
+  // Create a 600x600 pixel window.
   size(600, 600);
+
+  // Print the list of available serial ports to the console (the black area below the code).
+  // Look for the one that matches your Arduino.
   printArray(Serial.list());
 
-  // Change the index to match your Arduino's port
+  // Open the serial port. The number in the brackets (here [3]) is the
+  // position in the list printed above. You may need to change this
+  // to [0], [1], [2], etc. depending on your computer.
   port = new Serial(this, Serial.list()[3], 9600);
+
+  // Tell Processing to collect incoming data until it sees a newline character.
+  // This matches Arduino's Serial.println(), which adds a newline at the end.
   port.bufferUntil('\n');
 }
 
 void draw() {
+  // Redraw the background every frame (erases the previous circle).
   background(30);
+
+  // Set the fill color to orange (Red=255, Green=150, Blue=0).
   fill(255, 150, 0);
   noStroke();
+
+  // Draw a circle in the center of the window.
+  // "width" and "height" are built-in variables for the window size.
   ellipse(width / 2, height / 2, circleSize, circleSize);
 }
 
+// This function runs automatically every time a complete line arrives from Arduino.
 void serialEvent(Serial p) {
+  // Read the incoming text up to the newline character.
   String s = p.readStringUntil('\n');
+
+  // If nothing arrived, do nothing.
   if (s == null) return;
 
+  // Convert the text to a number. trim() removes any extra whitespace.
   int v = int(trim(s));
+
+  // Map the Arduino's 0-1023 range to a circle size between 10 and 500 pixels.
+  // This is the same map() function you've used on the Arduino!
   circleSize = int(map(v, 0, 1023, 10, 500));
 }
 ```
@@ -132,8 +159,16 @@ We read both potentiometers and send them as a comma-separated pair on each line
 
 #### Circuit
 
+We're using the same circuit from Session 05 with two potentiometers and two servos, but today we only need the two potentiometers. If your robot arm is still wired up, that's fine — the servos just won't do anything.
+
 1.  Potentiometer 1 (X): Outer pins → 5V and GND, Middle pin → A0
 2.  Potentiometer 2 (Y): Outer pins → 5V and GND, Middle pin → A1
+
+<p>
+  <img src="../session05/2pot-2servo.png" alt="2 potentiometer 2 servo circuit" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/3q7nDz11QsR-2-potentiometer-2-servo">Tinkercad Circuit</a></em>
+</p>
 
 #### Arduino Code
 
@@ -166,10 +201,14 @@ Processing reads the comma-separated values, maps them to screen coordinates, an
 import processing.serial.*;
 
 Serial port;
+
+// These store the pen's current position on screen.
 float penX, penY;
 
 void setup() {
   size(800, 800);
+
+  // Start with a white canvas.
   background(255);
 
   printArray(Serial.list());
@@ -178,27 +217,37 @@ void setup() {
 }
 
 void draw() {
-  // Drawing happens in serialEvent, not here.
-  // We leave draw() mostly empty so the background doesn't get cleared.
+  // We intentionally leave draw() empty.
+  // If we called background() here, it would erase our drawing every frame.
+  // Instead, all the drawing happens in serialEvent() below.
 }
 
+// This runs every time a complete line arrives from the Arduino.
 void serialEvent(Serial p) {
   String s = p.readStringUntil('\n');
   if (s == null) return;
   s = trim(s);
 
-  // Split the comma-separated values
+  // The Arduino sends something like "512,300".
+  // split() chops that string at the comma and gives us the pieces.
+  // After this line, values[0] is "512" and values[1] is "300".
+  // (An "array" is just a list of things — we access each item by number.)
   String[] values = split(s, ',');
+
+  // Make sure we actually got two values before continuing.
   if (values.length < 2) return;
 
+  // Convert the text values to numbers and map them to screen coordinates.
+  // int(values[0]) turns the text "512" into the number 512.
   float newX = map(int(values[0]), 0, 1023, 0, width);
   float newY = map(int(values[1]), 0, 1023, 0, height);
 
-  // Draw a line from the previous position to the new one
-  stroke(0);
-  strokeWeight(3);
+  // Draw a line from where the pen was to where it is now.
+  stroke(0);         // Black ink
+  strokeWeight(3);   // 3-pixel-wide line
   line(penX, penY, newX, newY);
 
+  // Remember this position for next time.
   penX = newX;
   penY = newY;
 }
@@ -275,12 +324,15 @@ void serialEvent(Serial p) {
   if (s == null) return;
   s = trim(s);
 
-  // Check for the clear command
+  // Check if the Arduino sent the word "CLEAR" (meaning the button was pressed).
+  // .equals() compares two strings — it returns true if they match exactly.
   if (s.equals("CLEAR")) {
+    // Re-paint the entire window white, erasing everything.
     background(255);
-    return;
+    return;  // Skip the rest of this function.
   }
 
+  // Otherwise, it's a normal "x,y" pair. Split and draw as before.
   String[] values = split(s, ',');
   if (values.length < 2) return;
 

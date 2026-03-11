@@ -140,8 +140,8 @@ This is the same principle behind the joystick-controlled arms used in everythin
 
 ### Circuit
 
-1.  Servo 1 (Base): Signal → Pin 9, Red → 5V, Brown → GND
-2.  Servo 2 (Arm): Signal → Pin 10, Red → 5V, Brown → GND
+1.  Servo 1 (Base): Signal → Pin 7, Red → 5V, Brown → GND
+2.  Servo 2 (Arm): Signal → Pin 9, Red → 5V, Brown → GND
 3.  Potentiometer 1 (Base control): Middle pin → A0, Outer pins → 5V and GND
 4.  Potentiometer 2 (Arm control): Middle pin → A1, Outer pins → 5V and GND
 
@@ -177,8 +177,8 @@ int ARM_POT_PIN  = A1;
 
 void setup() {
   // Attach each servo to its corresponding pin.
-  baseServo.attach(9);
-  armServo.attach(10);
+  baseServo.attach(7);
+  armServo.attach(9);
 
   Serial.begin(9600);
 }

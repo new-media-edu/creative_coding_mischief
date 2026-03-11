@@ -28,10 +28,16 @@ The Arduino waits for two bytes to arrive on the serial port: the first is the b
 
 #### Circuit
 
-Same robot arm circuit from Session 05:
+Same robot arm circuit from Session 05. You only need the two servos wired up today — the potentiometers can stay connected but we won't be reading them.
 
-1.  Servo 1 (Base): Signal → Pin 9, Red → 5V, Brown → GND
-2.  Servo 2 (Arm): Signal → Pin 10, Red → 5V, Brown → GND
+1.  Servo 1 (Base): Signal → Pin 7, Red → 5V, Brown → GND
+2.  Servo 2 (Arm): Signal → Pin 9, Red → 5V, Brown → GND
+
+<p>
+  <img src="../session05/2pot-2servo.png" alt="2 potentiometer 2 servo circuit" width="600">
+  <br>
+  <em><a href="https://www.tinkercad.com/things/3q7nDz11QsR-2-potentiometer-2-servo">Tinkercad Circuit</a></em>
+</p>
 
 #### Arduino Code
 
@@ -42,8 +48,8 @@ Servo baseServo;
 Servo armServo;
 
 void setup() {
-  baseServo.attach(9);
-  armServo.attach(10);
+  baseServo.attach(7);
+  armServo.attach(9);
   Serial.begin(9600);
 }
 
@@ -66,37 +72,52 @@ Processing maps the mouse position to two servo angles and sends them as two byt
 ```java
 import processing.serial.*;
 
+// A variable to hold our serial connection to the Arduino.
 Serial port;
 
 void setup() {
+  // Create a 600x600 pixel window.
   size(600, 600);
 
+  // Print available serial ports to the console so you can find your Arduino.
   printArray(Serial.list());
+
+  // Open the serial port. Change the [3] to match your Arduino's
+  // position in the list printed above.
   port = new Serial(this, Serial.list()[3], 9600);
 }
 
 void draw() {
+  // Redraw the background each frame.
   background(30);
 
-  // Map mouse position to servo angles (0–180)
+  // mouseX is a built-in variable that holds the current horizontal
+  // position of the mouse. mouseY is the vertical position.
+  // We map each one from the window size (0 to 600) to a servo angle (0 to 180).
   int baseAngle = (int) map(mouseX, 0, width, 0, 180);
   int armAngle = (int) map(mouseY, 0, height, 0, 180);
 
+  // constrain() clamps the value so it never goes below 0 or above 180,
+  // even if the mouse moves outside the window.
   baseAngle = constrain(baseAngle, 0, 180);
   armAngle = constrain(armAngle, 0, 180);
 
-  // Send both angles to the Arduino
+  // Send both angles to the Arduino as raw bytes.
+  // port.write() sends a single byte (a number 0–255).
+  // The Arduino reads them in the same order: base first, arm second.
   port.write(baseAngle);
   port.write(armAngle);
 
-  // Draw a crosshair to show the mouse position
-  stroke(255, 150, 0);
-  strokeWeight(2);
-  line(mouseX, 0, mouseX, height);
-  line(0, mouseY, width, mouseY);
+  // --- Visual feedback on screen ---
 
-  // Display angles
-  fill(255);
+  // Draw a crosshair at the mouse position.
+  stroke(255, 150, 0);  // Orange lines
+  strokeWeight(2);
+  line(mouseX, 0, mouseX, height);  // Vertical line
+  line(0, mouseY, width, mouseY);   // Horizontal line
+
+  // Display the current angles as text in the top-left corner.
+  fill(255);       // White text
   noStroke();
   textSize(16);
   text("Base: " + baseAngle + "°", 10, 30);
