@@ -5,8 +5,10 @@ Today we introduce Processing and use it to visualize data coming from the Ardui
 ## Agenda
 
 + What is Processing?
++ **The One Rule** of Serial Communication
 + Growing a circle with a potentiometer
 + Etch A Sketch with two potentiometers
++ Alternatives: p5.js and more
 
 ---
 
@@ -23,7 +25,11 @@ If you've used the Arduino IDE, Processing will feel immediately familiar:
 | `Serial.println()` sends data out | Can receive serial data |
 | Talks to hardware | Draws to a screen |
 
-That's all you need to know for now. We'll learn Processing by using it.
+### **The One Rule**
+Only one program can use the serial port at a time.
+- If the Arduino Serial Monitor is open, Processing can't connect.
+- **Always close the Serial Monitor** before running Processing.
+- If you get a "port busy" error, this is almost always the reason.
 
 ---
 
@@ -63,7 +69,7 @@ void loop() {
 
 Upload this to your Arduino. You can verify it works by opening the Serial Monitor. You should see numbers from 0 to 1023 streaming by.
 
-> Important: Close the Serial Monitor before running Processing! Only one program can use the serial port at a time.
+> **Remember:** Close the Serial Monitor before running Processing!
 
 ### The Processing Code
 
@@ -126,18 +132,6 @@ void serialEvent(Serial p) {
   circleSize = int(map(v, 0, 1023, 10, 500));
 }
 ```
-
-### Running It
-
-1.  Upload the Arduino code to your board.
-2.  Close the Arduino Serial Monitor.
-3.  Run the Processing sketch (click the Play button).
-4.  Turn the potentiometer. The circle on screen should grow and shrink.
-
-> Troubleshooting: "Port busy" or no data?
-> - Make sure the Arduino Serial Monitor is closed.
-> - Check the console output from `printArray(Serial.list())` and adjust the index if your Arduino isn't the first port listed.
-> - Make sure the baud rate matches (9600 on both sides).
 
 ---
 
@@ -230,15 +224,12 @@ void serialEvent(Serial p) {
 
   // The Arduino sends something like "512,300".
   // split() chops that string at the comma and gives us the pieces.
-  // After this line, values[0] is "512" and values[1] is "300".
-  // (An "array" is just a list of things — we access each item by number.)
   String[] values = split(s, ',');
 
   // Make sure we actually got two values before continuing.
   if (values.length < 2) return;
 
   // Convert the text values to numbers and map them to screen coordinates.
-  // int(values[0]) turns the text "512" into the number 512.
   float newX = map(int(values[0]), 0, 1023, 0, width);
   float newY = map(int(values[1]), 0, 1023, 0, height);
 
@@ -252,13 +243,6 @@ void serialEvent(Serial p) {
   penY = newY;
 }
 ```
-
-### Running It
-
-1.  Upload the Arduino code.
-2.  Close the Serial Monitor.
-3.  Run the Processing sketch.
-4.  Turn the two potentiometers to draw on screen. One controls left/right, the other controls up/down.
 
 ### Bonus: Add a Clear Button
 
@@ -279,7 +263,6 @@ void setup() {
 }
 
 void loop() {
-  // Check if the button is pressed
   if (digitalRead(BUTTON_PIN) == LOW) {
     Serial.println("CLEAR");
     delay(300);  // Simple debounce
@@ -302,48 +285,41 @@ void loop() {
 Check for the "CLEAR" message and reset the background when it arrives.
 
 ```java
-import processing.serial.*;
-
-Serial port;
-float penX, penY;
-
-void setup() {
-  size(800, 800);
-  background(255);
-
-  printArray(Serial.list());
-  port = new Serial(this, Serial.list()[3], 9600);
-  port.bufferUntil('\n');
-}
-
-void draw() {
-}
-
-void serialEvent(Serial p) {
-  String s = p.readStringUntil('\n');
-  if (s == null) return;
-  s = trim(s);
-
-  // Check if the Arduino sent the word "CLEAR" (meaning the button was pressed).
-  // .equals() compares two strings — it returns true if they match exactly.
+// ... serialEvent snippet
   if (s.equals("CLEAR")) {
-    // Re-paint the entire window white, erasing everything.
     background(255);
-    return;  // Skip the rest of this function.
+    return;
   }
-
-  // Otherwise, it's a normal "x,y" pair. Split and draw as before.
-  String[] values = split(s, ',');
-  if (values.length < 2) return;
-
-  float newX = map(int(values[0]), 0, 1023, 0, width);
-  float newY = map(int(values[1]), 0, 1023, 0, height);
-
-  stroke(0);
-  strokeWeight(3);
-  line(penX, penY, newX, newY);
-
-  penX = newX;
-  penY = newY;
-}
+// ...
 ```
+
+---
+
+## Part 3: Troubleshooting & Alternatives
+
+### Troubleshooting Table
+
+| Problem | Potential Fix |
+|---|---|
+| "Port busy" error | Close the Arduino Serial Monitor! Only one program can use the port. |
+| No data in Processing | Check your port index. Run `printArray(Serial.list())` and adjust `[3]` to match. |
+| Garbled data / weird characters | Baud rate must match on both sides (e.g., both 9600). |
+| Canvas is jumping at the start | This is normal; the first line of serial data is often incomplete. |
+
+### p5.js (Alternative for the Browser)
+
+You can also do this in the browser using [p5.js](https://p5js.org/) and the **Web Serial API**.
+- **Pros:** No software to install except a browser.
+- **Cons:** Only works in Chrome and Edge; requires a "Connect" button click for security.
+- **Arduino Code:** Stays exactly the same!
+
+Check out the `p5js/` folder for examples.
+
+### Additional Materials
+
+The substitute teacher provided several extra folders with examples:
+- `arduino/`: Arduino sketches for Etch A Sketch.
+- `substitute-processing/`: Processing versions of the sketches.
+- `afterhours_circles/`: A custom Processing sketch for generative circles.
+- `collaborative-dots/`: A Python-based server for collaborative drawing.
+- `p5js/`: Browser-based versions using Web Serial.

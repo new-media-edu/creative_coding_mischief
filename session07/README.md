@@ -1,11 +1,12 @@
 # Session 07: Processing → Arduino
 
-Last session we sent data from the Arduino to Processing. Today we go the other direction: Processing sends data to the Arduino. We'll use mouseX and mouseY to control the 2-DOF robot arms you built in Session 05. At the end of class, everyone will share what they're thinking about for their final projects.
+Last session we sent data from the Arduino to Processing. Today we go the other direction: Processing sends data to the Arduino. We'll use mouseX and mouseY to control the 2-DOF robot arms you built in Session 05. We'll also look at Hydra as a web-based alternative for visuals. At the end of class, everyone will share what they're thinking about for their final projects.
 
 ## Agenda
 
 + Processing → Arduino: controlling servos from the screen
 + Mouse-controlled robot arm
++ Alternative: Hydra + Web Serial
 + Final project brainstorm and share
 
 ---
@@ -91,33 +92,23 @@ void draw() {
   // Redraw the background each frame.
   background(30);
 
-  // mouseX is a built-in variable that holds the current horizontal
-  // position of the mouse. mouseY is the vertical position.
-  // We map each one from the window size (0 to 600) to a servo angle (0 to 180).
   int baseAngle = (int) map(mouseX, 0, width, 0, 180);
   int armAngle = (int) map(mouseY, 0, height, 0, 180);
 
-  // constrain() clamps the value so it never goes below 0 or above 180,
-  // even if the mouse moves outside the window.
   baseAngle = constrain(baseAngle, 0, 180);
   armAngle = constrain(armAngle, 0, 180);
 
   // Send both angles to the Arduino as raw bytes.
-  // port.write() sends a single byte (a number 0–255).
-  // The Arduino reads them in the same order: base first, arm second.
   port.write(baseAngle);
   port.write(armAngle);
 
   // --- Visual feedback on screen ---
-
-  // Draw a crosshair at the mouse position.
   stroke(255, 150, 0);  // Orange lines
   strokeWeight(2);
-  line(mouseX, 0, mouseX, height);  // Vertical line
-  line(0, mouseY, width, mouseY);   // Horizontal line
+  line(mouseX, 0, mouseX, height);
+  line(0, mouseY, width, mouseY);
 
-  // Display the current angles as text in the top-left corner.
-  fill(255);       // White text
+  fill(255);
   noStroke();
   textSize(16);
   text("Base: " + baseAngle + "°", 10, 30);
@@ -125,23 +116,43 @@ void draw() {
 }
 ```
 
-### Running It
+---
 
-1.  Upload the Arduino code.
-2.  Close the Serial Monitor.
-3.  Run the Processing sketch.
-4.  Move your mouse around the window. The robot arm should follow: left/right controls the base, up/down controls the arm.
+## Part 2: Alternative — Hydra + Web Serial
+
+[Hydra](https://hydra.ojack.xyz/) is a live-coding video synthesizer that runs in your browser. It's inspired by analog modular synthesizers.
+
+You can connect your Arduino to Hydra using the **Web Serial API**. This allows your physical knobs to control visual parameters in real-time without installing any software.
+
+### The Hydra Setup
+
+We've included a standalone example in the `hydra/` folder:
+- **`hydra_serial.html`**: Open this file in Chrome or Edge. Click "Connect Arduino" and use your potentiometers to control kaleidoscope patterns, feedback loops, and noise melts.
+
+The example uses the same "comma-separated" values we learned in Session 06:
+```javascript
+// Example Hydra snippet controlled by Arduino
+osc(() => knob1 * 60, 0.1, () => knob2 * 2)
+  .color(0.9, 0.3, () => knob2)
+  .rotate(() => knob1 * Math.PI)
+  .out();
+```
 
 ---
 
-## Part 2: Final Project Brainstorm
+## Part 3: Final Project Brainstorm
 
-Take a few minutes to think about what you'd like to build for your final project. It can use anything we've covered so far: LEDs, buttons, sensors, sound, motors, serial communication, Processing, or anything else you want to learn. It doesn't have to be fully formed yet, just a direction.
+We spent a significant portion of this session discussing final project ideas. Students shared their inspirations and technical hurdles.
 
-We'll go around the room and everyone will share:
+### Sharing Session
+Everyone shared:
+- **Project Concept:** What are you building?
+- **Excitement:** Which parts of the course are you most excited to use?
+- **Knowledge Gaps:** What else do you need to learn?
 
-- What are you thinking about building?
-- What parts of the course are you most excited to use?
-- Is there anything you'd need to learn that we haven't covered yet?
+### Common Themes
+- Interactive installations using servos and ultrasonic sensors.
+- Generative art controlled by physical interfaces (buttons/pots).
+- Wearable tech and musical instruments.
 
-This is informal. Half-baked ideas are welcome. The point is to start thinking out loud so we can help each other figure things out.
+The rest of the term will focus on refining these ideas and building the prototypes.
