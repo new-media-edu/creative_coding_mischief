@@ -298,6 +298,8 @@ This iteration is normal. It's not failure, it's calibration.
 
 ## More Project Ideas
 
+- [Scanning Distance Finder](distance_finder.md) — A potentiometer-controlled radar using a servo and ultrasonic sensor.
+
 | Project | What You'd Learn |
 |---|---|
 | Arduino Uno enclosure | Shell modeling, snap fits, port cutouts |
