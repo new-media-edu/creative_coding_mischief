@@ -197,7 +197,7 @@ All dimensions are in **millimeters** by default.
 <p>
   <img src="d-shaft-ruler.png" alt="example screenshot of constructing the pot knob with a d-shaft cut-out" width="400">
   <br>
-  <em>example screenshot of constructing the pot knob with a d-shaft cut-out</em>
+  <em>example screenshot of constructing the pot knob with a d-shaft cut-out. <a href="https://www.tinkercad.com/things/lHA0Xg6X4mE/edit?returnTo=%2Fdashboard&sharecode=B5KXZdTKHjlFH4aP8U_rgPzYfwBjJEAy9vfFU8oQ--Y">Link to finished design</a></em>
 </p>
 
 **1. The outer body (shape 1)**
@@ -311,12 +311,8 @@ A clean beginner walkthrough, regularly updated (last revised 2024).
 **Video + structured course**
 - **Learning TinkerCAD on LinkedIn Learning** (Kacie Hultgren) — searchable via LinkedIn Learning. An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
 
-In markdown:
-
-```markdown
 ## Further Reading
 
 - [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — official interactive tutorial, built into the app
 - [All3DP: TinkerCAD in 5 Steps](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — clean written beginner reference
 - [Learning TinkerCAD (LinkedIn Learning)](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — full video course by Kacie Hultgren, covers Codeblocks and Circuits
-```
