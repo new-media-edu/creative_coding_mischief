@@ -13,6 +13,13 @@ Hold them. Look at the layer lines. Notice the D-shaped hole in the knob. That's
 
 A 3D printer is essentially a very precise hot glue gun on a robot arm. It melts plastic filament (usually PLA) and deposits it layer by layer, building up a shape from the bottom. The process is called **FDM** - Fused Deposition Modeling.
 
+### Printer Hardware & Setup
+
+Before you start slicing your designs, please refer to the [3D Printer Setup Guide](../3d_printer_setup.md) for detailed instructions on using the Prusa i3 mk3 and Ender-3 printers available in the lab. It includes:
+- **Download link** for PrusaSlicer.
+- **Detailed setup** for each printer.
+- **File naming convention** (G-code files for different printers are incompatible!).
+
 Key things to internalize early:
 
 | Fact | Why it matters |
