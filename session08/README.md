@@ -297,3 +297,26 @@ This iteration is normal. It's not failure, it's calibration.
 | Servo horn extension arm | Screw hole tolerances, lever geometry |
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
+
+Three worth linking, each serving a different need:
+
+**Official / interactive**
+- **Let's Learn TinkerCAD** — `https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH`
+TinkerCAD's own built-in tutorial sequence. Guides you through the 3D design process with hands-on interactive lessons directly in the app.
+
+**Quick written reference**
+- **All3DP: TinkerCAD Tutorial — 5 Simple Steps to Success** — `https://all3dp.com/2/tinkercad-tutorial-easy-beginners/`
+A clean beginner walkthrough, regularly updated (last revised 2024).
+
+**Video + structured course**
+- **Learning TinkerCAD on LinkedIn Learning** (Kacie Hultgren) — searchable via LinkedIn Learning. An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
+
+In markdown:
+
+```markdown
+## Further Reading
+
+- [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — official interactive tutorial, built into the app
+- [All3DP: TinkerCAD in 5 Steps](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — clean written beginner reference
+- [Learning TinkerCAD (LinkedIn Learning)](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — full video course by Kacie Hultgren, covers Codeblocks and Circuits
+```
