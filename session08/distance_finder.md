@@ -163,6 +163,63 @@ void loop() {
 
 ---
 
+## Arduino Code (Pro: Interrupt & Timeout Handling)
+
+This is the "bulletproof" version. It solves the three biggest issues:
+- **Timeouts:** Prevents the code from "hanging" if no object is detected.
+- **Settling Time:** Gives the servo a moment to stop drawing peak current before the sensor fires.
+- **Stable Timing:** Uses `unsigned long` for duration to prevent math errors.
+
+```cpp
+#include <Servo.h>
+
+Servo myServo;
+const int potPin = A0;
+const int trigPin = 11;
+const int echoPin = 12;
+const int servoPin = 9;
+
+void setup() {
+  myServo.attach(servoPin);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // 1. Move the Servo
+  int potValue = analogRead(potPin);
+  int angle = map(potValue, 0, 1023, 0, 180);
+  myServo.write(angle);
+
+  // 2. THE "SETTLING" DELAY
+  // Wait 15ms to let the servo finish its micro-movement 
+  // and let electrical noise on the power line settle.
+  delay(15); 
+
+  // 3. Measure Distance with TIMEOUT
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // pulseIn(pin, value, timeout) 
+  // 25000 microseconds = ~425cm. If no echo, it returns 0 immediately.
+  unsigned long duration = pulseIn(echoPin, HIGH, 25000); 
+
+  if (duration > 0) {
+    int distance = duration * 0.034 / 2;
+    Serial.println(distance);
+  } else {
+    // Optional: Print a special value or nothing if out of range
+    // Serial.println(-1); 
+  }
+  
+  delay(20); 
+}
+```
+
 ## Processing Code
 
 Run this on your computer while the Arduino is plugged in. It creates a visual display of the distance.
