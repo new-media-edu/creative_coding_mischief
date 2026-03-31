@@ -8,6 +8,8 @@ We recommend using **PrusaSlicer** for both printers. It is powerful, open-sourc
 
 **Download Link:** [Download PrusaSlicer](https://www.prusa3d.com/page/prusaslicer_424/)
 
+**Video Tutorial:** [PrusaSlicer Beginner Tutorial: Learn the basics](https://www.youtube.com/watch?v=_kIqMPNQNSw)
+
 ---
 
 ## Important: File Naming Convention
