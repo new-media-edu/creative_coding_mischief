@@ -234,6 +234,16 @@ The order here matters. Do it wrong and the flat cut won't land correctly.
 
 **5. Make it yours**
 
+**Optional: Adding Grip Ridges**
+
+- Drag a **Box** onto the workplane. Set: **W 4mm, L 21mm, H 15mm** (the extra length makes it protrude past the 18mm body diameter).
+- Center it on the knob using **Align** (**L**).
+- With the box selected, **Ctrl+D** to duplicate, then rotate it **22.5°** using the rotation handle (or type it into the angle field in the Inspector).
+- **Ctrl+D** again — TinkerCAD remembers the last transform and applies the same 22.5° rotation automatically. Repeat until you have a full circle (8 duplicates total).
+- Select everything, **Ctrl+G**.
+
+> The 22.5° increment is what gives you exactly 8 evenly-spaced ridges (360° ÷ 8 = 45°, but since the box is symmetric you only need to rotate half that to get the next ridge). TinkerCAD's transform memory makes this fast: after the first manual rotation every subsequent duplicate lands in the right place automatically.
+
 | Customization | How in TinkerCAD |
 |---|---|
 | Pointer line on top | Add a thin flat Box (1mm tall) across the top surface, keep it solid, group |
