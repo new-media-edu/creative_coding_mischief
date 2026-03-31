@@ -1,3 +1,4 @@
+```markdown
 # Session 08: Designing for 3D Printing with TinkerCAD
 
 Today we will talk about use cases for 3d printing alongside physical computing projects. In particular we will design custom extensions for potentiometers so that they are more easily adjustable and visually customizable. We will do this using the minimal but effective free online tool [TinkerCAD](https://www.tinkercad.com).
@@ -94,13 +95,12 @@ Every shape in TinkerCAD is either a **solid** or a **hole** — this is the cor
 ## Project 1: Coffee Cup (~25 minutes)
 
 A simple mug: a hollow cylinder body with a handle. You'll learn: placing and sizing shapes, making a cavity with a hole, and the trickier skill of positioning the handle precisely using the ruler and midpoint mode.
+
 <p>
   <img src="coffee-cup.png" alt="a simple mug with a handle" width="400">
   <br>
   <em>A simple mug with a handle, as modeled in TinkerCAD.</em>
 </p>
-
-
 
 ### What You're Building
 
@@ -124,7 +124,7 @@ An outer cylinder for the body, a shorter cylinder hole for the cavity, and a to
 - Set: **Outer diameter ~30mm, Tube diameter ~8mm**. This is approximate — adjust to taste.
 - The torus is a full ring. You need to cut it in half so the flat face can sit against the cup wall. Drag a **Box** onto the workplane, size it larger than half the torus (e.g. **W 40mm, L 40mm, H 40mm**), toggle it to **Hole**, and position it to slice off exactly half the ring.
 
-> **Getting the cut centered**: This is where precision matters. Click the box hole, then press **E** (or click the ruler icon in the toolbar) to activate the **Ruler**. Click the ruler to place it at the midpoint of the torus. With the ruler placed, the position text boxes in the Inspector now show coordinates relative to that anchor point. Set the box position so its edge sits exactly at X=0 (the torus center). This is midpoint mode — you're measuring from the center of the object, not its corner.
+> **Getting the cut centered**: This is where precision matters. Click the box hole, then press **E** to activate the **Ruler**. Click to anchor it at the midpoint of the torus. With the ruler placed, the position text boxes in the Inspector now show coordinates relative to that anchor point. Set the box position so its edge sits exactly at X=0 (the torus center). This is midpoint mode — you're measuring from the center of the object, not its corner.
 
 - Select the torus and box hole, **Ctrl+G**. You now have a half-torus.
 
@@ -151,58 +151,82 @@ An outer cylinder for the body, a shorter cylinder hole for the cavity, and a to
 > **Why type the position instead of nudging?** Arrow keys move 1mm per tap. Getting from an arbitrary position to exactly 30.00mm by nudging means ~30 keystrokes and a lot of squinting. Clicking the text box and typing `30` takes one second. Use the text boxes any time you have a known target dimension.
 
 
+## Before Project 2: Printer Settings
+
+Before starting, set your grid to match the Prusa MK3 build plate. Look at the **bottom-right corner** of the screen and click the **Settings button** (gear icon).
+
+Set:
+- **Units**: Millimeters
+- **Width**: 250
+- **Length**: 210
+
+This ensures your design won't exceed the physical print area.
+
+
 ## Project 2: Custom Potentiometer Knob
 
 This is the real one. You've been twisting a bare metal shaft for weeks. Now you'll design a knob that fits it perfectly, looks how you want it to look, and has your name or a marker line on top.
 
 ### Know Your Hardware First
 
+<p>
+  <img src="d-shaft.jpg" alt="a pot with a d shaft" width="400">
+  <br>
+  <em>A pot with a D-shaped shaft.</em>
+</p>
+
 The potentiometers used in this course (standard 10kΩ panel-mount) have a **D-shaped shaft**:
-- **6mm** outer diameter
-- One side is flat (the "D"), cutting about **0.5mm** off the radius
+- **Shaft diameter**: 6mm
+- **Flat-to-opposite-side distance**: 4.5mm (the "D" cuts 1.5mm off one side)
+- **Shaft length**: typically 15–20mm from the mounting surface
 
-This is critical. A round 6mm hole will spin freely. You need to model the D-shape or the knob won't transmit rotation.
+This geometry is critical. A plain round 6mm hole will spin freely on the shaft — the knob won't transmit rotation at all. You need to model the D-shape exactly.
 
-Also account for **print tolerance**: add **0.3mm** to any dimension that needs to fit over a shaft. So model the hole as **6.3mm** diameter, not 6mm.
+Also account for **print tolerance**: add **0.3mm** to the hole diameter so it doesn't print too tight to fit. Model the round hole as **6.3mm**, not 6mm. The exact tolerance depends on your specific printer, so some trial and error is normal.
 
-### Knob Anatomy
+### How to Set Exact Dimensions on a Shape
 
-```
-    ┌──────────┐   ← Top (flat, or add a pointer ridge here)
-    │          │
-    │  (outer  │   ← Grip cylinder (~18mm diameter, ~15mm tall)
-    │   body)  │
-    └────┬─────┘
-         │         ← Shaft socket (below the body, ~8mm deep)
-         │         ← D-shaped hole through the whole thing
-```
+TinkerCAD doesn't have a single dimension input. Each axis has its own handle:
+
+- **Diameter (X and Y)**: Click once to select the shape. Click any **white square handle** at the corners of the base. Two blue text boxes appear on the grid — click into them and type your value.
+- **Height (Z)**: Click the **white square handle** at the very top-center of the shape. A vertical blue text box appears — type your value there.
+
+All dimensions are in **millimeters** by default.
 
 ### Step-by-Step
 
-**1. The outer body**
+**1. The outer body (shape 1)**
 - Drag a **Cylinder** onto the workplane. Press **D**.
-- Set: **Diameter 18mm, Height 15mm**.
-- This is your grip. You can change the diameter freely — larger is easier to turn, smaller looks sleeker.
+- Set: **Diameter 18mm, Height 15mm** using the corner handles described above.
+- This is your grip. Larger diameter = easier to turn; smaller = sleeker profile. Leave it as a solid for now.
 
-**2. The shaft hole (round part)**
-- Drag a **Cylinder** onto the workplane. Press **D**.
-- Set: **Diameter 6.3mm, Height 25mm** (taller than the knob body so it punches all the way through).
-- Toggle to **Hole**.
-- Align it to the center of the body (**L** key with both selected, center on both X and Y).
+**2. The shaft hole cylinder (shape 2)**
+- Drag another **Cylinder** onto the workplane. Press **D**.
+- Set: **Diameter 6.3mm, Height 20mm** (taller than the body so it punches all the way through when grouped).
+- **Do not toggle this to a hole yet.** Leave it as a solid for now.
+- Set it aside — you'll come back to it after step 3.
 
-**3. The D-flat cutout**
+**3. The D-flat cutout (shape 3)**
 - Drag a **Box** onto the workplane. Press **D**.
-- Set: **W 3mm, L 10mm, H 25mm**.
-- Toggle to **Hole**.
-- Move it so one of its long faces is **2.7mm from the center** of the shaft hole. (This trims 0.3mm off the radius, matching the flat on the real shaft.)
+- Set: **W 6mm, L 6mm, H 20mm**.
 
-> **How to position it precisely**: click the box, look at the X/Y position in the inspector. If your shaft hole is centered at X=0, move the flat-cut box to X = -(3.15 + 1.5) = -4.65mm. The math: shaft radius 3.15mm, plus half the box width 1.5mm, minus 0.5mm flat depth. Roughly: nudge it until it just barely bites into the side of the hole cylinder.
+> **Why 6×6?** TinkerCAD positions shapes from their corner, not their center. A 6×6 box gives you a clean edge to work with. You'll move this box using the ruler so one face lands at exactly 4.5mm from the shaft center — matching the flat-to-opposite-side distance on the real shaft.
 
-**4. Group**
-- Select all, **Ctrl+G**. The D-hole is now cut through the body.
+- With the box selected, press **E** to place the **Ruler**. Click to anchor it at the center of shape 2 (the shaft cylinder).
+- Now the Inspector's position fields show distance from that anchor. Type **X = 4.5mm** to move the box so its near face sits exactly at the flat of the D.
+
+**4. Group in the correct order**
+
+The order here matters. Do it wrong and the flat cut won't land correctly.
+
+- **Toggle shape 3 (the box) to Hole.**
+- Select **shape 3 and shape 2 only** → **Ctrl+G**. This cuts the D-flat into the shaft cylinder. You now have a D-shaped solid object.
+- **Toggle that group to Hole.**
+- Select **that group and shape 1** → **Ctrl+G**. The D-hole is now punched through the outer body.
+
+> **Why this order?** If you toggle shape 2 to a hole before grouping it with shape 3, TinkerCAD subtracts both shapes from the body at once and the flat cut loses its reference position. Always cut the flat into the round first, then subtract the whole D from the body as a single operation.
 
 **5. Make it yours**
-Here's where students diverge. Some ideas:
 
 | Customization | How in TinkerCAD |
 |---|---|
@@ -214,13 +238,14 @@ Here's where students diverge. Some ideas:
 
 **6. Check before exporting**
 - Orbit all the way under the knob. Is the D-hole visible from the bottom? Good.
-- Select the whole group and check the height in the inspector — should be 15mm.
+- Select the whole group — Inspector should show height as **15mm**.
 - **Export → .STL**.
 
 ### Test Fit (After Printing)
-- If it's too tight: re-open TinkerCAD, increase the hole cylinder diameter by 0.2mm, re-export, reprint.
-- If it spins freely: the D-flat cutout didn't go deep enough — move it 0.2mm further in and reprint.
-- This iteration is normal. It's not failure, it's calibration.
+- Too tight: increase the hole cylinder diameter by 0.2mm, re-export, reprint.
+- Spins freely: the D-flat cutout didn't go deep enough — move it 0.2mm further in and reprint.
+
+This iteration is normal. It's not failure, it's calibration.
 
 ---
 
@@ -229,7 +254,7 @@ Here's where students diverge. Some ideas:
 | Tip | Detail |
 |---|---|
 | **Layer height** | 0.2mm is fine for everything here. 0.1mm is smoother but 2× slower. |
-| **Infill** | 15–20% for the clip. 40%+ for the knob (it takes torque). |
+| **Infill** | 15–20% for the cup. 40%+ for the knob (it takes torque). |
 | **No supports needed** | Both projects are designed to avoid overhangs. |
 | **Orientation matters** | Print the knob with the top face *down* on the bed — the D-hole will be cleaner. |
 | **First layer adhesion** | If it's not sticking: clean the bed with IPA, slow down the first layer, or add a brim. |
@@ -244,6 +269,8 @@ Here's where students diverge. Some ideas:
 | **Ctrl+G (Group)** | Executes all cuts and merges, bakes the geometry |
 | **D key** | Drops shape to workplane — use obsessively |
 | **Align tool (L)** | Centers shapes relative to each other |
+| **Ruler (E key)** | Anchors the coordinate system to a point you choose |
+| **Midpoint mode** | Measures from an object's center, not its corner |
 | **Tolerance** | Add 0.2–0.4mm to any dimension that fits over hardware |
 | **.STL export** | The universal format slicer software (Cura, PrusaSlicer) reads |
 
@@ -255,3 +282,4 @@ Here's where students diverge. Some ideas:
 | Servo horn extension arm | Screw hole tolerances, lever geometry |
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
+```
