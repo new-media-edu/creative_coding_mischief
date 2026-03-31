@@ -152,3 +152,12 @@ void serialEvent(Serial myPort) {
 - **Power:** The servo and distance sensor can draw a lot of current. If your Arduino keeps resetting, try powering it from a wall adapter rather than just USB, or use a separate power supply for the servo (don't forget to connect the grounds!).
 - **Mounting:** Use blue-tack or a 3D printed bracket to hold the HC-SR04 onto the servo horn. If it's loose, your measurements will be jittery.
 - **Port Selection:** In the Processing code, if you get an error saying the port is busy or not found, double check the `Serial.list()` output in the console and adjust the `[0]` index.
+
+## Troubleshooting: Garbled Serial Data
+
+If you see weird characters like `2FRH1Mj` in the Serial Monitor or Processing console, it usually means one of two things:
+
+1.  **Baud Rate Mismatch:** Ensure both your Arduino code (`Serial.begin(9600)`) and your Serial Monitor/Processing code are set to the same speed (**9600**). If they don't match, the data will look like gibberish.
+2.  **Electrical Noise:** Servos are "noisy" motors. When they move, they can cause a momentary dip in power that confuses the Arduino's serial communication. 
+    - **The Fix:** Add a large capacitor (e.g., 100uF or 1000uF) across the 5V and GND rails on your breadboard to smooth out the power spikes.
+    - **Check Wires:** Ensure your GND wires are all connected together (Common Ground) and that no wires are loose. A loose GND wire is the #1 cause of "magic" characters.
