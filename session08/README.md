@@ -307,22 +307,14 @@ This iteration is normal. It's not failure, it's calibration.
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
 
-Three worth linking, each serving a different need:
-
-**Official / interactive**
-- **Let's Learn TinkerCAD** — `https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH`
-TinkerCAD's own built-in tutorial sequence. Guides you through the 3D design process with hands-on interactive lessons directly in the app.
-
-**Quick written reference**
-- **All3DP: TinkerCAD Tutorial — 5 Simple Steps to Success** — `https://all3dp.com/2/tinkercad-tutorial-easy-beginners/`
-A clean beginner walkthrough, regularly updated (last revised 2024).
-
-**Video + structured course**
-- **Learning TinkerCAD on LinkedIn Learning** (Kacie Hultgren) — searchable via LinkedIn Learning. An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
-
 ## Further Reading
 
-- [TinkerCAD - Tutorial for Beginners in 9 MINUTES! [ COMPLETE ]](https://www.youtube.com/watch?v=gOs6Mdj7y_4) — Fast-paced video walkthrough
-- [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — official interactive tutorial, built into the app
-- [All3DP: TinkerCAD in 5 Steps](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — clean written beginner reference
-- [Learning TinkerCAD (LinkedIn Learning)](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — full video course by Kacie Hultgren, covers Codeblocks and Circuits
+**Official / Interactive**
+- [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — TinkerCAD's own built-in tutorial sequence. Guides you through the 3D design process with hands-on interactive lessons directly in the app.
+
+**Quick Written Reference**
+- [All3DP: TinkerCAD Tutorial — 5 Simple Steps to Success](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — A clean beginner walkthrough, regularly updated (last revised 2024).
+
+**Video + Structured Course**
+- [TinkerCAD - Tutorial for Beginners in 9 MINUTES!](https://www.youtube.com/watch?v=gOs6Mdj7y_4) — Fast-paced video walkthrough.
+- [Learning TinkerCAD on LinkedIn Learning](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — (Kacie Hultgren) An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
