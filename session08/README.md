@@ -1,4 +1,3 @@
-```markdown
 # Session 08: Designing for 3D Printing with TinkerCAD
 
 Today we will talk about use cases for 3d printing alongside physical computing projects. In particular we will design custom extensions for potentiometers so that they are more easily adjustable and visually customizable. We will do this using the minimal but effective free online tool [TinkerCAD](https://www.tinkercad.com).
@@ -298,4 +297,3 @@ This iteration is normal. It's not failure, it's calibration.
 | Servo horn extension arm | Screw hole tolerances, lever geometry |
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
-```
