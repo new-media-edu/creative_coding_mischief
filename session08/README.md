@@ -195,6 +195,12 @@ All dimensions are in **millimeters** by default.
 
 ### Step-by-Step
 
+<p>
+  <img src="d-shaft-ruler.png" alt="example screenshot of constructing the pot knob with a d-shaft cut-out" width="400">
+  <br>
+  <em>example screenshot of constructing the pot knob with a d-shaft cut-out</em>
+</p>
+
 **1. The outer body (shape 1)**
 - Drag a **Cylinder** onto the workplane. Press **D**.
 - Set: **Diameter 18mm, Height 15mm** using the corner handles described above.
