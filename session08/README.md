@@ -1,12 +1,11 @@
 # Session 08: Designing for 3D Printing with TinkerCAD
 
-Last session we talked about 3D printing as something that *exists*. Today we actually use it. By the end of class you'll have two files ready to print: a small desk utility and a custom knob that fits the exact potentiometer you've been using since Session 04.
+Today we will talk about use cases for 3d printing alongside physical computing projects. In particular we will design custom extensions for potentiometers so that they are more easily adjustable and visually customizable. We will do this using the minimal but effective free online tool [TinkerCAD](https://www.tinkercad.com).
 
 ## Show and Tell
 
-*[Instructor brings in:]*
 - A stepper motor filament spool - a real printed part doing real mechanical work
-- A project box with a printed potentiometer knob - same thing you'll design today
+- A project box with a printed potentiometer knob.
 
 Hold them. Look at the layer lines. Notice the D-shaped hole in the knob. That's the whole lesson in one object.
 
@@ -23,9 +22,26 @@ Key things to internalize early:
 | Print time is real | A small knob: ~20 min. A full enclosure: hours. |
 | Tolerances are loose (~0.2-0.4mm) | Holes need to be slightly larger than the shaft they'll receive |
 
+<p>
+  <img src="supports2.png" alt="a demonstration of why 3d printed supports are necessary" width="400">
+  <br>
+  <em>Supports holding up an otherwise open hole.</em>
+</p>
+
+<p>
+  <img src="supports.webp" alt="a demonstration of why 3d printed supports are necessary" width="400">
+  <br>
+  <em>Supports holding up a complex print.</em>
+</p>
+
+## Before we begin - Start print
+
+Because 3d printing takes time, we will work backwards today: I will first start a print so that we can all see how it works before we begin modeling. (Sorry for the noise!)
+
+
 ## TinkerCAD Interface
 
-TinkerCAD runs in the browser at [tinkercad.com](https://www.tinkercad.com). Create a free account, click **Create** → **3D Design**.
+TinkerCAD runs in the browser at [tinkercad.com](https://www.tinkercad.com). Create a free account, click Create → 3D Design.
 
 ### The Three Panels
 
@@ -48,49 +64,92 @@ TinkerCAD runs in the browser at [tinkercad.com](https://www.tinkercad.com). Cre
 | **Undo** | **Ctrl+Z** |
 | **Nudge** | Arrow keys (1mm), Shift+Arrow (10mm) |
 | **Home view** | **Home** key |
+| **Scale** | Drag white corner handles (hold **Shift** to scale uniformly) |
+| **Scale from center** | Hold **Alt** while scaling |
 
 > **The D key is the most-forgotten thing in TinkerCAD.** When you drag a shape onto the workplane it often floats in mid-air. Press **D** and it snaps down to the surface. Do this every time you place a shape.
 
----
+## Basic Shapes
 
-## Project 1: Cable Clip (~20 minutes)
+Shapes live in the left panel. Drag any shape onto the workplane, then press **D** to drop it to the surface. Every shape can be resized, repositioned, and toggled between solid and hole.
 
-A simple clip that wraps around the edge of a desk and holds a USB cable. You'll learn: placing shapes, resizing, making a hole, grouping.
+| Shape | What it is |
+|---|---|
+| **Box** | A rectangular solid — the workhorse. Use it for bodies, tabs, cutouts, and flat features. All six faces are flat, so it prints cleanly in any orientation. |
+| **Cylinder** | A round solid with flat top and bottom. Use it for shaft holes, rounded posts, and any feature with circular cross-section. Resize the two radius handles independently to make an oval. |
+| **Scribble** | A freehand draw tool. Sketch a 2D outline and TinkerCAD extrudes it into a solid. Useful for organic shapes, logos, or anything that doesn't fit a primitive. Results can be unpredictable — keep outlines simple and avoid self-intersecting lines. |
+
+### Positive vs. Negative
+
+Every shape in TinkerCAD is either a **solid** or a **hole** — this is the core concept behind all modeling here.
+
+| Type | What it does |
+|---|---|
+| **Positive shape (solid)** | The default. Adds material. Shown in color. When grouped, it becomes part of the finished object. |
+| **Negative shape (hole)** | Subtracts material. Toggle any shape to a hole in the Inspector — it turns translucent red/grey. On its own it does nothing. Group it with a solid and TinkerCAD punches it through. |
+
+> A hole shape must be **grouped** with a solid before it cuts anything. `Ctrl+G` is what executes the boolean operation — until then, the hole is just floating geometry.
+
+
+## Project 1: Coffee Cup (~25 minutes)
+
+A simple mug: a hollow cylinder body with a handle. You'll learn: placing and sizing shapes, making a cavity with a hole, and the trickier skill of positioning the handle precisely using the ruler and midpoint mode.
+<p>
+  <img src="coffee-cup.png" alt="a simple mug with a handle" width="400">
+  <br>
+  <em>A simple mug with a handle, as modeled in TinkerCAD.</em>
+</p>
+
+
 
 ### What You're Building
 
-A rectangular body with a channel through the middle (for the cable) and a notch on the back (to hook the desk edge). Two shapes, one boolean subtract, one group.
+An outer cylinder for the body, a shorter cylinder hole for the cavity, and a torus for the handle — cut in half so the flat face sits flush against the cup wall. The handle alignment is where most people get stuck, and it's the thing worth learning.
 
 ### Step-by-Step
 
-**1. Place the body**
-- Drag a **Box** onto the workplane. Press **D**.
-- Click it to select, then click the white square handles to resize.
-- Set: **W 20mm, L 30mm, H 15mm** (type values in the inspector top-right, or click the dimension bubbles directly).
-
-**2. Make the cable channel**
+**1. The outer body**
 - Drag a **Cylinder** onto the workplane. Press **D**.
-- Resize it: **Diameter 8mm, Height 25mm** (make it taller than the box — it needs to poke through both sides).
-- In the **Inspector** (top right), toggle this shape to **Hole** (the shape turns translucent red/grey).
-- Move it so it's centered left-right on the box, roughly centered front-to-back.
-- Use the **Align** tool (select both, press **L**) to center them on both axes.
+- Set: **Diameter 60mm, Height 70mm**.
 
-**3. Make the desk-edge notch**
-- Drag another **Box** onto the workplane. Press **D**.
-- Size: **W 24mm, L 8mm, H 6mm** (slightly wider than the body so it cuts all the way through the sides).
-- Toggle to **Hole**.
-- Move it to the back edge of the body, flush with the bottom.
+**2. The inner cavity**
+- Drag another **Cylinder** onto the workplane. Press **D**.
+- Set: **Diameter 52mm, Height 65mm** (narrower and shorter than the body — this leaves a 4mm wall and a solid base).
+- Toggle it to **Hole** in the Inspector.
+- Use the **Align tool** (**L** with both selected) to center it on both X and Y axes.
+- Group both (**Ctrl+G**). The cup is now hollow.
 
-**4. Group everything**
-- Select all (Ctrl+A).
-- Press **Ctrl+G** to group. TinkerCAD punches the holes through the solid.
+**3. The handle**
+- Drag a **Torus** onto the workplane. Press **D**.
+- Set: **Outer diameter ~30mm, Tube diameter ~8mm**. This is approximate — adjust to taste.
+- The torus is a full ring. You need to cut it in half so the flat face can sit against the cup wall. Drag a **Box** onto the workplane, size it larger than half the torus (e.g. **W 40mm, L 40mm, H 40mm**), toggle it to **Hole**, and position it to slice off exactly half the ring.
 
-**5. Export**
-- Click **Export** → **.STL**. That file goes to the printer.
+> **Getting the cut centered**: This is where precision matters. Click the box hole, then press **E** (or click the ruler icon in the toolbar) to activate the **Ruler**. Click the ruler to place it at the midpoint of the torus. With the ruler placed, the position text boxes in the Inspector now show coordinates relative to that anchor point. Set the box position so its edge sits exactly at X=0 (the torus center). This is midpoint mode — you're measuring from the center of the object, not its corner.
 
-*Change the cable channel diameter to fit whatever cable you use. 6mm for a thin cable, 10mm for a chunky one.*
+- Select the torus and box hole, **Ctrl+G**. You now have a half-torus.
 
----
+**4. Attach the handle**
+- With the half-torus selected, look at the Inspector. The flat face needs to sit flush against the cup's outer wall.
+- The cup outer radius is **30mm** (half of 60mm). So the flat face of the handle needs to be at X = 30mm from the cup center.
+- Click the half-torus, then click into the **X position text box** in the Inspector and type the value directly. Don't nudge — type it. This is the fastest way to land on an exact position.
+- Use **Align** (**L**) to center the handle vertically on the cup (align on the Z axis to match midpoints).
+
+**5. Final group**
+- Select everything, **Ctrl+G**.
+- Orbit underneath — check the base is solid and the cavity doesn't poke through the bottom.
+- **Export → .STL**.
+
+### New Concepts Introduced Here
+
+| Concept | What it does |
+|---|---|
+| **Ruler (E key)** | Places a measurement anchor on the workplane — position text boxes now show distance from that point |
+| **Midpoint mode** | Snap the ruler to the center of a shape, not its corner, so your coordinates describe the object's center |
+| **Position text boxes** | Click directly into the X/Y/Z fields in the Inspector and type a number — much faster than nudging for exact placement |
+| **Torus** | A ring primitive — useful for handles, gaskets, and any circular loop shape |
+
+> **Why type the position instead of nudging?** Arrow keys move 1mm per tap. Getting from an arbitrary position to exactly 30.00mm by nudging means ~30 keystrokes and a lot of squinting. Clicking the text box and typing `30` takes one second. Use the text boxes any time you have a known target dimension.
+
 
 ## Project 2: Custom Potentiometer Knob
 
