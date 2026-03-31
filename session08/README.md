@@ -1,7 +1,3 @@
-Here's a draft for Week 08. The parts tray felt too passive as a warmup - instead, suggesting a **tabbed cable clip** because it only uses two shapes and one boolean, but the result is immediately useful on a desk. The potentiometer knob is the main project.
-
----
-
 # Session 08: Designing for 3D Printing with TinkerCAD
 
 Last session we talked about 3D printing as something that *exists*. Today we actually use it. By the end of class you'll have two files ready to print: a small desk utility and a custom knob that fits the exact potentiometer you've been using since Session 04.
@@ -200,7 +196,3 @@ Here's where students diverge. Some ideas:
 | Servo horn extension arm | Screw hole tolerances, lever geometry |
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
-
----
-
-A few notes on the draft: the D-flat positioning math in step 3 is written for students who'll scratch their heads at it — you may want to simplify that into a "just nudge it until it looks right, then print a test" instruction depending on how much precision your class can handle. Also worth deciding whether you want to demo the cable clip live and have them do the knob independently, or walk through both together.
