@@ -70,6 +70,8 @@ void drawSidebar() {
   btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Source View (V)");
   btnY += btnH + spacing;
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Live AV (K)");
+  btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Delete Quad (D)");
   btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Save Config (S)");

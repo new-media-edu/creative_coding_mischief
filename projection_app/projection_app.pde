@@ -4,10 +4,13 @@
  */
 
 import processing.video.*;
+import processing.serial.*;
+import processing.sound.*;
 
 // Global State
 ArrayList<Surface> surfaces;
 Surface selectedSurface = null;
+LiveAV liveAV;
 
 // UI/Interaction State
 boolean isMarquee = false;
@@ -36,11 +39,30 @@ void settings() {
 void setup() {
   surface.setTitle("Projection Mapper - Controller");
   
+  println("--- System Diagnostics ---");
+  println("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
+  println("Java: " + System.getProperty("java.version"));
+  println("GStreamer Path Prop: " + System.getProperty("gst.plugin.path"));
+  
   // Linux GStreamer conflict resolution
   System.setProperty("gst.plugin.path", "/usr/lib/x86_64-linux-gnu/gstreamer-1.0");
-  System.setProperty("GST_PLUGIN_FEATURE_RANK", "souphttpsrc:0");
+  System.setProperty("gst.registry.fork", "false");
+  
+  // Aggressively disable plugins that cause SIGSEGV on Linux/NVIDIA/GStreamer 1.24
+  // We disable: NVIDIA hardware codecs (nv*), VAAPI (vaapi*), and problematic libav elements
+  String disableRanks = "souphttpsrc:0"
+    + ",nvh264dec:0,nvh265dec:0,nvdec:0,nvenc:0,nvh264sldec:0,nvv4l2h264enc:0"
+    + ",vaapidecode:0,vaapiencode:0,vaapipostproc:0"
+    + ",avdec_h264:0,avdec_h265:0,avdec_mpeg4:0";
+  System.setProperty("GST_PLUGIN_FEATURE_RANK", disableRanks);
+  
+  println("GST_PLUGIN_FEATURE_RANK set to: " + disableRanks);
+  println("--------------------------");
   
   surfaces = new ArrayList<Surface>();
+  
+  // Initialize Live AV Manager
+  liveAV = new LiveAV(this);
   
   // Load previous configuration
   loadConfig();
@@ -56,13 +78,18 @@ void setup() {
 void draw() {
   background(25);
   
-  // 1. Sync video bridge frames (movieEvent fires read(); here we copy pixels to PImage)
-  for (Surface s : surfaces) {
-    s.updateVideoBridge();
-  }
+  // 0. Update Live AV data
+  liveAV.update();
   
-  // 2. Draw Controller UI and Mapping Area
-  drawMainWorkspace();
+  synchronized(surfaces) {
+    // 1. Sync video bridge frames (movieEvent fires read(); here we copy pixels to PImage)
+    for (Surface s : surfaces) {
+      s.updateVideoBridge();
+    }
+    
+    // 2. Draw Controller UI and Mapping Area
+    drawMainWorkspace();
+  }
   
   // 3. Draw Overlays
   if (isMarquee) {

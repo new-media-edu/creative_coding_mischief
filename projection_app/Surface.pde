@@ -15,7 +15,9 @@ class Surface {
   PGraphics bridgeG;  // Offscreen PGraphics for GPU->CPU pixel readback
   PImage videoFrame;  // CPU-side bridge image shared with the output window
   String mediaPath = "";
+  String pendingMediaPath = "";
   boolean isVideo = false;
+  boolean isLive = false;
   
   int gridRes = 20; 
   
@@ -52,25 +54,55 @@ class Surface {
     }
     mediaPath = json.getString("mediaPath", "");
     if (!mediaPath.equals("")) loadMedia(parent, mediaPath);
+    
+    isLive = json.getBoolean("isLive", false);
+    if (isLive) setLive(true);
+  }
+  
+  void setLive(boolean live) {
+    if (live && !isLive) {
+      unloadMedia();
+      isLive = true;
+      liveAV.trigger(true);
+    } else if (!live && isLive) {
+      isLive = false;
+      liveAV.trigger(false);
+    }
   }
   
   void unloadMedia() {
+    if (isLive) {
+      liveAV.trigger(false);
+      isLive = false;
+    }
+    
+    // Set isVideo to false FIRST to stop other threads from accessing 'video'
+    isVideo = false;
+    
     if (video != null) {
-      video.stop();
-      video.dispose();
+      try {
+        video.stop();
+        // Small delay to let GStreamer thread stop before dispose
+        delay(20);
+        video.dispose();
+      } catch (Exception e) {}
       video = null;
     }
+    
     if (bridgeG != null) {
       bridgeG.dispose();
       bridgeG = null;
     }
     videoFrame = null;
     img = null;
-    isVideo = false;
     mediaPath = "";
   }
 
   void loadMedia(PApplet parent, String path) {
+    this.pendingMediaPath = path;
+  }
+
+  private void performLoadMedia(PApplet parent, String path) {
     // Stop and release any previously loaded video before replacing it
     if (video != null) {
       video.stop();
@@ -84,10 +116,13 @@ class Surface {
     videoFrame = null;
 
     this.mediaPath = path;
+    this.isLive = false;
     String lowerPath = path.toLowerCase();
     if (lowerPath.endsWith(".mp4") || lowerPath.endsWith(".mov") || lowerPath.endsWith(".avi")) {
       try {
+        println("[DEBUG] [Surface] GStreamer Load Start: " + path);
         video = new Movie(parent, path);
+        println("[DEBUG] [Surface] GStreamer Load Success: " + path);
         video.loop();
         isVideo = true;
         img = null;
@@ -109,25 +144,53 @@ class Surface {
    * separate GL context.
    */
   void updateVideoBridge() {
-    if (!isVideo || video == null || video.width == 0 || video.height == 0) return;
-
-    // Create or resize the offscreen readback surface
-    if (bridgeG == null || bridgeG.width != video.width || bridgeG.height != video.height) {
-      if (bridgeG != null) bridgeG.dispose();
-      bridgeG = createGraphics(video.width, video.height, P2D);
+    // 1. Process thread-safe loading on the main animation thread
+    if (!pendingMediaPath.equals("")) {
+      performLoadMedia(projection_app.this, pendingMediaPath);
+      pendingMediaPath = "";
+      // Small safety delay after loading to let GStreamer settle
+      delay(50);
     }
+    
+    if (isLive) {
+      // Create or resize the offscreen readback surface
+      if (bridgeG == null || bridgeG.width != liveAV.canvas.width || bridgeG.height != liveAV.canvas.height) {
+        if (bridgeG != null) bridgeG.dispose();
+        bridgeG = createGraphics(liveAV.canvas.width, liveAV.canvas.height, P2D);
+      }
+      bridgeG.beginDraw();
+      bridgeG.image(liveAV.canvas, 0, 0);
+      bridgeG.endDraw();
+    } else {
+      if (!isVideo || video == null || video.width == 0 || video.height == 0) return;
 
-    // Blit the Movie's GL texture into the PGraphics framebuffer
-    bridgeG.beginDraw();
-    bridgeG.image(video, 0, 0);
-    bridgeG.endDraw();
+      // Downsampling logic for high-res video (like 4K) to prevent GL/CPU bottlenecks
+      int targetW = video.width;
+      int targetH = video.height;
+      if (video.width > 1280) {
+        float scale = 1280.0 / video.width;
+        targetW = 1280;
+        targetH = (int)(video.height * scale);
+      }
+
+      // Create or resize the offscreen readback surface
+      if (bridgeG == null || bridgeG.width != targetW || bridgeG.height != targetH) {
+        if (bridgeG != null) bridgeG.dispose();
+        bridgeG = createGraphics(targetW, targetH, P2D);
+      }
+
+      // Blit the Movie's GL texture into the PGraphics framebuffer (auto-resizes)
+      bridgeG.beginDraw();
+      bridgeG.image(video, 0, 0, targetW, targetH);
+      bridgeG.endDraw();
+    }
 
     // Readback from the framebuffer to CPU pixels[]
     bridgeG.loadPixels();
 
     // Copy into the plain PImage bridge used by the output window
-    if (videoFrame == null || videoFrame.width != video.width || videoFrame.height != video.height) {
-      videoFrame = createImage(video.width, video.height, RGB);
+    if (videoFrame == null || videoFrame.width != bridgeG.width || videoFrame.height != bridgeG.height) {
+      videoFrame = createImage(bridgeG.width, bridgeG.height, RGB);
     }
     videoFrame.loadPixels();
     System.arraycopy(bridgeG.pixels, 0, videoFrame.pixels, 0, bridgeG.pixels.length);
@@ -135,8 +198,20 @@ class Surface {
   }
 
   void display(PApplet p, boolean isController, int xOffset, int viewWidth, boolean isSourceView) {
-    // videoFrame is the pixel-copied bridge; fall back to the Movie itself if not yet populated
-    PImage tex = isVideo ? (videoFrame != null ? videoFrame : video) : img;
+    PImage tex;
+    if (isVideo || isLive) {
+      if (videoFrame != null) {
+        tex = videoFrame;
+      } else if (isController) {
+        // Fallback only allowed in the controller window (same GL context)
+        tex = isLive ? liveAV.canvas : video;
+      } else {
+        // Output window must wait for the bridge to be populated
+        tex = null;
+      }
+    } else {
+      tex = img;
+    }
     
     p.pushMatrix();
     p.translate(xOffset, 0);
@@ -340,8 +415,11 @@ class Surface {
     println("  --- Surface[" + idx + "] ---");
     println("  mediaPath   : " + mediaPath);
     println("  isVideo     : " + isVideo);
-    if (isVideo) {
-      if (video == null) {
+    println("  isLive      : " + isLive);
+    if (isLive || isVideo) {
+      if (isLive) {
+        println("  live canvas : " + liveAV.canvas.width + " x " + liveAV.canvas.height);
+      } else if (video == null) {
         println("  video       : NULL");
       } else {
         println("  video dims  : " + video.width + " x " + video.height);
@@ -379,6 +457,7 @@ class Surface {
     for (int i = 0; i < 4; i++) { JSONObject cp = new JSONObject(); cp.setFloat("x", sourceCorners[i].x); cp.setFloat("y", sourceCorners[i].y); jsonSrc.setJSONObject(i, cp); }
     json.setJSONArray("sourceCorners", jsonSrc);
     json.setString("mediaPath", mediaPath);
+    json.setBoolean("isLive", isLive);
     return json;
   }
 }

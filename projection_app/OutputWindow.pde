@@ -20,17 +20,17 @@ public class OutputWindow extends PApplet {
     background(0);
     
     // Force modified=true on every video frame before drawing.
-    // The main sketch's renderer clears this flag after uploading to its own GL
-    // context. Without this, the output window's GL context sees modified=false
-    // and never re-uploads beyond the first frame.
-    for (Surface s : surfaces) {
-      if (s.isVideo && s.videoFrame != null) {
-        s.videoFrame.setModified(true);
+    // Use synchronized to avoid conflicts with main sketch modifications
+    synchronized(surfaces) {
+      for (Surface s : surfaces) {
+        if ((s.isVideo || s.isLive) && s.videoFrame != null) {
+          s.videoFrame.setModified(true);
+        }
       }
-    }
-    
-    for (Surface s : surfaces) {
-      s.display(this, false, 0, width, false);
+      
+      for (Surface s : surfaces) {
+        s.display(this, false, 0, width, false);
+      }
     }
   }
 }
