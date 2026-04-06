@@ -13,6 +13,13 @@ Hold them. Look at the layer lines. Notice the D-shaped hole in the knob. That's
 
 A 3D printer is essentially a very precise hot glue gun on a robot arm. It melts plastic filament (usually PLA) and deposits it layer by layer, building up a shape from the bottom. The process is called **FDM** - Fused Deposition Modeling.
 
+### Printer Hardware & Setup
+
+Before you start slicing your designs, please refer to the [3D Printer Setup Guide](../3d_printer_setup.md) for detailed instructions on using the Prusa i3 mk3 and Ender-3 printers available in the lab. It includes:
+- **Download link** for PrusaSlicer.
+- **Detailed setup** for each printer.
+- **File naming convention** (G-code files for different printers are incompatible!).
+
 Key things to internalize early:
 
 | Fact | Why it matters |
@@ -291,6 +298,8 @@ This iteration is normal. It's not failure, it's calibration.
 
 ## More Project Ideas
 
+- [Scanning Distance Finder](distance_finder.md) — A potentiometer-controlled radar using a servo and ultrasonic sensor.
+
 | Project | What You'd Learn |
 |---|---|
 | Arduino Uno enclosure | Shell modeling, snap fits, port cutouts |
@@ -298,21 +307,14 @@ This iteration is normal. It's not failure, it's calibration.
 | Breadboard feet | Thin flat parts, press-fit pegs |
 | LED diffuser cap | Thin walls, translucent filament |
 
-Three worth linking, each serving a different need:
-
-**Official / interactive**
-- **Let's Learn TinkerCAD** — `https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH`
-TinkerCAD's own built-in tutorial sequence. Guides you through the 3D design process with hands-on interactive lessons directly in the app.
-
-**Quick written reference**
-- **All3DP: TinkerCAD Tutorial — 5 Simple Steps to Success** — `https://all3dp.com/2/tinkercad-tutorial-easy-beginners/`
-A clean beginner walkthrough, regularly updated (last revised 2024).
-
-**Video + structured course**
-- **Learning TinkerCAD on LinkedIn Learning** (Kacie Hultgren) — searchable via LinkedIn Learning. An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
-
 ## Further Reading
 
-- [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — official interactive tutorial, built into the app
-- [All3DP: TinkerCAD in 5 Steps](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — clean written beginner reference
-- [Learning TinkerCAD (LinkedIn Learning)](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — full video course by Kacie Hultgren, covers Codeblocks and Circuits
+**Official / Interactive**
+- [Let's Learn TinkerCAD](https://www.tinkercad.com/learn/overview/O8XV0X1IRXTXGIH) — TinkerCAD's own built-in tutorial sequence. Guides you through the 3D design process with hands-on interactive lessons directly in the app.
+
+**Quick Written Reference**
+- [All3DP: TinkerCAD Tutorial — 5 Simple Steps to Success](https://all3dp.com/2/tinkercad-tutorial-easy-beginners/) — A clean beginner walkthrough, regularly updated (last revised 2024).
+
+**Video + Structured Course**
+- [TinkerCAD - Tutorial for Beginners in 9 MINUTES!](https://www.youtube.com/watch?v=gOs6Mdj7y_4) — Fast-paced video walkthrough.
+- [Learning TinkerCAD on LinkedIn Learning](https://www.linkedin.com/learning/search?keywords=learning+tinkercad) — (Kacie Hultgren) An 11-section course covering fundamentals through Codeblocks and Circuits, with a completion certificate. Good for students who want to go deeper after the session.
