@@ -16,6 +16,11 @@ A simple Processing-based tool for projection mapping quads with corner pinning.
 - **Processing 3 or 4**
 - **Video Library**: Install the "Video" library by the Processing Foundation via the Contribution Manager (Tools > Add Tool > Libraries).
 
+## Downloads (Pre-built)
+If you don't want to run from source, you can download the exported binaries:
+- [**Download for Linux (amd64)**](https://mega.nz/file/qZ1zGZ7T#binkrm2HaXu4p4-KvEo1gRGwObYY-jY7t3V8jTNlA7I)
+- [**Download for Windows (amd64)**](https://mega.nz/file/6MtwTJhR#7o9HiGiA6axhZWsw7WpjWjgFjzKEHjEi5FaKqoXPzro)
+
 ## Controls
 - **Mouse Drag**: Move corners of a quad.
 - **'a'**: Add a new quad.
