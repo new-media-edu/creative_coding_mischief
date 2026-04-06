@@ -1,2 +1,4 @@
 .DS_Store
 projection_app/data/config.json
+linux-amd64/
+windows-amd64/
