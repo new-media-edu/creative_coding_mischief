@@ -19,8 +19,16 @@ public class OutputWindow extends PApplet {
   public void draw() {
     background(0);
     
-    // Draw all surfaces using their bridge frames or standard textures.
-    // We pass 'this' as the parent PApplet to ensure correct context rendering.
+    // Force modified=true on every video frame before drawing.
+    // The main sketch's renderer clears this flag after uploading to its own GL
+    // context. Without this, the output window's GL context sees modified=false
+    // and never re-uploads beyond the first frame.
+    for (Surface s : surfaces) {
+      if (s.isVideo && s.videoFrame != null) {
+        s.videoFrame.setModified(true);
+      }
+    }
+    
     for (Surface s : surfaces) {
       s.display(this, false, 0, width, false);
     }

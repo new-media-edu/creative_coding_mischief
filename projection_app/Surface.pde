@@ -12,7 +12,8 @@ class Surface {
   
   PImage img;
   Movie video;
-  PImage videoFrame; // The bridge image used for multi-window output
+  PGraphics bridgeG;  // Offscreen PGraphics for GPU->CPU pixel readback
+  PImage videoFrame;  // CPU-side bridge image shared with the output window
   String mediaPath = "";
   boolean isVideo = false;
   
@@ -79,16 +80,37 @@ class Surface {
    * used as a texture in both the controller and output window OpenGL contexts.
    * Called each draw() from the primary applet thread after movieEvent has fired.
    */
+  /**
+   * GPU->CPU bridge: the video library uploads frames directly to a GL texture
+   * and never populates pixels[]. We draw the Movie into an offscreen P2D
+   * PGraphics (same GL context as the primary sketch), then call loadPixels()
+   * to do a glReadPixels readback into CPU memory. The resulting videoFrame
+   * PImage carries real pixel data that can be uploaded in the output window's
+   * separate GL context.
+   */
   void updateVideoBridge() {
     if (!isVideo || video == null || video.width == 0 || video.height == 0) return;
 
+    // Create or resize the offscreen readback surface
+    if (bridgeG == null || bridgeG.width != video.width || bridgeG.height != video.height) {
+      if (bridgeG != null) bridgeG.dispose();
+      bridgeG = createGraphics(video.width, video.height, P2D);
+    }
+
+    // Blit the Movie's GL texture into the PGraphics framebuffer
+    bridgeG.beginDraw();
+    bridgeG.image(video, 0, 0);
+    bridgeG.endDraw();
+
+    // Readback from the framebuffer to CPU pixels[]
+    bridgeG.loadPixels();
+
+    // Copy into the plain PImage bridge used by the output window
     if (videoFrame == null || videoFrame.width != video.width || videoFrame.height != video.height) {
       videoFrame = createImage(video.width, video.height, RGB);
     }
-
-    video.loadPixels();
     videoFrame.loadPixels();
-    System.arraycopy(video.pixels, 0, videoFrame.pixels, 0, video.pixels.length);
+    System.arraycopy(bridgeG.pixels, 0, videoFrame.pixels, 0, bridgeG.pixels.length);
     videoFrame.updatePixels();
   }
 
@@ -303,25 +325,25 @@ class Surface {
         println("  video       : NULL");
       } else {
         println("  video dims  : " + video.width + " x " + video.height);
-        println("  video time  : " + video.time() + " / " + video.duration());
-        println("  video.available(): " + video.available());
-        // Sample a few pixels to detect black vs real content
-        if (video.width > 0 && video.height > 0) {
-          video.loadPixels();
-          int mid = video.pixels.length / 2;
-          println("  pixel[0]    : " + hex(video.pixels[0]));
-          println("  pixel[mid]  : " + hex(video.pixels[mid]));
-          println("  pixel[-1]   : " + hex(video.pixels[video.pixels.length - 1]));
-        }
+        println("  video time  : " + video.time());
+      }
+      if (bridgeG == null) {
+        println("  bridgeG     : NULL");
+      } else {
+        bridgeG.loadPixels();
+        int mid = bridgeG.pixels.length / 2;
+        println("  bridgeG     : " + bridgeG.width + "x" + bridgeG.height
+          + "  pixel[0]=" + hex(bridgeG.pixels[0])
+          + "  pixel[mid]=" + hex(bridgeG.pixels[mid]));
       }
       if (videoFrame == null) {
-        println("  videoFrame  : NULL (bridge not yet created)");
+        println("  videoFrame  : NULL");
       } else {
-        println("  videoFrame  : " + videoFrame.width + " x " + videoFrame.height + "  format=" + videoFrame.format);
         videoFrame.loadPixels();
         int mid = videoFrame.pixels.length / 2;
-        println("  vfPixel[0]  : " + hex(videoFrame.pixels[0]));
-        println("  vfPixel[mid]: " + hex(videoFrame.pixels[mid]));
+        println("  videoFrame  : " + videoFrame.width + "x" + videoFrame.height
+          + "  pixel[0]=" + hex(videoFrame.pixels[0])
+          + "  pixel[mid]=" + hex(videoFrame.pixels[mid]));
       }
     } else {
       println("  img         : " + (img == null ? "NULL" : img.width + " x " + img.height));

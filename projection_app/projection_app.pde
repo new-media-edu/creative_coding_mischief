@@ -84,10 +84,15 @@ void drawMarquee() {
 void movieEvent(Movie m) {
   m.read();
   diagMovieEventCount++;
-  if (diagMovieEventCount <= 3) {
-    println("[DIAG] movieEvent fired #" + diagMovieEventCount
-      + "  video.width=" + m.width + "  video.height=" + m.height
-      + "  time=" + m.time());
+  if (diagMovieEventCount <= 5) {
+    // Check pixels RIGHT here, before any loadPixels() call.
+    // If these are non-zero, video.loadPixels() in updateVideoBridge is the bug.
+    // If these are zero, the library is using a GL texture path and pixels[] is never populated.
+    String p0 = (m.pixels != null && m.pixels.length > 0) ? hex(m.pixels[0]) : "null";
+    String pm = (m.pixels != null && m.pixels.length > 1) ? hex(m.pixels[m.pixels.length/2]) : "null";
+    println("[DIAG] movieEvent #" + diagMovieEventCount
+      + "  w=" + m.width + "  h=" + m.height
+      + "  pixel[0]=" + p0 + "  pixel[mid]=" + pm);
   }
 }
 
