@@ -54,7 +54,35 @@ class Surface {
     if (!mediaPath.equals("")) loadMedia(parent, mediaPath);
   }
   
+  void unloadMedia() {
+    if (video != null) {
+      video.stop();
+      video.dispose();
+      video = null;
+    }
+    if (bridgeG != null) {
+      bridgeG.dispose();
+      bridgeG = null;
+    }
+    videoFrame = null;
+    img = null;
+    isVideo = false;
+    mediaPath = "";
+  }
+
   void loadMedia(PApplet parent, String path) {
+    // Stop and release any previously loaded video before replacing it
+    if (video != null) {
+      video.stop();
+      video.dispose();
+      video = null;
+    }
+    if (bridgeG != null) {
+      bridgeG.dispose();
+      bridgeG = null;
+    }
+    videoFrame = null;
+
     this.mediaPath = path;
     String lowerPath = path.toLowerCase();
     if (lowerPath.endsWith(".mp4") || lowerPath.endsWith(".mov") || lowerPath.endsWith(".avi")) {
@@ -63,23 +91,15 @@ class Surface {
         video.loop();
         isVideo = true;
         img = null;
-        videoFrame = null;
       } catch (Exception e) {
         println("Error loading video: " + e.getMessage());
       }
     } else {
       img = parent.loadImage(path);
       isVideo = false;
-      video = null;
-      videoFrame = null;
     }
   }
 
-  /**
-   * Copies the current Movie frame into a PImage bridge so it can be safely
-   * used as a texture in both the controller and output window OpenGL contexts.
-   * Called each draw() from the primary applet thread after movieEvent has fired.
-   */
   /**
    * GPU->CPU bridge: the video library uploads frames directly to a GL texture
    * and never populates pixels[]. We draw the Movie into an offscreen P2D

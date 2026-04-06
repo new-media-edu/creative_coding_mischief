@@ -23,6 +23,7 @@ void loadMediaAction() {
 
 void deleteAction() {
   if (selectedSurface != null) {
+    selectedSurface.unloadMedia();
     surfaces.remove(selectedSurface);
     selectedSurface = null;
   }
