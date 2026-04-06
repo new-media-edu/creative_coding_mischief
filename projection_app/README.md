@@ -8,6 +8,7 @@ A simple Processing-based tool for projection mapping quads with corner pinning.
   - **Output Window**: Clean output for the projector (defaulted to full screen on the first monitor, can be adjusted for a second).
 - **Corner Pinning**: Drag the green handles in the Controller window to map your quads.
 - **Media Support**: Load images (`.jpg`, `.png`) or videos (`.mp4`, `.mov`) onto any quad.
+- **Live AV (Arduino)**: Connect an Arduino with a potentiometer to drive live sound and modulated generative visuals. [**See the Live AV Guide**](LIVE_AV_GUIDE.md).
 - **Persistence**: Save your mapping configuration to `data/config.json`.
 - **Multiple Surfaces**: Add as many quads as you need.
 
