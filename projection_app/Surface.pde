@@ -12,15 +12,22 @@ class Surface {
   
   PImage img;
   Movie video;
-  PGraphics bridgeG;  // Offscreen PGraphics for GPU->CPU pixel readback
-  PImage videoFrame;  // CPU-side bridge image shared with the output window
+  PGraphics bridgeG;  // Offscreen PGraphics for GPU->CPU pixel readback (LiveAV/Playground only)
+  PImage videoFrame;  // CPU-side bridge image (LiveAV/Playground only, not needed for video/images)
   String mediaPath = "";
   String pendingMediaPath = "";
   boolean isVideo = false;
   boolean isLive = false;
   boolean isPlayground = false;
+  boolean isCircle = false;
+  boolean isLocked = false;
   
-  int gridRes = 20; 
+  // Output window's own resources (avoids expensive CPU pixel bridge)
+  Movie outputVideo;
+  boolean outputNeedsLoad = false;
+  
+  int gridRes = 20;
+  int circleSegments = 36;
   
   Surface(PApplet parent) {
     corners = new PVector[4];
@@ -61,6 +68,9 @@ class Surface {
     
     isPlayground = json.getBoolean("isPlayground", false);
     if (isPlayground) setPlayground(true);
+    
+    isCircle = json.getBoolean("isCircle", false);
+    isLocked = json.getBoolean("isLocked", false);
   }
   
   void setLive(boolean live) {
@@ -103,12 +113,21 @@ class Surface {
     if (video != null) {
       try {
         video.stop();
-        // Small delay to let GStreamer thread stop before dispose
         delay(20);
         video.dispose();
       } catch (Exception e) {}
       video = null;
     }
+    
+    if (outputVideo != null) {
+      try {
+        outputVideo.stop();
+        delay(20);
+        outputVideo.dispose();
+      } catch (Exception e) {}
+      outputVideo = null;
+    }
+    outputNeedsLoad = false;
     
     if (bridgeG != null) {
       bridgeG.dispose();
@@ -154,75 +173,70 @@ class Surface {
       img = parent.loadImage(path);
       isVideo = false;
     }
+    outputNeedsLoad = true;
+  }
+  
+  /**
+   * Load media in the output window's GL context.
+   * Called from OutputWindow.draw() so textures are native — no CPU bridge needed.
+   */
+  void ensureOutputMedia(PApplet outputApp) {
+    if (!outputNeedsLoad) return;
+    outputNeedsLoad = false;
+    
+    if (outputVideo != null) {
+      try { outputVideo.stop(); outputVideo.dispose(); } catch (Exception e) {}
+      outputVideo = null;
+    }
+    
+    if (mediaPath.equals("")) return;
+    
+    String lowerPath = mediaPath.toLowerCase();
+    if (lowerPath.endsWith(".mp4") || lowerPath.endsWith(".mov") || lowerPath.endsWith(".avi")) {
+      try {
+        outputVideo = new Movie(outputApp, mediaPath);
+        outputVideo.loop();
+        println("[OutputWindow] Video loaded: " + mediaPath);
+      } catch (Exception e) {
+        println("[OutputWindow] Error loading video: " + e.getMessage());
+      }
+    }
+    // Images (img) work cross-context via CPU pixels — no output copy needed
   }
 
   /**
-   * GPU->CPU bridge: the video library uploads frames directly to a GL texture
-   * and never populates pixels[]. We draw the Movie into an offscreen P2D
-   * PGraphics (same GL context as the primary sketch), then call loadPixels()
-   * to do a glReadPixels readback into CPU memory. The resulting videoFrame
-   * PImage carries real pixel data that can be uploaded in the output window's
-   * separate GL context.
+   * Process pending media loads and bridge LiveAV/Playground content.
+   * Video and images no longer need the CPU bridge — the output window
+   * loads its own Movie/PImage in its own GL context (see ensureOutputMedia).
+   * The bridge is only used for LiveAV and Playground (PGraphics sources).
    */
   void updateVideoBridge() {
     // 1. Process thread-safe loading on the main animation thread
     if (!pendingMediaPath.equals("")) {
       performLoadMedia(projection_app.this, pendingMediaPath);
       pendingMediaPath = "";
-      // Small safety delay after loading to let GStreamer settle
       delay(50);
     }
     
-    if (isLive) {
-      // Create or resize the offscreen readback surface
-      if (bridgeG == null || bridgeG.width != liveAV.canvas.width || bridgeG.height != liveAV.canvas.height) {
-        if (bridgeG != null) bridgeG.dispose();
-        bridgeG = createGraphics(liveAV.canvas.width, liveAV.canvas.height, P2D);
-      }
-      bridgeG.beginDraw();
-      bridgeG.image(liveAV.canvas, 0, 0);
-      bridgeG.endDraw();
-    } else if (isPlayground) {
-      // Create or resize the offscreen readback surface for playground
-      if (bridgeG == null || bridgeG.width != playground.canvas.width || bridgeG.height != playground.canvas.height) {
-        if (bridgeG != null) bridgeG.dispose();
-        bridgeG = createGraphics(playground.canvas.width, playground.canvas.height, P2D);
-      }
-      bridgeG.beginDraw();
-      bridgeG.image(playground.canvas, 0, 0);
-      bridgeG.endDraw();
-    } else {
-      if (!isVideo || video == null || video.width == 0 || video.height == 0) return;
-
-      // Downsampling logic for high-res video (like 4K) to prevent GL/CPU bottlenecks
-      int targetW = video.width;
-      int targetH = video.height;
-      if (video.width > 1280) {
-        float scale = 1280.0 / video.width;
-        targetW = 1280;
-        targetH = (int)(video.height * scale);
-      }
-
-      // Create or resize the offscreen readback surface
-      if (bridgeG == null || bridgeG.width != targetW || bridgeG.height != targetH) {
-        if (bridgeG != null) bridgeG.dispose();
-        bridgeG = createGraphics(targetW, targetH, P2D);
-      }
-
-      // Blit the Movie's GL texture into the PGraphics framebuffer (auto-resizes)
-      bridgeG.beginDraw();
-      bridgeG.image(video, 0, 0, targetW, targetH);
-      bridgeG.endDraw();
+    // 2. Bridge only needed for LiveAV/Playground (procedural PGraphics sources)
+    if (!isLive && !isPlayground) return;
+    
+    // 3. Throttle: every other frame to save CPU
+    if (frameCount % 2 != 0) return;
+    
+    PGraphics sourceCanvas = isLive ? liveAV.canvas : playground.canvas;
+    
+    if (bridgeG == null || bridgeG.width != sourceCanvas.width || bridgeG.height != sourceCanvas.height) {
+      if (bridgeG != null) bridgeG.dispose();
+      bridgeG = createGraphics(sourceCanvas.width, sourceCanvas.height, P2D);
     }
+    bridgeG.beginDraw();
+    bridgeG.image(sourceCanvas, 0, 0);
+    bridgeG.endDraw();
 
-    // Readback from the framebuffer to CPU pixels[]
     bridgeG.loadPixels();
-
-    // Use pixelWidth/pixelHeight to account for Retina/HiDPI scaling
     int pw = bridgeG.pixelWidth;
     int ph = bridgeG.pixelHeight;
-
-    // Copy into the plain PImage bridge used by the output window
     if (videoFrame == null || videoFrame.width != pw || videoFrame.height != ph) {
       videoFrame = createImage(pw, ph, RGB);
     }
@@ -233,20 +247,17 @@ class Surface {
 
   void display(PApplet p, boolean isController, int xOffset, int viewWidth, boolean isSourceView) {
     PImage tex;
-    if (isVideo || isLive || isPlayground) {
-      if (videoFrame != null) {
-        tex = videoFrame;
-      } else if (isController) {
-        // Fallback only allowed in the controller window (same GL context)
-        if (isLive) tex = liveAV.canvas;
-        else if (isPlayground) tex = playground.canvas;
-        else tex = video;
-      } else {
-        // Output window must wait for the bridge to be populated
-        tex = null;
-      }
+    if (isController) {
+      // Controller uses native GL textures (same GL context) — no bridge overhead
+      if (isVideo && video != null) tex = video;
+      else if (isLive) tex = liveAV.canvas;
+      else if (isPlayground) tex = playground.canvas;
+      else tex = img;
     } else {
-      tex = img;
+      // Output window: use its own Movie, or bridge for LiveAV/Playground
+      if (isVideo) tex = outputVideo; // Own Movie in output GL context
+      else if (isLive || isPlayground) tex = videoFrame; // CPU bridge (throttled)
+      else tex = img; // PImages work cross-context (CPU pixel data)
     }
     
     p.pushMatrix();
@@ -301,6 +312,14 @@ class Surface {
       };
     }
     
+    if (isCircle) {
+      drawCircleMappingView(p, activeTex, activeSrc, isController);
+    } else {
+      drawQuadMappingView(p, activeTex, activeSrc, isController);
+    }
+  }
+  
+  private void drawQuadMappingView(PApplet p, PImage activeTex, PVector[] activeSrc, boolean isController) {
     if (activeTex != null) {
       p.noStroke();
       p.beginShape(QUADS);
@@ -348,6 +367,79 @@ class Surface {
         p.ellipse(corners[i].x, corners[i].y, 12, 12);
       }
     }
+  }
+  
+  private void drawCircleMappingView(PApplet p, PImage activeTex, PVector[] activeSrc, boolean isController) {
+    if (activeTex != null) {
+      p.noStroke();
+      p.textureMode(NORMAL);
+      // Polar mesh: rings × segments, mapped through the quad's bilinear transform
+      int rings = gridRes;
+      for (int r = 0; r < rings; r++) {
+        float r1 = (float)r / rings * 0.5;
+        float r2 = (float)(r + 1) / rings * 0.5;
+        p.beginShape(QUAD_STRIP);
+        p.texture(activeTex);
+        for (int s = 0; s <= circleSegments; s++) {
+          float angle = TWO_PI * s / circleSegments;
+          float cosA = cos(angle);
+          float sinA = sin(angle);
+          // UV coords in the 0-1 quad space
+          float u1 = 0.5 + r1 * cosA; float v1 = 0.5 + r1 * sinA;
+          float u2 = 0.5 + r2 * cosA; float v2 = 0.5 + r2 * sinA;
+          PVector pos1 = getBilinearPoint(u1, v1, corners);
+          PVector pos2 = getBilinearPoint(u2, v2, corners);
+          PVector tex1 = getBilinearPoint(u1, v1, activeSrc);
+          PVector tex2 = getBilinearPoint(u2, v2, activeSrc);
+          p.vertex(pos1.x, pos1.y, tex1.x, tex1.y);
+          p.vertex(pos2.x, pos2.y, tex2.x, tex2.y);
+        }
+        p.endShape();
+      }
+    } else {
+      // Draw ellipse outline from corners
+      p.stroke(255, 100);
+      if (isSelected && isController) p.fill(0, 255, 0, 40);
+      else p.noFill();
+      p.beginShape();
+      for (int s = 0; s <= circleSegments; s++) {
+        float angle = TWO_PI * s / circleSegments;
+        float u = 0.5 + 0.5 * cos(angle);
+        float v = 0.5 + 0.5 * sin(angle);
+        PVector pt = getBilinearPoint(u, v, corners);
+        p.vertex(pt.x, pt.y);
+      }
+      p.endShape(CLOSE);
+    }
+    
+    if (isController) {
+      if (isSelected) {
+        p.stroke(0, 255, 0, 150); p.strokeWeight(2); p.noFill();
+        p.beginShape();
+        for (int s = 0; s <= circleSegments; s++) {
+          float angle = TWO_PI * s / circleSegments;
+          float u = 0.5 + 0.5 * cos(angle);
+          float v = 0.5 + 0.5 * sin(angle);
+          PVector pt = getBilinearPoint(u, v, corners);
+          p.vertex(pt.x, pt.y);
+        }
+        p.endShape(CLOSE);
+        p.strokeWeight(1);
+      }
+      for (int i = 0; i < 4; i++) {
+        p.stroke(255);
+        p.fill(selectedCorners[i] ? p.color(255, 255, 0) : p.color(0, 255, 0));
+        p.ellipse(corners[i].x, corners[i].y, 12, 12);
+      }
+    }
+  }
+  
+  // Helper: get the texture reference for the controller context
+  PImage getControllerTex() {
+    if (isVideo && video != null) return video;
+    if (isLive) return liveAV.canvas;
+    if (isPlayground) return playground.canvas;
+    return img;
   }
   
   PVector getBilinearPoint(float u, float v, PVector[] pts) {
@@ -412,7 +504,7 @@ class Surface {
   }
   
   int getSourceCornerAt(float x, float y, int xOffset, int viewWidth, PApplet p) {
-    PImage tex = isVideo ? (videoFrame != null ? videoFrame : video) : img;
+    PImage tex = getControllerTex();
     if (tex == null) return -1;
     float aspect = (float)tex.width / tex.height;
     float drawW = viewWidth - 40; float drawH = drawW / aspect;
@@ -425,6 +517,19 @@ class Surface {
   
   boolean isInside(float x, float y, int xOffset) {
     float tx = x - xOffset; float ty = y;
+    if (isCircle) {
+      // Approximate ellipse from bounding quad
+      float cx = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+      float cy = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+      float rx = (dist(corners[0].x, corners[0].y, corners[1].x, corners[1].y)
+                + dist(corners[3].x, corners[3].y, corners[2].x, corners[2].y)) / 4;
+      float ry = (dist(corners[0].x, corners[0].y, corners[3].x, corners[3].y)
+                + dist(corners[1].x, corners[1].y, corners[2].x, corners[2].y)) / 4;
+      if (rx == 0 || ry == 0) return false;
+      float dx = (tx - cx) / rx;
+      float dy2 = (ty - cy) / ry;
+      return dx * dx + dy2 * dy2 <= 1;
+    }
     int i, j; boolean c = false;
     for (i = 0, j = 3; i < 4; j = i++) {
       if (((corners[i].y > ty) != (corners[j].y > ty)) && (tx < (corners[j].x - corners[i].x) * (ty - corners[i].y) / (corners[j].y - corners[i].y) + corners[i].x)) c = !c;
@@ -433,7 +538,7 @@ class Surface {
   }
   
   boolean isInsideSource(float x, float y, int xOffset, int viewWidth, PApplet p) {
-    PImage tex = isVideo ? (videoFrame != null ? videoFrame : video) : img;
+    PImage tex = getControllerTex();
     if (tex == null) return false;
     float aspect = (float)tex.width / tex.height;
     float drawW = viewWidth - 40; float drawH = drawW / aspect;
@@ -464,37 +569,27 @@ class Surface {
     println("  isVideo     : " + isVideo);
     println("  isLive      : " + isLive);
     println("  isPlayground: " + isPlayground);
+    println("  isCircle    : " + isCircle);
     if (isPlayground) {
       println("  pg canvas   : " + playground.canvas.width + " x " + playground.canvas.height);
-    } else if (isLive || isVideo) {
-      if (isLive) {
-        println("  live canvas : " + liveAV.canvas.width + " x " + liveAV.canvas.height);
-      } else if (video == null) {
+    } else if (isLive) {
+      println("  live canvas : " + liveAV.canvas.width + " x " + liveAV.canvas.height);
+    } else if (isVideo) {
+      if (video == null) {
         println("  video       : NULL");
       } else {
         println("  video dims  : " + video.width + " x " + video.height);
         println("  video time  : " + video.time());
       }
-      if (bridgeG == null) {
-        println("  bridgeG     : NULL");
-      } else {
-        bridgeG.loadPixels();
-        int mid = bridgeG.pixels.length / 2;
-        println("  bridgeG     : " + bridgeG.width + "x" + bridgeG.height
-          + "  pixel[0]=" + hex(bridgeG.pixels[0])
-          + "  pixel[mid]=" + hex(bridgeG.pixels[mid]));
-      }
-      if (videoFrame == null) {
-        println("  videoFrame  : NULL");
-      } else {
-        videoFrame.loadPixels();
-        int mid = videoFrame.pixels.length / 2;
-        println("  videoFrame  : " + videoFrame.width + "x" + videoFrame.height
-          + "  pixel[0]=" + hex(videoFrame.pixels[0])
-          + "  pixel[mid]=" + hex(videoFrame.pixels[mid]));
-      }
+      println("  outputVideo : " + (outputVideo == null ? "NULL" : outputVideo.width + " x " + outputVideo.height));
     } else {
       println("  img         : " + (img == null ? "NULL" : img.width + " x " + img.height));
+    }
+    if (bridgeG != null) {
+      println("  bridgeG     : " + bridgeG.width + "x" + bridgeG.height);
+    }
+    if (videoFrame != null) {
+      println("  videoFrame  : " + videoFrame.width + "x" + videoFrame.height);
     }
   }
 
@@ -509,6 +604,8 @@ class Surface {
     json.setString("mediaPath", mediaPath);
     json.setBoolean("isLive", isLive);
     json.setBoolean("isPlayground", isPlayground);
+    json.setBoolean("isCircle", isCircle);
+    json.setBoolean("isLocked", isLocked);
     return json;
   }
 }

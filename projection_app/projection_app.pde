@@ -13,6 +13,10 @@ Surface selectedSurface = null;
 LiveAV liveAV;
 Playground playground;
 
+// Undo System
+ArrayList<JSONArray> undoStack = new ArrayList<JSONArray>();
+int maxUndoLevels = 50;
+
 // UI/Interaction State
 boolean isMarquee = false;
 float marqueeX1, marqueeY1;
@@ -20,6 +24,7 @@ boolean isDraggingVertex = false;
 boolean isDraggingShape = false;
 boolean isDraggingSourceVertex = false;
 boolean isDraggingSourceShape = false;
+boolean undoPushedThisDrag = false;
 boolean showSourceView = false;
 
 // Configuration Constants

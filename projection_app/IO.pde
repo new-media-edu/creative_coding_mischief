@@ -1,11 +1,56 @@
 /**
  * IO Module
- * Handles file selection, media loading, and JSON configuration.
+ * Handles file selection, media loading, JSON configuration, and undo.
  */
 
+// --- Undo System ---
+
+void pushUndo() {
+  synchronized(surfaces) {
+    JSONArray snapshot = new JSONArray();
+    for (int i = 0; i < surfaces.size(); i++) {
+      snapshot.setJSONObject(i, surfaces.get(i).toJSON());
+    }
+    undoStack.add(snapshot);
+    if (undoStack.size() > maxUndoLevels) {
+      undoStack.remove(0);
+    }
+  }
+}
+
+void performUndo() {
+  if (undoStack.isEmpty()) return;
+  JSONArray snapshot = undoStack.remove(undoStack.size() - 1);
+  synchronized(surfaces) {
+    // Unload all current surfaces
+    for (Surface s : surfaces) s.unloadMedia();
+    surfaces.clear();
+    selectedSurface = null;
+    // Restore from snapshot
+    for (int i = 0; i < snapshot.size(); i++) {
+      surfaces.add(new Surface(projection_app.this, snapshot.getJSONObject(i)));
+    }
+  }
+}
+
+// --- Surface Creation ---
+
 void addQuad() {
+  pushUndo();
   synchronized(surfaces) {
     Surface s = new Surface(this);
+    surfaces.add(s);
+    clearAllSelections();
+    s.isSelected = true;
+    selectedSurface = s;
+  }
+}
+
+void addCircle() {
+  pushUndo();
+  synchronized(surfaces) {
+    Surface s = new Surface(this);
+    s.isCircle = true;
     surfaces.add(s);
     clearAllSelections();
     s.isSelected = true;
@@ -23,6 +68,36 @@ void cycleMirror() {
 
 void toggleMappingGuide() {
   showMappingGuide = !showMappingGuide;
+}
+
+void toggleLock() {
+  if (selectedSurface != null) {
+    selectedSurface.isLocked = !selectedSurface.isLocked;
+  }
+}
+
+void moveLayerUp() {
+  if (selectedSurface == null) return;
+  pushUndo();
+  synchronized(surfaces) {
+    int idx = surfaces.indexOf(selectedSurface);
+    if (idx < surfaces.size() - 1) {
+      surfaces.remove(idx);
+      surfaces.add(idx + 1, selectedSurface);
+    }
+  }
+}
+
+void moveLayerDown() {
+  if (selectedSurface == null) return;
+  pushUndo();
+  synchronized(surfaces) {
+    int idx = surfaces.indexOf(selectedSurface);
+    if (idx > 0) {
+      surfaces.remove(idx);
+      surfaces.add(idx - 1, selectedSurface);
+    }
+  }
 }
 
 void resetCanvasView() {
@@ -50,6 +125,7 @@ void fitToProjector() {
 
 void toggleLiveAction() {
   if (selectedSurface != null) {
+    pushUndo();
     synchronized(surfaces) {
       selectedSurface.setLive(!selectedSurface.isLive);
     }
@@ -58,6 +134,7 @@ void toggleLiveAction() {
 
 void togglePlaygroundAction() {
   if (selectedSurface != null) {
+    pushUndo();
     synchronized(surfaces) {
       selectedSurface.setPlayground(!selectedSurface.isPlayground);
     }
@@ -72,6 +149,7 @@ void loadMediaAction() {
 
 void deleteAction() {
   if (selectedSurface != null) {
+    pushUndo();
     synchronized(surfaces) {
       selectedSurface.unloadMedia();
       surfaces.remove(selectedSurface);
@@ -82,6 +160,7 @@ void deleteAction() {
 
 void fileSelected(File selection) {
   if (selection != null && selectedSurface != null) {
+    pushUndo();
     synchronized(surfaces) {
       selectedSurface.loadMedia(this, selection.getAbsolutePath());
     }

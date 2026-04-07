@@ -41,6 +41,8 @@ void drawMainWorkspace() {
     for (int si = 0; si < surfaces.size(); si++) {
       guideIndex = si;
       surfaces.get(si).display(this, true, 0, viewW, false);
+      if (showMappingGuide) drawLayerNumber(surfaces.get(si), si);
+      if (surfaces.get(si).isLocked) drawLockIndicator(surfaces.get(si));
     }
     popMatrix();
     noClip();
@@ -65,6 +67,8 @@ void drawMainWorkspace() {
     for (int si = 0; si < surfaces.size(); si++) {
       guideIndex = si;
       surfaces.get(si).display(this, true, 0, mappingAreaW, false);
+      if (showMappingGuide) drawLayerNumber(surfaces.get(si), si);
+      if (surfaces.get(si).isLocked) drawLockIndicator(surfaces.get(si));
     }
     popMatrix();
     noClip();
@@ -91,23 +95,33 @@ void drawSidebar() {
   float spacing = 5;
   
   textSize(11);
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Add Quad (A)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Add Quad (A)", false);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Load Media (L)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Add Circle (C)", false);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Source View (V)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Load Media (L)", false);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Live AV (K)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Source View (V)", showSourceView);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Playground (P)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Live AV (K)", selectedSurface != null && selectedSurface.isLive);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Delete Quad (D)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Playground (P)", selectedSurface != null && selectedSurface.isPlayground);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Save Config (S)");
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Delete Quad (D)", false);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Mirror (M): " + mirrorLabels[outputMirror]);
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Save Config (S)", false);
   btnY += btnH + spacing;
-  drawButton(UI_MARGIN, btnY, btnW, btnH, "Guide (G): " + (showMappingGuide ? "ON" : "OFF"));
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Mirror (M): " + mirrorLabels[outputMirror], false);
+  btnY += btnH + spacing;
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Guide (G): " + (showMappingGuide ? "ON" : "OFF"), showMappingGuide);
+  btnY += btnH + spacing;
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Lock (X)", selectedSurface != null && selectedSurface.isLocked);
+  btnY += btnH + spacing;
+  
+  // Layer ordering buttons (half-width side by side)
+  float halfW = (btnW - spacing) / 2;
+  drawButton(UI_MARGIN, btnY, halfW, btnH, "Layer Up ([)", false);
+  drawButton(UI_MARGIN + halfW + spacing, btnY, halfW, btnH, "Layer Dn (])", false);
   
   btnY += btnH + 12;
   stroke(100);
@@ -150,14 +164,18 @@ void drawSidebar() {
   fill(120);
   textSize(9);
   textAlign(LEFT, BOTTOM);
-  String help = "Scroll:Zoom  ALT+Drag:Pan  0:Reset\nSHIFT:Multi-select  D/DEL:Delete";
+  String help = "Scroll:Zoom  ALT+Drag:Pan  0:Reset\nSHIFT:Multi-select  [/]:Reorder  Cmd-Z:Undo";
   text(help, UI_MARGIN, height - 8);
 }
 
-void drawButton(float x, float y, float w, float h, String label) {
+void drawButton(float x, float y, float w, float h, String label, boolean active) {
   boolean hover = mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
-  fill(hover ? 75 : 55);
-  stroke(90);
+  if (active) {
+    fill(hover ? 80 : 45, hover ? 160 : 130, hover ? 80 : 45);
+  } else {
+    fill(hover ? 75 : 55);
+  }
+  stroke(active ? color(60, 160, 60) : 90);
   rect(x, y, w, h, 4);
   fill(255);
   textAlign(CENTER, CENTER);
@@ -202,4 +220,42 @@ void drawProjectorFrame() {
   textAlign(LEFT, TOP);
   text("PROJECTOR  " + output.width + "x" + output.height, 4, 4);
   strokeWeight(1);
+}
+
+void drawLayerNumber(Surface s, int idx) {
+  // Draw layer index at top-right corner of the surface
+  float labelX = s.corners[1].x;  // Top-right corner
+  float labelY = s.corners[1].y;
+  float sz = 14 / canvasZoom;
+  float pad = 3 / canvasZoom;
+  String label = str(idx);
+  textSize(sz);
+  float tw = textWidth(label) + pad * 2;
+  float th = sz + pad * 2;
+  // Background pill
+  fill(0, 200);
+  noStroke();
+  rect(labelX - tw - 2 / canvasZoom, labelY + 2 / canvasZoom, tw, th, 3 / canvasZoom);
+  // Number text
+  fill(255);
+  textAlign(CENTER, TOP);
+  text(label, labelX - tw / 2 - 2 / canvasZoom, labelY + 2 / canvasZoom + pad);
+}
+
+void drawLockIndicator(Surface s) {
+  // Draw a lock icon at top-left corner of the surface
+  float cx = (s.corners[0].x + s.corners[1].x + s.corners[2].x + s.corners[3].x) / 4;
+  float cy = (s.corners[0].y + s.corners[1].y + s.corners[2].y + s.corners[3].y) / 4;
+  float sz = 12 / canvasZoom;
+  float pad = 3 / canvasZoom;
+  String icon = "LOCKED";
+  textSize(sz);
+  float tw = textWidth(icon) + pad * 2;
+  float th = sz + pad * 2;
+  fill(200, 60, 60, 200);
+  noStroke();
+  rect(cx - tw / 2, cy - th / 2, tw, th, 3 / canvasZoom);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text(icon, cx, cy - 1 / canvasZoom);
 }

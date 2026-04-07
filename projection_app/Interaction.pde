@@ -55,6 +55,7 @@ void mousePressed() {
   
   // 1. Check Vertex Hits (Priority)
   for (Surface s : surfaces) {
+    if (s.isLocked) continue;
     int idx = s.getCornerAt(cmx, cmy, 0);
     if (idx != -1) {
       hitVertex = true;
@@ -75,6 +76,7 @@ void mousePressed() {
   // 2. Check Edge Hits
   if (!hitVertex) {
     for (Surface s : surfaces) {
+      if (s.isLocked) continue;
       int edgeIdx = s.getEdgeAt(cmx, cmy, 0);
       if (edgeIdx != -1) {
         hitEdge = true;
@@ -96,7 +98,7 @@ void mousePressed() {
         if (!(keyPressed && keyCode == SHIFT) && !s.isSelected) clearAllSelections();
         s.isSelected = true;
         selectedSurface = s;
-        isDraggingShape = true;
+        if (!s.isLocked) isDraggingShape = true;
         return;
       }
     }
@@ -122,8 +124,9 @@ void mouseDragged() {
   }
   
   if (isDraggingSourceVertex || isDraggingSourceShape) {
+    if (!undoPushedThisDrag) { pushUndo(); undoPushedThisDrag = true; }
     int viewW = (width - SIDEBAR_WIDTH) / 2;
-    PImage tex = selectedSurface.isVideo ? selectedSurface.videoFrame : selectedSurface.img;
+    PImage tex = selectedSurface.getControllerTex();
     if (tex != null) {
       float aspect = (float)tex.width / tex.height;
       float drawW = viewW - 40;
@@ -136,10 +139,12 @@ void mouseDragged() {
       else selectedSurface.moveSource(dx / drawW, dy / drawH);
     }
   } else if (isDraggingVertex) {
+    if (!undoPushedThisDrag) { pushUndo(); undoPushedThisDrag = true; }
     for (Surface s : surfaces) {
       s.moveSelectedCorners(dx / canvasZoom, dy / canvasZoom);
     }
   } else if (isDraggingShape) {
+    if (!undoPushedThisDrag) { pushUndo(); undoPushedThisDrag = true; }
     if (selectedSurface != null) selectedSurface.move(dx / canvasZoom, dy / canvasZoom);
   }
 }
@@ -163,10 +168,20 @@ void mouseReleased() {
   isDraggingSourceVertex = false;
   isDraggingSourceShape = false;
   isPanningCanvas = false;
+  undoPushedThisDrag = false;
 }
 
 void keyPressed() {
+  // Undo: Ctrl-Z (Windows/Linux) or Cmd-Z (Mac)
+  if ((key == 26 || key == 'z') && (keyCode == 90) && 
+      ((keyEvent.isControlDown() && !keyEvent.isShiftDown()) || 
+       (keyEvent.isMetaDown() && !keyEvent.isShiftDown()))) {
+    performUndo();
+    return;
+  }
+  
   if (key == 'a') addQuad();
+  else if (key == 'c') addCircle();
   else if (key == 'l') loadMediaAction();
   else if (key == 'v') toggleSourceView();
   else if (key == 'k') toggleLiveAction();
@@ -174,6 +189,9 @@ void keyPressed() {
   else if (key == 's') saveConfig();
   else if (key == 'm') cycleMirror();
   else if (key == 'g') toggleMappingGuide();
+  else if (key == 'x') toggleLock();
+  else if (key == '[') moveLayerDown();
+  else if (key == ']') moveLayerUp();
   else if (key == '0') resetCanvasView();
   else if (key == 'd' || keyCode == BACKSPACE || keyCode == DELETE) deleteAction();
   else if (key == 'i' || key == 'I') {
@@ -204,13 +222,21 @@ void handleSidebarClick() {
   
   if (mouseX > UI_MARGIN && mouseX < UI_MARGIN + btnW) {
     if (mouseY > startY && mouseY < startY + btnH) addQuad();
-    else if (mouseY > startY + (btnH + spacing) && mouseY < startY + (btnH + spacing) + btnH) loadMediaAction();
-    else if (mouseY > startY + (btnH + spacing) * 2 && mouseY < startY + (btnH + spacing) * 2 + btnH) toggleSourceView();
-    else if (mouseY > startY + (btnH + spacing) * 3 && mouseY < startY + (btnH + spacing) * 3 + btnH) toggleLiveAction();
-    else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) togglePlaygroundAction();
-    else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) deleteAction();
-    else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) saveConfig();
-    else if (mouseY > startY + (btnH + spacing) * 7 && mouseY < startY + (btnH + spacing) * 7 + btnH) cycleMirror();
-    else if (mouseY > startY + (btnH + spacing) * 8 && mouseY < startY + (btnH + spacing) * 8 + btnH) toggleMappingGuide();
+    else if (mouseY > startY + (btnH + spacing) && mouseY < startY + (btnH + spacing) + btnH) addCircle();
+    else if (mouseY > startY + (btnH + spacing) * 2 && mouseY < startY + (btnH + spacing) * 2 + btnH) loadMediaAction();
+    else if (mouseY > startY + (btnH + spacing) * 3 && mouseY < startY + (btnH + spacing) * 3 + btnH) toggleSourceView();
+    else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) toggleLiveAction();
+    else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) togglePlaygroundAction();
+    else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) deleteAction();
+    else if (mouseY > startY + (btnH + spacing) * 7 && mouseY < startY + (btnH + spacing) * 7 + btnH) saveConfig();
+    else if (mouseY > startY + (btnH + spacing) * 8 && mouseY < startY + (btnH + spacing) * 8 + btnH) cycleMirror();
+    else if (mouseY > startY + (btnH + spacing) * 9 && mouseY < startY + (btnH + spacing) * 9 + btnH) toggleMappingGuide();
+    else if (mouseY > startY + (btnH + spacing) * 10 && mouseY < startY + (btnH + spacing) * 10 + btnH) toggleLock();
+    else if (mouseY > startY + (btnH + spacing) * 11 && mouseY < startY + (btnH + spacing) * 11 + btnH) {
+      // Layer ordering buttons: left half = Up, right half = Down
+      float halfW = (btnW - 5) / 2;
+      if (mouseX < UI_MARGIN + halfW) moveLayerUp();
+      else moveLayerDown();
+    }
   }
 }

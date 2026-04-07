@@ -1,20 +1,21 @@
 /**
  * OutputWindow Module
  * The clean, secondary window designed for the projector.
+ * 
+ * Performance: Video surfaces load their own Movie instance in this GL
+ * context, eliminating the expensive GPU→CPU→GPU pixel bridge. Only
+ * LiveAV/Playground still use a throttled CPU bridge.
  */
 
 public class OutputWindow extends PApplet {
   
   public void settings() {
-    // Note: display 1 is typically the primary monitor, 2 is the projector.
     fullScreen(P3D, outputDisplay);
     pixelDensity(displayDensity());
   }
   
   public void setup() { 
     background(0); 
-    // Optimization: avoid standard loop overhead if needed, but 
-    // standard setup is fine for this use case.
   }
   
   public void draw() {
@@ -37,12 +38,21 @@ public class OutputWindow extends PApplet {
         break;
     }
     
-    // Force modified=true on every video frame before drawing.
-    // Use synchronized to avoid conflicts with main sketch modifications
     synchronized(surfaces) {
+      // Ensure each surface has its own output-side media loaded
       for (int si = 0; si < surfaces.size(); si++) {
-        if ((surfaces.get(si).isVideo || surfaces.get(si).isLive || surfaces.get(si).isPlayground) && surfaces.get(si).videoFrame != null) {
-          surfaces.get(si).videoFrame.setModified(true);
+        surfaces.get(si).ensureOutputMedia(this);
+      }
+      
+      // Mark bridge frames (LiveAV/Playground only) for texture re-upload
+      for (int si = 0; si < surfaces.size(); si++) {
+        Surface s = surfaces.get(si);
+        if ((s.isLive || s.isPlayground) && s.videoFrame != null) {
+          s.videoFrame.setModified(true);
+        }
+        // Images: mark modified on first use so this context uploads them
+        if (!s.isVideo && !s.isLive && !s.isPlayground && s.img != null) {
+          s.img.setModified(true);
         }
       }
       
@@ -68,5 +78,10 @@ public class OutputWindow extends PApplet {
       }
     }
     popMatrix();
+  }
+  
+  // Called by the Video library when a frame is ready for Movies owned by this PApplet
+  public void movieEvent(Movie m) {
+    try { m.read(); } catch (Exception e) {}
   }
 }
