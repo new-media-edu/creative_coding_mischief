@@ -3,6 +3,14 @@
  * Handles all mouse and keyboard events.
  */
 
+// Convert screen coordinates to canvas space
+float toCanvasX(float sx, int mappingAreaX) {
+  return (sx - mappingAreaX - canvasPanX) / canvasZoom;
+}
+float toCanvasY(float sy) {
+  return (sy - canvasPanY) / canvasZoom;
+}
+
 void mousePressed() {
   if (mouseX < SIDEBAR_WIDTH) {
     handleSidebarClick();
@@ -32,12 +40,22 @@ void mousePressed() {
     mappingAreaW = viewW;
   }
   
+  // Canvas panning (ALT+click or middle mouse)
+  if ((keyPressed && keyCode == ALT) || mouseButton == CENTER) {
+    isPanningCanvas = true;
+    return;
+  }
+  
+  // Convert mouse coords to canvas space for hit testing
+  float cmx = toCanvasX(mouseX, mappingAreaX);
+  float cmy = toCanvasY(mouseY);
+  
   boolean hitVertex = false;
   boolean hitEdge = false;
   
   // 1. Check Vertex Hits (Priority)
   for (Surface s : surfaces) {
-    int idx = s.getCornerAt(mouseX, mouseY, mappingAreaX);
+    int idx = s.getCornerAt(cmx, cmy, 0);
     if (idx != -1) {
       hitVertex = true;
       if (keyPressed && keyCode == SHIFT) {
@@ -57,7 +75,7 @@ void mousePressed() {
   // 2. Check Edge Hits
   if (!hitVertex) {
     for (Surface s : surfaces) {
-      int edgeIdx = s.getEdgeAt(mouseX, mouseY, mappingAreaX);
+      int edgeIdx = s.getEdgeAt(cmx, cmy, 0);
       if (edgeIdx != -1) {
         hitEdge = true;
         if (!(keyPressed && keyCode == SHIFT)) clearAllSelections();
@@ -74,7 +92,7 @@ void mousePressed() {
   // 3. Check Shape Hits
   if (!hitVertex && !hitEdge) {
     for (Surface s : surfaces) {
-      if (s.isInside(mouseX, mouseY, mappingAreaX)) {
+      if (s.isInside(cmx, cmy, 0)) {
         if (!(keyPressed && keyCode == SHIFT) && !s.isSelected) clearAllSelections();
         s.isSelected = true;
         selectedSurface = s;
@@ -97,6 +115,12 @@ void mouseDragged() {
   float dx = mouseX - pmouseX;
   float dy = mouseY - pmouseY;
   
+  if (isPanningCanvas) {
+    canvasPanX += dx;
+    canvasPanY += dy;
+    return;
+  }
+  
   if (isDraggingSourceVertex || isDraggingSourceShape) {
     int viewW = (width - SIDEBAR_WIDTH) / 2;
     PImage tex = selectedSurface.isVideo ? selectedSurface.videoFrame : selectedSurface.img;
@@ -113,10 +137,10 @@ void mouseDragged() {
     }
   } else if (isDraggingVertex) {
     for (Surface s : surfaces) {
-      s.moveSelectedCorners(dx, dy);
+      s.moveSelectedCorners(dx / canvasZoom, dy / canvasZoom);
     }
   } else if (isDraggingShape) {
-    if (selectedSurface != null) selectedSurface.move(dx, dy);
+    if (selectedSurface != null) selectedSurface.move(dx / canvasZoom, dy / canvasZoom);
   }
 }
 
@@ -124,8 +148,12 @@ void mouseReleased() {
   if (isMarquee) {
     int mappingAreaX = SIDEBAR_WIDTH;
     if (showSourceView) mappingAreaX += (width - SIDEBAR_WIDTH) / 2;
+    float mx1 = toCanvasX(marqueeX1, mappingAreaX);
+    float my1 = toCanvasY(marqueeY1);
+    float mx2 = toCanvasX(mouseX, mappingAreaX);
+    float my2 = toCanvasY(mouseY);
     for (Surface s : surfaces) {
-      s.selectCornersInBox(marqueeX1, marqueeY1, mouseX, mouseY, mappingAreaX);
+      s.selectCornersInBox(mx1, my1, mx2, my2, 0);
       if (anyCornerSelected(s)) s.isSelected = true;
     }
   }
@@ -134,6 +162,7 @@ void mouseReleased() {
   isDraggingShape = false;
   isDraggingSourceVertex = false;
   isDraggingSourceShape = false;
+  isPanningCanvas = false;
 }
 
 void keyPressed() {
@@ -143,6 +172,8 @@ void keyPressed() {
   else if (key == 'k') toggleLiveAction();
   else if (key == 's') saveConfig();
   else if (key == 'm') cycleMirror();
+  else if (key == 'g') toggleMappingGuide();
+  else if (key == '0') resetCanvasView();
   else if (key == 'd' || keyCode == BACKSPACE || keyCode == DELETE) deleteAction();
   else if (key == 'i' || key == 'I') {
     println("\n====== DIAGNOSTIC DUMP (frame " + frameCount + ") ======");
@@ -166,9 +197,9 @@ void clearAllSelections() {
 
 void handleSidebarClick() {
   float btnW = SIDEBAR_WIDTH - (UI_MARGIN * 2);
-  float btnH = 32;
-  float spacing = 10;
-  float startY = 60;
+  float btnH = 26;
+  float spacing = 5;
+  float startY = 38;
   
   if (mouseX > UI_MARGIN && mouseX < UI_MARGIN + btnW) {
     if (mouseY > startY && mouseY < startY + btnH) addQuad();
@@ -178,5 +209,6 @@ void handleSidebarClick() {
     else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) deleteAction();
     else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) saveConfig();
     else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) cycleMirror();
+    else if (mouseY > startY + (btnH + spacing) * 7 && mouseY < startY + (btnH + spacing) * 7 + btnH) toggleMappingGuide();
   }
 }

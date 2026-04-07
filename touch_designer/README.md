@@ -9,9 +9,17 @@ While TouchDesigner projects are primarily node-based and binary (`.toe`), this 
 ## How to use `build_network.py`
 
 1.  Open TouchDesigner.
-2.  In the network editor, create a **Text DAT** (shortcut: `Alt + Shift + t`).
-3.  Right-click the Text DAT and select **Edit in External Editor** or simply paste the contents of `build_network.py` into it.
-4.  Right-click the Text DAT again and select **Run Script**.
+2.  In the main canvas, press **Tab** to open the OP Create dialog. Navigate to **DAT > Text** and click to place a **Text DAT** (green node). Do **not** use a Text TOP (purple node) — that is for rendering visual text, not running scripts.
+3.  Click the Text DAT to select it. In the **Parameters** panel on the right, under the **File** page, click the **Edit..** button to open a text editor where you can paste the contents of `build_network.py`. Alternatively, set the **File** field to the full path of the script (e.g. `/Users/you/path/to/build_network.py`) and click **Load File** to pull it in.
+4.  Right-click the Text DAT and select **Run Script**.
+
+### Viewing errors and script output
+
+If nothing happens after running a script, check the **Textport** for error messages:
+- Open it via **Dialogs > Textport**, or press **Alt+Shift+T**, or press **F4** (opens as a floating window).
+- Make sure the toggle in the upper-left corner of the Textport is set to **Py** (Python mode).
+- All `print()` output and script errors from DATs appear here.
+- You can also drag a Text DAT onto the Textport and choose **Run DAT** to execute it directly there.
 
 ### What it builds:
 - A `Serial CHOP` to receive Arduino data (defaulting to COM3/9600).

@@ -188,9 +188,13 @@ class Surface {
     // Readback from the framebuffer to CPU pixels[]
     bridgeG.loadPixels();
 
+    // Use pixelWidth/pixelHeight to account for Retina/HiDPI scaling
+    int pw = bridgeG.pixelWidth;
+    int ph = bridgeG.pixelHeight;
+
     // Copy into the plain PImage bridge used by the output window
-    if (videoFrame == null || videoFrame.width != bridgeG.width || videoFrame.height != bridgeG.height) {
-      videoFrame = createImage(bridgeG.width, bridgeG.height, RGB);
+    if (videoFrame == null || videoFrame.width != pw || videoFrame.height != ph) {
+      videoFrame = createImage(pw, ph, RGB);
     }
     videoFrame.loadPixels();
     System.arraycopy(bridgeG.pixels, 0, videoFrame.pixels, 0, bridgeG.pixels.length);
@@ -254,10 +258,21 @@ class Surface {
   }
 
   private void drawMappingView(PApplet p, PImage tex, boolean isController) {
-    if (tex != null) {
+    PImage activeTex = tex;
+    PVector[] activeSrc = sourceCorners;
+    
+    if (showMappingGuide) {
+      activeTex = guideTextures[guideIndex % guideTextures.length];
+      activeSrc = new PVector[] {
+        new PVector(0, 0), new PVector(1, 0),
+        new PVector(1, 1), new PVector(0, 1)
+      };
+    }
+    
+    if (activeTex != null) {
       p.noStroke();
       p.beginShape(QUADS);
-      p.texture(tex);
+      p.texture(activeTex);
       p.textureMode(NORMAL);
       for (int y = 0; y < gridRes; y++) {
         for (int x = 0; x < gridRes; x++) {
@@ -267,10 +282,10 @@ class Surface {
           PVector p2 = getBilinearPoint(u2, v1, corners);
           PVector p3 = getBilinearPoint(u2, v2, corners);
           PVector p4 = getBilinearPoint(u1, v2, corners);
-          PVector t1 = getBilinearPoint(u1, v1, sourceCorners);
-          PVector t2 = getBilinearPoint(u2, v1, sourceCorners);
-          PVector t3 = getBilinearPoint(u2, v2, sourceCorners);
-          PVector t4 = getBilinearPoint(u1, v2, sourceCorners);
+          PVector t1 = getBilinearPoint(u1, v1, activeSrc);
+          PVector t2 = getBilinearPoint(u2, v1, activeSrc);
+          PVector t3 = getBilinearPoint(u2, v2, activeSrc);
+          PVector t4 = getBilinearPoint(u1, v2, activeSrc);
           p.vertex(p1.x, p1.y, t1.x, t1.y);
           p.vertex(p2.x, p2.y, t2.x, t2.y);
           p.vertex(p3.x, p3.y, t3.x, t3.y);

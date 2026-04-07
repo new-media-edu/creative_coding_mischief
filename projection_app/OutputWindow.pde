@@ -7,7 +7,8 @@ public class OutputWindow extends PApplet {
   
   public void settings() {
     // Note: display 1 is typically the primary monitor, 2 is the projector.
-    fullScreen(P3D, outputDisplay); 
+    fullScreen(P3D, outputDisplay);
+    pixelDensity(displayDensity());
   }
   
   public void setup() { 
@@ -39,14 +40,15 @@ public class OutputWindow extends PApplet {
     // Force modified=true on every video frame before drawing.
     // Use synchronized to avoid conflicts with main sketch modifications
     synchronized(surfaces) {
-      for (Surface s : surfaces) {
-        if ((s.isVideo || s.isLive) && s.videoFrame != null) {
-          s.videoFrame.setModified(true);
+      for (int si = 0; si < surfaces.size(); si++) {
+        if ((surfaces.get(si).isVideo || surfaces.get(si).isLive) && surfaces.get(si).videoFrame != null) {
+          surfaces.get(si).videoFrame.setModified(true);
         }
       }
       
-      for (Surface s : surfaces) {
-        s.display(this, false, 0, width, false);
+      for (int si = 0; si < surfaces.size(); si++) {
+        guideIndex = si;
+        surfaces.get(si).display(this, false, 0, width, false);
       }
     }
     popMatrix();

@@ -21,6 +21,16 @@ void cycleMirror() {
   outputMirror = (outputMirror + 1) % 4;
 }
 
+void toggleMappingGuide() {
+  showMappingGuide = !showMappingGuide;
+}
+
+void resetCanvasView() {
+  canvasZoom = 1.0;
+  canvasPanX = 0;
+  canvasPanY = 0;
+}
+
 void toggleLiveAction() {
   if (selectedSurface != null) {
     synchronized(surfaces) {
