@@ -164,6 +164,7 @@ class Surface {
         video = new Movie(parent, path);
         println("[DEBUG] [Surface] GStreamer Load Success: " + path);
         video.loop();
+        video.volume(0);  // Mute controller copy — output window plays audio
         isVideo = true;
         img = null;
       } catch (Exception e) {
