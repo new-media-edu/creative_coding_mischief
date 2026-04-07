@@ -37,6 +37,7 @@ void drawMainWorkspace() {
     pushMatrix();
     translate(mappingAreaX + viewW + canvasPanX, canvasPanY);
     scale(canvasZoom);
+    drawProjectorFrame();
     for (int si = 0; si < surfaces.size(); si++) {
       guideIndex = si;
       surfaces.get(si).display(this, true, 0, viewW, false);
@@ -60,6 +61,7 @@ void drawMainWorkspace() {
     pushMatrix();
     translate(mappingAreaX + canvasPanX, canvasPanY);
     scale(canvasZoom);
+    drawProjectorFrame();
     for (int si = 0; si < surfaces.size(); si++) {
       guideIndex = si;
       surfaces.get(si).display(this, true, 0, mappingAreaW, false);
@@ -97,6 +99,8 @@ void drawSidebar() {
   btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Live AV (K)");
   btnY += btnH + spacing;
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Playground (P)");
+  btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Delete Quad (D)");
   btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Save Config (S)");
@@ -133,7 +137,9 @@ void drawSidebar() {
     btnY += 14;
     fill(200);
     String path = selectedSurface.mediaPath;
-    if (path.equals("")) path = "No media";
+    if (selectedSurface.isPlayground) path = "Playground";
+    else if (selectedSurface.isLive) path = "Live AV";
+    else if (path.equals("")) path = "No media";
     else {
       File f = new File(path);
       path = f.getName();
@@ -169,4 +175,31 @@ void drawGuideBackground(float x, float y, float w, float h) {
   vertex(x + w, y + h, w, h);
   vertex(x, y + h, 0, h);
   endShape();
+}
+
+void drawProjectorFrame() {
+  if (output == null || output.width <= 0 || output.height <= 0) return;
+  // Dashed-style projector boundary
+  stroke(255, 255, 255, 80);
+  strokeWeight(1.0 / canvasZoom); // Keep 1px regardless of zoom
+  noFill();
+  rect(0, 0, output.width, output.height);
+  // Corner ticks for visibility
+  float tick = 20;
+  stroke(255, 255, 255, 150);
+  // Top-left
+  line(0, 0, tick, 0); line(0, 0, 0, tick);
+  // Top-right
+  line(output.width, 0, output.width - tick, 0); line(output.width, 0, output.width, tick);
+  // Bottom-right
+  line(output.width, output.height, output.width - tick, output.height); line(output.width, output.height, output.width, output.height - tick);
+  // Bottom-left
+  line(0, output.height, tick, output.height); line(0, output.height, 0, output.height - tick);
+  // Label
+  fill(255, 255, 255, 60);
+  noStroke();
+  textSize(12 / canvasZoom);
+  textAlign(LEFT, TOP);
+  text("PROJECTOR  " + output.width + "x" + output.height, 4, 4);
+  strokeWeight(1);
 }

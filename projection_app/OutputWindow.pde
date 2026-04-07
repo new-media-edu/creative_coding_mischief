@@ -41,9 +41,25 @@ public class OutputWindow extends PApplet {
     // Use synchronized to avoid conflicts with main sketch modifications
     synchronized(surfaces) {
       for (int si = 0; si < surfaces.size(); si++) {
-        if ((surfaces.get(si).isVideo || surfaces.get(si).isLive) && surfaces.get(si).videoFrame != null) {
+        if ((surfaces.get(si).isVideo || surfaces.get(si).isLive || surfaces.get(si).isPlayground) && surfaces.get(si).videoFrame != null) {
           surfaces.get(si).videoFrame.setModified(true);
         }
+      }
+      
+      // Force guide textures to re-upload into this GL context
+      if (showMappingGuide) {
+        for (PImage gt : guideTextures) gt.setModified(true);
+        guideGridBg.setModified(true);
+        noStroke();
+        textureWrap(REPEAT);
+        textureMode(IMAGE);
+        beginShape(QUADS);
+        texture(guideGridBg);
+        vertex(0, 0, 0, 0);
+        vertex(width, 0, width, 0);
+        vertex(width, height, width, height);
+        vertex(0, height, 0, height);
+        endShape();
       }
       
       for (int si = 0; si < surfaces.size(); si++) {

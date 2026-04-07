@@ -170,6 +170,7 @@ void keyPressed() {
   else if (key == 'l') loadMediaAction();
   else if (key == 'v') toggleSourceView();
   else if (key == 'k') toggleLiveAction();
+  else if (key == 'p') togglePlaygroundAction();
   else if (key == 's') saveConfig();
   else if (key == 'm') cycleMirror();
   else if (key == 'g') toggleMappingGuide();
@@ -206,9 +207,10 @@ void handleSidebarClick() {
     else if (mouseY > startY + (btnH + spacing) && mouseY < startY + (btnH + spacing) + btnH) loadMediaAction();
     else if (mouseY > startY + (btnH + spacing) * 2 && mouseY < startY + (btnH + spacing) * 2 + btnH) toggleSourceView();
     else if (mouseY > startY + (btnH + spacing) * 3 && mouseY < startY + (btnH + spacing) * 3 + btnH) toggleLiveAction();
-    else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) deleteAction();
-    else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) saveConfig();
-    else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) cycleMirror();
-    else if (mouseY > startY + (btnH + spacing) * 7 && mouseY < startY + (btnH + spacing) * 7 + btnH) toggleMappingGuide();
+    else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) togglePlaygroundAction();
+    else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) deleteAction();
+    else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) saveConfig();
+    else if (mouseY > startY + (btnH + spacing) * 7 && mouseY < startY + (btnH + spacing) * 7 + btnH) cycleMirror();
+    else if (mouseY > startY + (btnH + spacing) * 8 && mouseY < startY + (btnH + spacing) * 8 + btnH) toggleMappingGuide();
   }
 }

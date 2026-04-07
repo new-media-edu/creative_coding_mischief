@@ -26,15 +26,40 @@ void toggleMappingGuide() {
 }
 
 void resetCanvasView() {
-  canvasZoom = 1.0;
-  canvasPanX = 0;
-  canvasPanY = 0;
+  fitToProjector();
+}
+
+void fitToProjector() {
+  if (output == null || output.width <= 0 || output.height <= 0) {
+    canvasZoom = 1.0;
+    canvasPanX = 0;
+    canvasPanY = 0;
+    return;
+  }
+  int mappingAreaW = width - SIDEBAR_WIDTH;
+  if (showSourceView) mappingAreaW /= 2;
+  float margin = 40;
+  float availW = mappingAreaW - margin * 2;
+  float availH = height - margin * 2;
+  float scaleX = availW / output.width;
+  float scaleY = availH / output.height;
+  canvasZoom = min(scaleX, scaleY);
+  canvasPanX = (mappingAreaW - output.width * canvasZoom) / 2;
+  canvasPanY = (height - output.height * canvasZoom) / 2;
 }
 
 void toggleLiveAction() {
   if (selectedSurface != null) {
     synchronized(surfaces) {
       selectedSurface.setLive(!selectedSurface.isLive);
+    }
+  }
+}
+
+void togglePlaygroundAction() {
+  if (selectedSurface != null) {
+    synchronized(surfaces) {
+      selectedSurface.setPlayground(!selectedSurface.isPlayground);
     }
   }
 }

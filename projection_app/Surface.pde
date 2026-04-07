@@ -18,6 +18,7 @@ class Surface {
   String pendingMediaPath = "";
   boolean isVideo = false;
   boolean isLive = false;
+  boolean isPlayground = false;
   
   int gridRes = 20; 
   
@@ -57,12 +58,16 @@ class Surface {
     
     isLive = json.getBoolean("isLive", false);
     if (isLive) setLive(true);
+    
+    isPlayground = json.getBoolean("isPlayground", false);
+    if (isPlayground) setPlayground(true);
   }
   
   void setLive(boolean live) {
     if (live && !isLive) {
       unloadMedia();
       isLive = true;
+      isPlayground = false;
       liveAV.trigger(true);
     } else if (!live && isLive) {
       isLive = false;
@@ -70,10 +75,26 @@ class Surface {
     }
   }
   
+  void setPlayground(boolean pg) {
+    if (pg && !isPlayground) {
+      unloadMedia();
+      isPlayground = true;
+      isLive = false;
+      playground.trigger(true);
+    } else if (!pg && isPlayground) {
+      isPlayground = false;
+      playground.trigger(false);
+    }
+  }
+  
   void unloadMedia() {
     if (isLive) {
       liveAV.trigger(false);
       isLive = false;
+    }
+    if (isPlayground) {
+      playground.trigger(false);
+      isPlayground = false;
     }
     
     // Set isVideo to false FIRST to stop other threads from accessing 'video'
@@ -161,6 +182,15 @@ class Surface {
       bridgeG.beginDraw();
       bridgeG.image(liveAV.canvas, 0, 0);
       bridgeG.endDraw();
+    } else if (isPlayground) {
+      // Create or resize the offscreen readback surface for playground
+      if (bridgeG == null || bridgeG.width != playground.canvas.width || bridgeG.height != playground.canvas.height) {
+        if (bridgeG != null) bridgeG.dispose();
+        bridgeG = createGraphics(playground.canvas.width, playground.canvas.height, P2D);
+      }
+      bridgeG.beginDraw();
+      bridgeG.image(playground.canvas, 0, 0);
+      bridgeG.endDraw();
     } else {
       if (!isVideo || video == null || video.width == 0 || video.height == 0) return;
 
@@ -203,12 +233,14 @@ class Surface {
 
   void display(PApplet p, boolean isController, int xOffset, int viewWidth, boolean isSourceView) {
     PImage tex;
-    if (isVideo || isLive) {
+    if (isVideo || isLive || isPlayground) {
       if (videoFrame != null) {
         tex = videoFrame;
       } else if (isController) {
         // Fallback only allowed in the controller window (same GL context)
-        tex = isLive ? liveAV.canvas : video;
+        if (isLive) tex = liveAV.canvas;
+        else if (isPlayground) tex = playground.canvas;
+        else tex = video;
       } else {
         // Output window must wait for the bridge to be populated
         tex = null;
@@ -431,7 +463,10 @@ class Surface {
     println("  mediaPath   : " + mediaPath);
     println("  isVideo     : " + isVideo);
     println("  isLive      : " + isLive);
-    if (isLive || isVideo) {
+    println("  isPlayground: " + isPlayground);
+    if (isPlayground) {
+      println("  pg canvas   : " + playground.canvas.width + " x " + playground.canvas.height);
+    } else if (isLive || isVideo) {
       if (isLive) {
         println("  live canvas : " + liveAV.canvas.width + " x " + liveAV.canvas.height);
       } else if (video == null) {
@@ -473,6 +508,7 @@ class Surface {
     json.setJSONArray("sourceCorners", jsonSrc);
     json.setString("mediaPath", mediaPath);
     json.setBoolean("isLive", isLive);
+    json.setBoolean("isPlayground", isPlayground);
     return json;
   }
 }

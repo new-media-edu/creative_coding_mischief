@@ -11,6 +11,7 @@ import processing.sound.*;
 ArrayList<Surface> surfaces;
 Surface selectedSurface = null;
 LiveAV liveAV;
+Playground playground;
 
 // UI/Interaction State
 boolean isMarquee = false;
@@ -33,6 +34,7 @@ float canvasZoom = 1.0;
 float canvasPanX = 0;
 float canvasPanY = 0;
 boolean isPanningCanvas = false;
+boolean hasAutoFit = false; // Whether we've done the initial fit-to-projector
 
 // Mapping Guide
 boolean showMappingGuide = false;
@@ -83,6 +85,9 @@ void setup() {
   // Initialize Live AV Manager
   liveAV = new LiveAV(this);
   
+  // Initialize Playground
+  playground = new Playground();
+  
   // Load previous configuration
   loadConfig();
   if (surfaces.isEmpty()) {
@@ -101,8 +106,15 @@ void setup() {
 void draw() {
   background(25);
   
-  // 0. Update Live AV data
+  // 0. Auto-fit to projector frame once output window is ready
+  if (!hasAutoFit && output != null && output.width > 0 && output.height > 0) {
+    fitToProjector();
+    hasAutoFit = true;
+  }
+  
+  // 0b. Update Live AV and Playground
   liveAV.update();
+  playground.update();
   
   synchronized(surfaces) {
     // 1. Sync video bridge frames (movieEvent fires read(); here we copy pixels to PImage)
