@@ -26,20 +26,20 @@ Create visuals → Define surfaces in software → Warp/pin to match the object 
 
 ## Tool 1: Custom Processing App
 
-I built a projection mapping tool in Processing that lives in the `projection_app/` folder of this repo. It lets you define quadrilateral surfaces, assign visuals to each one, and warp them interactively.
+I built a projection mapping tool in Processing called **mappy**. It lives in its own repo: [github.com/prismspecs/mappy](https://github.com/prismspecs/mappy). It lets you define quadrilateral surfaces, assign visuals to each one, and warp them interactively.
 
-A pre-built binary is included — you don't need to compile anything.
+### Downloads
 
-### Running It
+Pre-built binaries are available on the [Releases page](https://github.com/prismspecs/mappy/releases):
 
-```
-projection_app/linux-amd64/projection_app   # Linux
-projection_app/windows-amd64/              # Windows (run the .exe)
-```
+- [macOS (Apple Silicon)](https://github.com/prismspecs/mappy/releases/latest/download/mappy-macos-aarch64.zip)
+- [macOS (Intel)](https://github.com/prismspecs/mappy/releases/latest/download/mappy-macos-x86_64.zip)
+- [Linux (amd64)](https://github.com/prismspecs/mappy/releases/latest/download/mappy-linux-amd64.zip)
+- [Windows (amd64)](https://github.com/prismspecs/mappy/releases/latest/download/mappy-windows-amd64.zip)
 
 ### Controls
 
-Refer to [projection_app/LIVE_AV_GUIDE.md](../projection_app/LIVE_AV_GUIDE.md) for the full control reference.
+Refer to the [Live AV Guide](https://github.com/prismspecs/mappy/blob/main/LIVE_AV_GUIDE.md) for the full control reference.
 
 ---
 
@@ -96,4 +96,4 @@ Reads `A0` and prints the value over serial at 9600 baud, once per loop.
 
 ### Hooking it up in the Processing app
 
-The Processing app reads serial data on a configurable port. See `projection_app/IO.pde` for the serial setup.
+The Processing app reads serial data on a configurable port. See [`IO.pde`](https://github.com/prismspecs/mappy/blob/main/IO.pde) for the serial setup.
