@@ -25,6 +25,8 @@ boolean showSourceView = false;
 int SIDEBAR_WIDTH = 220;
 int UI_MARGIN = 20;
 int outputDisplay = 2; // Default to display 2 (projector)
+int outputMirror = 0; // 0=Normal, 1=Flipped H, 2=Flipped V, 3=Flipped H+V
+String[] mirrorLabels = {"Normal", "Mirror H", "Mirror V", "Mirror H+V"};
 
 // Secondary Window
 OutputWindow output;

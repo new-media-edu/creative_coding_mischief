@@ -1,54 +1,38 @@
-# Projection Mapping with TouchDesigner: A Beginner's Guide
+This guide walks you through a simple projection mapping setup using the `kantanMapper` tool in TouchDesigner.
 
-This guide will walk you through a simple projection mapping setup using the `kantanMapper` tool in TouchDesigner.
+Before you start, download this VJ pack and use clips from the "mp4" folder:
+https://drive.google.com/drive/folders/1cxOtitX3fUVFC7dv5_FeAjSED2p31LM4?usp=sharing
+You can also browse https://www.reddit.com/r/VJloops/ for more loop content.
 
-## 1. Load the Mapper
+Add the `kantanMapper` component to your project:
+- Press `Alt + L` to open the **Palette**.
+- Navigate to **Mapping > kantanMapper**.
+- Drag `kantanMapper` into the main Network Editor (the grid area).
+- Close the Palette window.
 
-First, you need to add the `kantanMapper` component to your project.
+Send output to your projector:
+- Click the `kantanMapper` node.
+- In the parameter panel, find **Open Kantan Window** and click **Pulse**.
+- In the Kantan window, click **Window Options** (top-left).
+- Set **Monitor** to `1` (usually projector), since `0` is usually your laptop display.
+- Set **Opening Size** to **Fill**.
+- Close options.
+- In the Kantan window left menu, click **Toggle Output**.
 
-1.  Press `Alt + L` to open the **Palette**.
-2.  Navigate to **Mapping > kantanMapper**.
-3.  Drag the `kantanMapper` tool into your main Network Editor (the grid area).
-4.  You can now close the Palette window.
+Load media into TouchDesigner before assigning textures:
+- Pick a video or image file (the VJ pack's "mp4" folder is a good starting point).
+- Drag it into the main Network Editor.
+- TouchDesigner will create a TOP node (usually purple), for example `moviefilein1`.
 
-## 2. Configure the Projector Output
+Create a quad and assign texture:
+- Return to the **Kantan Window**.
+- In **Tools**, click **Create Quad** (square icon).
+- Click and drag on the canvas to draw the mapping shape.
+- Select the new quad and find the **Texture** field on the right.
+- Assign media by either dragging `moviefilein1` onto **Texture**, or typing `/project1/moviefilein1`.
 
-Next, you need to send the output to your projector.
+If the quad stays solid blue, click the `X` next to the texture field and reassign the texture.
 
-1.  Click on the `kantanMapper` node to select it.
-2.  In the properties panel on the right, find the **Open Kantan Window** parameter and click the **Pulse** button next to it.
-3.  A new "Kantan" window will appear. In the top-left corner, click **Window Options**.
-4.  Set the **Monitor** to `1`. (Monitor `0` is typically your primary laptop screen, and `1` is the external projector).
-5.  Set the **Opening Size** to **Fill**.
-6.  Close the options panel.
-7.  In the main Kantan window's left menu, click **Toggle Output** to activate the projection.
-
-## 3. Load Your Media
-
-It's more reliable to load your visual content (videos or images) into TouchDesigner first, before assigning it in the mapper.
-
-1.  Find a video or image file on your computer.
-2.  Drag and drop it directly into the main TouchDesigner Network Editor.
-3.  This will create a new TOP operator (usually a purple node), for example, `moviefilein1`. Take note of this name.
-
-## 4. Map and Assign Your Texture
-
-Now you will create a mapping shape (a quad) and assign your media to it.
-
-1.  Go back to the **Kantan Window**.
-2.  In the "Tools" section, click **Create Quad** (it looks like a square icon).
-3.  Click and drag your mouse on the canvas to draw a rectangular shape. You should see this shape appear on your projection surface.
-4.  With the new quad selected, look at the sidebar on the right.
-5.  Find the **Texture** parameter field.
-6.  To assign your media, you can either:
-    *   **Drag & Drop:** Drag the purple `moviefilein1` node from your Network Editor and drop it directly onto the **Texture** field.
-    *   **Type Path:** Manually type the path to your media node, for example: `/project1/moviefilein1`.
-
-**Important:** If the shape remains a solid blue color, click the "X" button next to the texture field to ensure the texture is active.
-
-## 5. Final Adjustments
-
-The last step is to align your projection with the physical object.
-
-1.  Click and drag the corners of the quad in the Kantan window to match the shape of your physical object.
-2.  To get a clean final output, click **Show Guides** in the top menu of the Kantan window to toggle them **OFF**. This will hide the grid lines from the final projection.
+Align and clean the final output:
+- Drag quad corners in the Kantan window to match your physical surface.
+- Toggle **Show Guides** off to hide grid lines in the final projection.

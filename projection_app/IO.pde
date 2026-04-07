@@ -17,6 +17,10 @@ void toggleSourceView() {
   showSourceView = !showSourceView; 
 }
 
+void cycleMirror() {
+  outputMirror = (outputMirror + 1) % 4;
+}
+
 void toggleLiveAction() {
   if (selectedSurface != null) {
     synchronized(surfaces) {

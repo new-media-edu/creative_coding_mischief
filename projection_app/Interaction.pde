@@ -142,6 +142,7 @@ void keyPressed() {
   else if (key == 'v') toggleSourceView();
   else if (key == 'k') toggleLiveAction();
   else if (key == 's') saveConfig();
+  else if (key == 'm') cycleMirror();
   else if (key == 'd' || keyCode == BACKSPACE || keyCode == DELETE) deleteAction();
   else if (key == 'i' || key == 'I') {
     println("\n====== DIAGNOSTIC DUMP (frame " + frameCount + ") ======");
@@ -176,5 +177,6 @@ void handleSidebarClick() {
     else if (mouseY > startY + (btnH + spacing) * 3 && mouseY < startY + (btnH + spacing) * 3 + btnH) toggleLiveAction();
     else if (mouseY > startY + (btnH + spacing) * 4 && mouseY < startY + (btnH + spacing) * 4 + btnH) deleteAction();
     else if (mouseY > startY + (btnH + spacing) * 5 && mouseY < startY + (btnH + spacing) * 5 + btnH) saveConfig();
+    else if (mouseY > startY + (btnH + spacing) * 6 && mouseY < startY + (btnH + spacing) * 6 + btnH) cycleMirror();
   }
 }

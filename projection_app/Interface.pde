@@ -75,6 +75,8 @@ void drawSidebar() {
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Delete Quad (D)");
   btnY += btnH + spacing;
   drawButton(UI_MARGIN, btnY, btnW, btnH, "Save Config (S)");
+  btnY += btnH + spacing;
+  drawButton(UI_MARGIN, btnY, btnW, btnH, "Mirror (M): " + mirrorLabels[outputMirror]);
   
   btnY += btnH + 40;
   stroke(100);
