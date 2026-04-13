@@ -1,6 +1,6 @@
 # Session 04: Analog Input and Loops
 
-In this session, we'll bridge the gap between the digital and analog worlds. We'll learn how to read variable inputs from a potentiometer and how to use loops to create repetitive actions like fading lights or warbling sirens. Finally, we'll combine these ideas with buttons to create an interactive musical instrument.
+So far everything has been on or off. Today we read values that actually change — a potentiometer gives us a number between 0 and 1023 instead of just HIGH and LOW. We'll also learn `while` loops for repeating things, and at the end we'll wire up a simple button keyboard.
 
 ## Agenda
 
@@ -134,11 +134,11 @@ while (condition) {
 ```
 
 ### The Concept of "Blocking" Code
-This is a very important concept. Code that is **blocking** "blocks" or pauses the entire program until it's finished. 
+Code that is **blocking** pauses the entire program until it's finished. 
 
 The most common blocking function we use is `delay()`. When your program reaches `delay(1000)`, it stops dead in its tracks for one full second. It cannot read sensors, check buttons, or do anything else until that second is over.
 
-`while` loops can also be a form of blocking code. In the examples below, the `while` loop will capture the program's full attention until its condition is no longer true. This is useful for simple, dedicated actions, but it makes it very difficult to do two things at once. This is why the "state machine" technique we saw in Session 03 (using variables to remember a "state" in the main loop) is so powerful for more advanced projects.
+`while` loops can also be a form of blocking code. In the examples below, the `while` loop will capture the program's full attention until its condition is no longer true. This is useful for simple, dedicated actions, but it makes it very difficult to do two things at once. This is why the "state machine" technique from Session 03 (using variables to track the current state in the main loop) works better for anything that needs to do more than one thing.
 
 ### `while` Loop Example: Fading an LED
 

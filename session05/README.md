@@ -1,6 +1,6 @@
 # Session 05: Sensors, Motors, and Introduction to Processing
 
-In this session, we move beyond knobs and buttons into moving things in the world. We'll learn to control servo motors and DC motors to build a funky robot arm.
+Today we make things move. Servo motors let the Arduino rotate to a specific angle on command, which means we can build actual mechanisms. We'll wire up a servo, control it with a pot, then build a two-joint robot arm.
 
 ## Agenda
 
@@ -129,14 +129,12 @@ void loop() {
 }
 ```
 
-*Turn the knob slowly and watch the servo follow your hand. This is essentially a manual remote control!*
+*Turn the knob slowly and watch the servo follow your hand.*
 
 
 ## Part 2: 2-DOF Robot Arm
 
 Now for the fun part. We'll combine two servos and two potentiometers to build a simple 2 Degrees of Freedom (DOF) robot arm. One servo controls the base rotation, and the other controls the arm's elevation. Each potentiometer controls one servo, so you have full manual control of the arm with your hands.
-
-This is the same principle behind the joystick-controlled arms used in everything from toy cranes to surgical robots.
 
 ### Circuit
 

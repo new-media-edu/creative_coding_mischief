@@ -1,6 +1,6 @@
 # TouchDesigner Plain Text Workflow
 
-While TouchDesigner projects are primarily node-based and binary (`.toe`), this directory demonstrates how to bridge the gap using plain-text scripts and configuration files.
+TouchDesigner projects are node-based and binary (`.toe`), so they don't play well with version control. This directory keeps the scriptable parts in plain text so they can be tracked in Git.
 
 ## Files
 - `build_network.py`: A Python script to programmatically build a projection mapping network.

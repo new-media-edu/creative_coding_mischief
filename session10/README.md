@@ -1,76 +1,69 @@
-# Session 10: Advanced Projection Mapping & Final Projects
+# Session 10: Projection Mapping II + Final Projects
 
-Today is split in two. First, we dig deeper into projection mapping by chaining together the tools we've been learning — TouchDesigner, Processing (mappy), and Arduino — into more powerful combinations. Then we spend the second half of class talking seriously about final projects.
+Two things today. We're going to take the projection mapping setup from last session and actually start combining tools: TouchDesigner feeding into mappy, writing code inside mappy, and hooking up an Arduino to control it all. Then we'll switch gears and talk about final projects for the rest of class.
 
 ## Agenda
 
-+ Demo 1: Syphon/Spout — piping video from TouchDesigner into mappy
-+ Demo 2: The Playground — writing Processing code inside mappy
-+ Demo 3: Arduino → Playground — potentiometer-controlled projection mapping
++ Syphon/Spout: piping video from TouchDesigner into mappy
++ The Playground: writing Processing code inside mappy
++ Arduino → Playground: potentiometer-controlled visuals
 + Final project discussion
 
 ---
 
-## Demo 1: Syphon / Spout — TouchDesigner → Mappy
+## Syphon / Spout: TouchDesigner → Mappy
 
-Up to now we've used TouchDesigner *or* mappy. But what if you want TouchDesigner's powerful generative tools **and** mappy's quad-warping workflow? The answer is **Syphon** (macOS) or **Spout** (Windows) — protocols that let applications share video frames in real time with zero latency.
+Last session we used TouchDesigner and mappy separately. What if you want to generate something wild in TouchDesigner but use mappy to do the quad-warping and surface alignment? That's what Syphon (macOS) and Spout (Windows) are for. They're protocols that let one application send its video output to another application, frame by frame, with basically no delay.
 
-The idea: TouchDesigner renders something → sends it out via Syphon/Spout → mappy picks it up as a live texture you can map onto any surface.
+So the flow is: TouchDesigner makes something visually interesting → Syphon/Spout carries it over → mappy receives it like any other video source and maps it onto your surfaces.
 
-### TouchDesigner Side (3 nodes, 2 minutes)
+### TouchDesigner setup (3 nodes)
 
-1. Open TouchDesigner. You start with an empty network.
-2. **Tab** → search **Noise** → drop a `Noise` TOP onto the network.
-   - In its parameters, set **Type** to `Random (GPU)`.
-   - Set **Resolution** to `1280 x 720`.
-   - Turn on **Time** under the Transform tab so it animates.
-3. **Tab** → search **Syphon Spout Out** → drop a `Syphon Spout Out` TOP.
-   - Wire the output of your Noise TOP into the Syphon Spout Out's input (drag from the little connector on the right side of Noise to the left side of Syphon Spout Out).
-   - That's it. TouchDesigner is now broadcasting this texture.
+1. Open TouchDesigner.
+2. Press Tab, search for `Noise`, and drop a Noise TOP onto the network.
+   - In the parameters panel, set Type to `Random (GPU)`.
+   - Set Resolution to `1280 x 720`.
+   - Under the Transform tab, turn on Time so it actually moves.
+3. Press Tab again, search for `Syphon Spout Out`, and drop one of those on.
+   - Drag a wire from the right side of the Noise TOP to the left side of the Syphon Spout Out TOP.
+   - Done. TouchDesigner is now broadcasting.
 
-> **Tip:** You can replace the Noise TOP with anything — a `Movie File In`, a feedback loop, a `GLSL` shader, a webcam (`Video Device In`). The Syphon Spout Out node doesn't care what it receives.
+You can swap the Noise TOP for anything: a `Movie File In`, a `GLSL` shader, a webcam via `Video Device In`, whatever. The Syphon Spout Out node just sends whatever image it gets.
 
-### Mappy Side
+### Mappy setup
 
 1. Launch mappy.
-2. Create a surface (or use an existing one).
-3. With the surface selected, press **V** (or click **Video/Image** in the sidebar) and choose the Syphon/Spout source from the list. It should appear automatically as long as TouchDesigner is running.
-4. Warp the corners onto your physical object. Done — you're now projection mapping a live TouchDesigner feed.
+2. Create a surface (or select an existing one).
+3. Press **V** (or click Video/Image in the sidebar) and pick the Syphon/Spout source from the dropdown. It shows up automatically if TouchDesigner is running.
+4. Warp the corners onto your object.
 
-### Make It Weirder
+That's it. You're projection mapping a live TouchDesigner feed.
 
-Back in TouchDesigner, try chaining more nodes before the Syphon Spout Out:
+### Make it weirder
 
-- **Feedback** TOP → plug the Syphon output back into itself with a `Feedback` and `Composite` TOP for trails.
-- **HSV Adjust** TOP → shift the hue over time for psychedelic color cycling.
-- **Edge** TOP → turn your noise into a line drawing.
+Back in TouchDesigner, chain more nodes before the Syphon Spout Out:
 
-Every change you make in TouchDesigner updates instantly in mappy.
+- Add a `Feedback` TOP and a `Composite` TOP to create trails
+- Add an `HSV Adjust` TOP to shift the hue over time
+- Add an `Edge` TOP to turn your noise into line art
+
+Changes in TouchDesigner show up in mappy right away.
 
 ---
 
-## Demo 2: The Playground
+## The Playground
 
-Mappy has a built-in **Playground** — a Processing sketch that runs inside the app and renders to a canvas that gets projection-mapped onto your surfaces. This means you can write code (just like a normal Processing sketch) and have it projected and warped in real time.
+Mappy has a built-in Playground. It's basically a Processing sketch that lives inside the app and renders to a canvas that gets mapped onto your surfaces. You write `playgroundSetup()` and `playgroundDraw()` just like you'd write `setup()` and `draw()` in a normal Processing sketch, except you draw to a `PGraphics` object called `canvas` (640×480).
 
-### Activating the Playground
+### Turn it on
 
-1. In mappy, select a surface.
-2. Press **P** (or click the **Playground** button in the sidebar).
-3. The surface now displays whatever the Playground draws.
+1. Select a surface in mappy.
+2. Press **P** (or click the Playground button in the sidebar).
+3. That surface now shows whatever the Playground is drawing.
 
-### How It Works
+### The default sketch
 
-The Playground is a class with two functions you edit:
-
-- `playgroundSetup()` — runs once (just like `setup()`).
-- `playgroundDraw()` — runs every frame (just like `draw()`).
-
-You draw to a `PGraphics` object called `canvas` (640×480 by default). Everything you draw to `canvas` gets texture-mapped onto any surface assigned to the Playground.
-
-### Default Sketch: Random Squares
-
-Out of the box, the Playground draws random colorful squares that accumulate on screen:
+Out of the box it draws random colorful squares that pile up on screen:
 
 ```java
 void playgroundDraw() {
@@ -85,9 +78,9 @@ void playgroundDraw() {
 }
 ```
 
-### Try Something Cooler: Pulsing Rings
+### Something better: pulsing rings
 
-Replace the default `playgroundDraw()` with this:
+Replace the default `playgroundDraw()` with this to get concentric rings that pulse and shift color:
 
 ```java
 // YOUR VARIABLES
@@ -115,21 +108,21 @@ void playgroundDraw() {
 }
 ```
 
-This gives you concentric rings that pulse and cycle through colors — looks great on physical objects.
+Looks especially good when projected onto an actual 3D object.
 
-### Editing the Playground Code
+### Where to edit it
 
-The Playground source lives in the `source/` folder alongside the other `.pde` files. Open it in any text editor, make changes, and restart mappy to see the result. (No need to recompile — mappy reads the source at launch.)
+The Playground source is in the `source/` folder alongside the other `.pde` files. Edit it in any text editor and restart mappy. No recompilation needed.
 
 ---
 
-## Demo 3: Arduino Potentiometer → Playground
+## Arduino Potentiometer → Playground
 
-Now we connect physical input to the Playground. A potentiometer will control a visual parameter in real time — turn the knob and the projection changes.
+Now the fun part: plug in a potentiometer and use it to control what the Playground draws. Turn the knob, the projection changes.
 
-### Arduino Side
+### Arduino sketch
 
-Upload this sketch (same one from Session 09 — it's in `session09/arduino_pot_serial/`):
+Same one from Session 09. It's in `session09/arduino_pot_serial/`:
 
 ```cpp
 const int potPin = A0;
@@ -145,17 +138,13 @@ void loop() {
 }
 ```
 
-Wire a potentiometer to **A0**, **5V**, and **GND** — same circuit as Session 04.
+Wire a potentiometer to A0, 5V, and GND (same circuit as Session 04).
 
-### Playground Side
+### Playground side
 
-In the Playground class, flip the serial toggle and write a sketch that uses the incoming value:
+In the Playground class, set `useSerial = true;` near the top. That's really the only switch you need to flip. The serial code auto-connects and fills in the `serialValues[]` array with incoming numbers. `serialValues[0]` will hold the raw 0-1023 value from the pot.
 
-1. Set `useSerial = true;` near the top of the Playground class.
-2. The serial code auto-connects and parses incoming values into the `serialValues[]` array.
-3. Use `serialValues[0]` in your `playgroundDraw()` — it will hold the raw 0–1023 value from the potentiometer.
-
-### Example: Potentiometer-Controlled Rings
+### Example: pot-controlled rings
 
 ```java
 // YOUR VARIABLES
@@ -187,11 +176,11 @@ void playgroundDraw() {
 }
 ```
 
-Turn the knob all the way left: one slow ring. Turn it all the way right: twenty fast rings. The projection on the physical surface updates immediately.
+Knob all the way left: one slow ring. All the way right: twenty fast ones.
 
-### Sending Multiple Values
+### Two pots
 
-If you want to control more parameters (say, two pots), update the Arduino sketch to send comma-separated values:
+If you want to control more stuff, update the Arduino sketch to send comma-separated values:
 
 ```cpp
 int potA = A0;
@@ -209,60 +198,53 @@ void loop() {
 }
 ```
 
-In the Playground, `serialValues[0]` is the first pot and `serialValues[1]` is the second. The array supports up to 8 comma-separated values.
+Then in the Playground, `serialValues[0]` is the first pot, `serialValues[1]` is the second. The array goes up to 8 values.
 
 ---
 
-## The Full Pipeline
+## Putting it together
 
-Here's what we can do now after Sessions 09 and 10:
+After today you've got a few different ways to feed visuals into mappy:
 
 ```
-TouchDesigner ──Syphon/Spout──→ ┐
-                                 ├─→ Mappy (warp + map onto surfaces) ──→ Projector ──→ Physical Object
-Arduino ──Serial──→ Playground ──┘
+TouchDesigner ──Syphon/Spout──→ mappy ──→ Projector ──→ Physical Object
+Arduino ──Serial──→ Playground ──→ mappy ──→ Projector ──→ Physical Object
 ```
 
-You can use any combination:
-- **TouchDesigner alone** for generative visuals mapped via Syphon/Spout.
-- **Playground alone** for custom Processing code projected directly.
-- **Arduino + Playground** for physical-input-driven visuals.
-- **All three** — TouchDesigner on some surfaces, Arduino-controlled Playground on others.
+You can mix and match. TouchDesigner on some surfaces, Playground on others, Arduino controlling whichever one you want. Or just one of the above. Up to you.
 
 ---
 
 ## Final Projects
 
-The remaining sessions (11 and 12) are dedicated workshop time for your final projects. The final exhibition is **May 5**.
+Sessions 11 and 12 are workshop time. The final exhibition is May 5.
 
-### Timeline
-
-| Date | Milestone |
+| Date | What's happening |
 |---|---|
-| **Today (April 14)** | Commit to a concept. Identify what you need to learn. |
-| **April 21 (Session 11)** | Working prototype. Bring something that runs. |
-| **April 28 (Session 12)** | Polish, test, document. |
-| **May 5** | Final exhibition. |
+| Today (April 14) | Commit to a concept. Figure out what you still need to learn. |
+| April 21 (Session 11) | Bring a working prototype. Something that runs, even if it's ugly. |
+| April 28 (Session 12) | Polish, test, document. |
+| May 5 | Exhibition. |
 
-### What Makes a Good Final Project?
+### The talk
 
-- **Uses skills from this course.** Arduino, Processing, serial communication, projection mapping, 3D printing — pick at least two.
-- **Has a clear concept.** Not just "it does cool stuff" — what does it say? What does the audience experience?
-- **Is scoped realistically.** You have three weeks. Better to finish a focused piece than half-build an ambitious one.
+We're going to go around the room. For each person:
 
-### Discussion Prompts
+1. What's your concept? One sentence.
+2. What tools/techniques are you going to use?
+3. What's the hardest part? What do you still need to figure out?
+4. What do you need from me? Parts, code help, fabrication time, whatever.
 
-Go around the room. For each person:
+### Scoping
 
-1. **What's your concept?** One sentence.
-2. **What tools/techniques will you use?** Be specific.
-3. **What's the hardest part?** What do you still need to figure out?
-4. **What do you need from me?** Parts, code help, fabrication time, etc.
+You have three weeks. Scope accordingly. A finished small project is better than an unfinished ambitious one. Your project should use at least a couple things from this course (Arduino, Processing, serial, projection mapping, 3D printing, etc.) and it should have some kind of concept behind it beyond "it looks cool."
 
-### Project Ideas (If You're Stuck)
+### If you're stuck
 
-- **Reactive sculpture:** 3D-print a geometric form, project patterns onto it, use a distance sensor to change the visuals as people approach.
-- **Sound machine:** Potentiometers and buttons controlling generative audio + visuals through Processing, projected onto a surface.
-- **Data portrait:** Pull live data (weather, social media, sensor readings) and visualize it as a projection-mapped installation.
-- **Interactive mural:** Project onto a wall. Use ultrasonic sensors to detect where people are standing and change what's projected in that zone.
-- **Kinetic + projected:** Combine a servo-driven moving element with projection mapping that tracks or complements the motion.
+Some starting points people have run with in the past:
+
+- 3D-print a geometric form, project onto it, use a distance sensor to change the visuals when people get close
+- Pots and buttons controlling generative audio + visuals through Processing, projected onto a surface
+- Pull live data (weather, whatever) and turn it into a projection-mapped visualization
+- Project onto a wall and use ultrasonic sensors to react to where people are standing
+- Servo-driven moving piece with projection mapping that follows the motion
