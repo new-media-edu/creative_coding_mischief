@@ -1,6 +1,6 @@
 # Session 03: Sound and Square Waves
 
-In this session, we will explore how to generate sound using an Arduino. We will start by manipulating a piezoelectric buzzer directly with `digitalWrite()` to understand the fundamental concept of sound as a vibration over time.
+Today we make noise. We'll use `digitalWrite()` to flip a piezoelectric buzzer on and off fast enough that it vibrates the air, which is all sound really is.
 
 ## Agenda
 

@@ -145,10 +145,7 @@ osc(() => knob1 * 60, 0.1, () => knob2 * 2)
 We spent a significant portion of this session discussing final project ideas. Students shared their inspirations and technical hurdles.
 
 ### Sharing Session
-Everyone shared:
-- **Project Concept:** What are you building?
-- **Excitement:** Which parts of the course are you most excited to use?
-- **Knowledge Gaps:** What else do you need to learn?
+Everyone shared what they're building, which tools from the course they want to use, and what they still need to figure out.
 
 ### Common Themes
 - Interactive installations using servos and ultrasonic sensors.

@@ -5,7 +5,7 @@
 **Meeting Time:** Tuesdays
 
 ## Course Description
-This course focuses on the creative misuse of technology for art and activism, adopting a DIY/open-source ethos. Students will learn to build their own tools, moving from basic electronics and 3D fabrication to complex systems bridging physical and virtual worlds through communication protocols. The curriculum culminates in a final project integrating hardware, software, and networked communication.
+This course is about creatively misusing technology for art and activism, with a DIY/open-source approach. Students build their own tools, starting with basic electronics and 3D fabrication and working up to systems that connect hardware, software, and networks. The course ends with a final project that puts all of it together.
 
 Note that this schedule is subject to change due contingencies and the preferences of the participants as it moves forward. In particular I can see weeks 9-12 shifting considerably as people start to get an idea of what they would like to work on.
 
