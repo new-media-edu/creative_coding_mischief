@@ -17,6 +17,10 @@ Last session we used TouchDesigner and mappy separately. What if you want to gen
 
 So the flow is: TouchDesigner makes something visually interesting → Syphon/Spout carries it over → mappy receives it like any other video source and maps it onto your surfaces.
 
+Basically all you need to do is add a Syphon/Spout node and plug your output into that:
+
+<img src="touch-designer.png" alt="TouchDesigner Syphon setup" width="600">
+
 ### TouchDesigner setup (3 nodes)
 
 1. Open TouchDesigner.
