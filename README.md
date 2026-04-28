@@ -143,10 +143,15 @@ Note that this schedule is subject to change due contingencies and the preferenc
 
 *Deliverable:* Completed Final Project, ready for exhibition.
 
-### Final Exhibition & Wrap-up
+### Session 13: Final Project Workshop (continued)
 **Date:** Tuesday, May 5, 2026
-- Presentation and exhibition of Final Projects.
-- Course conclusion.
+*Topics:*
+- Final project polishing and testing.
+- Documentation and presentation prep.
+- Instructor check-ins and feedback.
+
+### Final Exhibition
+**Date:** Thursday, May 14, 2026
 
 
 
