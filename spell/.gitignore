@@ -1,0 +1,13 @@
+# Virtual Environment
+.venv/
+
+# Local Mamba package manager and environment
+bin/
+.mamba-env/
+
+# C++ Build outputs and Whisper models
+aural-glossary/engine_a/whisper.cpp/build/
+aural-glossary/engine_a/whisper.cpp/models/ggml-*.bin
+aural-glossary/engine_a/whisper.cpp/models/for-tests-*.bin
+__pycache__/
+*.pyc
