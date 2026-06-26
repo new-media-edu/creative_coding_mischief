@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aural Glossary Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="logo-area">
+                <span class="logo-dot"></span>
+                <h1>AURAL GLOSSARY</h1>
+                <p class="tagline">Applied SMC for Radical Accessibility</p>
+            </div>
+            <div class="status-panel">
+                <div class="status-badge" id="system-status">
+                    <span class="pulse-indicator offline"></span>
+                    <span class="status-text">OFFLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Controls Card -->
+            <section class="card glass-card control-card">
+                <h2>Control Panel</h2>
+                <div class="control-grid">
+                    <div class="control-group">
+                        <label for="llm-select">LLM Engine</label>
+                        <select id="llm-select">
+                            <option value="mock">Local Heuristic (Mock)</option>
+                            <option value="gemini">Gemini 2.5 Flash API</option>
+                            <option value="ollama">Local Ollama (Llama 3)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="labels-input">CLAP Sound Taxonomy</label>
+                        <input type="text" id="labels-input" placeholder="music, drone, thud, laughter, speaking...">
+                    </div>
+                    <div class="action-buttons">
+                        <button id="btn-start" class="btn btn-primary">Start System</button>
+                        <button id="btn-stop" class="btn btn-danger" disabled>Stop System</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Large Story Section (Central Narrative Focus) -->
+            <section class="card glass-card story-card">
+                <h2>Live Synesthetic Narrative</h2>
+                <div class="story-container">
+                    <p id="story-display" class="story-text">System idle. Start the capturing pipeline to begin generating the sensory description of your live audio space.</p>
+                </div>
+            </section>
+
+            <!-- Transcription Section -->
+            <section class="card glass-card transcription-card">
+                <h2>Engine A: Dialogue & Lyrics (Whisper C++)</h2>
+                <div class="feed-container" id="transcription-feed">
+                    <div class="feed-placeholder">Waiting for speech...</div>
+                </div>
+            </section>
+
+            <!-- CLAP Sound Classification Section -->
+            <section class="card glass-card clap-card">
+                <h2>Engine B: Sound Classification (CLAP)</h2>
+                <div class="clap-bars-container" id="clap-container">
+                    <div class="feed-placeholder">Waiting for acoustic features...</div>
+                </div>
+            </section>
+
+            <!-- DSP Audio Features Section -->
+            <section class="card glass-card dsp-card">
+                <h2>Engine B: DSP Audio Features</h2>
+                <div class="dsp-meters">
+                    <!-- RMS Meter -->
+                    <div class="meter-group">
+                        <div class="meter-header">
+                            <span>Loudness (RMS)</span>
+                            <span id="val-rms">0.0000</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill cyan-fill" id="fill-rms" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Centroid Meter -->
+                    <div class="meter-group">
+                        <div class="meter-header">
+                            <span>Spectral Centroid (Brightness)</span>
+                            <span id="val-centroid">0 Hz</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill violet-fill" id="fill-centroid" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tempo Meter -->
+                    <div class="meter-group">
+                        <div class="meter-header">
+                            <span>Rhythm (Tempo)</span>
+                            <span id="val-tempo">0 BPM</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill amber-fill" id="fill-tempo" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

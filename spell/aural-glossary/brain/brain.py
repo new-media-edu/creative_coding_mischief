@@ -8,6 +8,10 @@ import threading
 import queue
 import argparse
 import requests
+import http.server
+import socketserver
+import asyncio
+import websockets
 
 # Force PortAudio lib path if LD_LIBRARY_PATH isn't set
 if "LD_LIBRARY_PATH" not in os.environ:
@@ -22,6 +26,14 @@ class BrainOrchestrator:
         
         self.transcription_lock = threading.Lock()
         self.analysis_lock = threading.Lock()
+        self.process_lock = threading.Lock()
+        
+        self.proc_a = None
+        self.proc_b = None
+        self.is_running = False
+        
+        self.ws_clients = set()
+        self.ws_loop = None
         
         self.context_info = ""
         self._load_context_file()
@@ -50,7 +62,6 @@ class BrainOrchestrator:
             except Exception as e:
                 print(f"Brain: Error reading context file: {e}", file=sys.stderr)
         else:
-            # Set default aural glossary guidelines if none provided
             self.context_info = """
             AURAL GLOSSARY STYLE AND VOCABULARY GUIDELINES:
             - Focus on synesthetic descriptions (e.g. colors, textures, physical sensations).
@@ -59,70 +70,107 @@ class BrainOrchestrator:
             - Keep descriptions evocative, non-normative, and brief (1-2 sentences).
             """
 
-    def start_processes(self):
-        # Spawn Engine A (C++ Whisper)
-        whisper_cmd = [
-            self.args.whisper_bin,
-            "-m", self.args.whisper_model,
-            "--json"
-        ]
-        if self.args.whisper_device is not None:
-            whisper_cmd.extend(["-c", str(self.args.whisper_device)])
+    def start_processes(self, llm=None, labels=None):
+        with self.process_lock:
+            if self.is_running:
+                return
+            
+            if llm:
+                self.args.llm = llm
+            if labels:
+                self.args.engine_b_labels = labels
 
-        print(f"Brain: Starting Engine A: {' '.join(whisper_cmd)}", file=sys.stderr)
-        try:
-            self.proc_a = subprocess.Popen(
-                whisper_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1
-            )
-        except Exception as e:
-            print(f"Brain: Failed to start Engine A: {e}", file=sys.stderr)
-            sys.exit(1)
+            # Spawn Engine A (C++ Whisper)
+            whisper_cmd = [
+                self.args.whisper_bin,
+                "-m", self.args.whisper_model,
+                "--json"
+            ]
+            if self.args.whisper_device is not None:
+                whisper_cmd.extend(["-c", str(self.args.whisper_device)])
 
-        # Spawn Engine B (Python CLAP & DSP)
-        engine_b_cmd = [
-            sys.executable,
-            self.args.engine_b_script,
-            "--window", str(self.args.engine_b_window),
-            "--step", str(self.args.engine_b_step)
-        ]
-        if self.args.engine_b_device is not None:
-            engine_b_cmd.extend(["--device", str(self.args.engine_b_device)])
-        if self.args.engine_b_labels:
-            engine_b_cmd.extend(["--labels", self.args.engine_b_labels])
+            print(f"Brain: Starting Engine A: {' '.join(whisper_cmd)}", file=sys.stderr)
+            try:
+                self.proc_a = subprocess.Popen(
+                    whisper_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1
+                )
+            except Exception as e:
+                print(f"Brain: Failed to start Engine A: {e}", file=sys.stderr)
+                return
 
-        print(f"Brain: Starting Engine B: {' '.join(engine_b_cmd)}", file=sys.stderr)
-        try:
-            # Inject LD_LIBRARY_PATH so Engine B can find libportaudio
-            env = os.environ.copy()
-            env["LD_LIBRARY_PATH"] = "/home/grayson/.local/share/mamba/envs/.mamba-env/lib"
-            self.proc_b = subprocess.Popen(
-                engine_b_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                env=env
-            )
-        except Exception as e:
-            print(f"Brain: Failed to start Engine B: {e}", file=sys.stderr)
-            sys.exit(1)
+            # Spawn Engine B (Python CLAP & DSP)
+            engine_b_cmd = [
+                sys.executable,
+                self.args.engine_b_script,
+                "--window", str(self.args.engine_b_window),
+                "--step", str(self.args.engine_b_step)
+            ]
+            if self.args.engine_b_device is not None:
+                engine_b_cmd.extend(["--device", str(self.args.engine_b_device)])
+            if self.args.engine_b_labels:
+                engine_b_cmd.extend(["--labels", self.args.engine_b_labels])
 
-        # Start stdout reader threads
-        self.thread_a = threading.Thread(target=self._reader_loop, args=(self.proc_a, "engine-a"), daemon=True)
-        self.thread_b = threading.Thread(target=self._reader_loop, args=(self.proc_b, "engine-b"), daemon=True)
-        
-        # Start stderr logging threads to keep logs clear and print errors
-        self.err_thread_a = threading.Thread(target=self._logging_loop, args=(self.proc_a.stderr, "[Engine A Stderr]"), daemon=True)
-        self.err_thread_b = threading.Thread(target=self._logging_loop, args=(self.proc_b.stderr, "[Engine B Stderr]"), daemon=True)
+            print(f"Brain: Starting Engine B: {' '.join(engine_b_cmd)}", file=sys.stderr)
+            try:
+                env = os.environ.copy()
+                env["LD_LIBRARY_PATH"] = "/home/grayson/.local/share/mamba/envs/.mamba-env/lib"
+                self.proc_b = subprocess.Popen(
+                    engine_b_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    env=env
+                )
+            except Exception as e:
+                print(f"Brain: Failed to start Engine B: {e}", file=sys.stderr)
+                if self.proc_a:
+                    self.proc_a.terminate()
+                return
 
-        self.thread_a.start()
-        self.thread_b.start()
-        self.err_thread_a.start()
-        self.err_thread_b.start()
+            self.is_running = True
+
+            # Start stdout reader threads
+            self.thread_a = threading.Thread(target=self._reader_loop, args=(self.proc_a, "engine-a"), daemon=True)
+            self.thread_b = threading.Thread(target=self._reader_loop, args=(self.proc_b, "engine-b"), daemon=True)
+            
+            # Start stderr logging threads
+            self.err_thread_a = threading.Thread(target=self._logging_loop, args=(self.proc_a.stderr, "[Engine A Stderr]"), daemon=True)
+            self.err_thread_b = threading.Thread(target=self._logging_loop, args=(self.proc_b.stderr, "[Engine B Stderr]"), daemon=True)
+
+            self.thread_a.start()
+            self.thread_b.start()
+            self.err_thread_a.start()
+            self.err_thread_b.start()
+            
+            self.broadcast(json.dumps({"type": "status", "status": "started"}))
+
+    def stop_processes(self):
+        with self.process_lock:
+            if not self.is_running:
+                return
+            
+            print("Brain: Stopping backend engines...", file=sys.stderr)
+            if self.proc_a:
+                self.proc_a.terminate()
+                self.proc_a = None
+            if self.proc_b:
+                self.proc_b.terminate()
+                self.proc_b = None
+                
+            self.is_running = False
+            
+            # Clear buffers
+            with self.transcription_lock:
+                self.transcriptions.clear()
+            with self.analysis_lock:
+                self.analysis_packets.clear()
+
+            self.broadcast(json.dumps({"type": "status", "status": "stopped"}))
 
     def _reader_loop(self, proc, name):
         for line in iter(proc.stdout.readline, ''):
@@ -132,9 +180,11 @@ class BrainOrchestrator:
             if line:
                 try:
                     packet = json.loads(line)
+                    # Forward packet directly to all connected WebSockets
+                    self.broadcast(line)
+                    # Queue locally for LLM sliding window
                     self.event_queue.put((name, packet))
                 except json.JSONDecodeError:
-                    # Ignore lines that aren't valid JSON (e.g. startup/debug logging)
                     pass
         proc.stdout.close()
 
@@ -148,7 +198,6 @@ class BrainOrchestrator:
         pipe.close()
 
     def update_buffers(self):
-        # Read all pending events from queue
         while not self.event_queue.empty():
             try:
                 name, packet = self.event_queue.get_nowait()
@@ -162,7 +211,6 @@ class BrainOrchestrator:
                                 "end_ms": packet.get("end_ms", 0),
                                 "time": time.time()
                             })
-                            # Keep last 10 transcriptions
                             if len(self.transcriptions) > 10:
                                 self.transcriptions.pop(0)
                 elif name == "engine-b":
@@ -176,23 +224,19 @@ class BrainOrchestrator:
                                 "labels": packet.get("labels", {}),
                                 "time": time.time()
                             })
-                            # Keep last 20 seconds of analysis packets
                             cutoff = time.time() - 20
                             self.analysis_packets = [p for p in self.analysis_packets if p["time"] > cutoff]
             except queue.Empty:
                 break
 
     def get_summary_context(self):
-        # Aggregate transcription text
         with self.transcription_lock:
-            # Filter out transcriptions older than 60 seconds
             cutoff_t = time.time() - 60
             recent_trans = [t for t in self.transcriptions if t["time"] > cutoff_t]
             dialogue_text = "\n".join([f'- "{t["text"]}" (confidence: {t["confidence"]:.2f})' for t in recent_trans])
             if not dialogue_text:
                 dialogue_text = "(No dialogue captured recently)"
 
-        # Aggregate audio features
         with self.analysis_lock:
             if not self.analysis_packets:
                 return dialogue_text, "(No audio analysis data available)"
@@ -201,14 +245,12 @@ class BrainOrchestrator:
             avg_centroid = sum(p["centroid"] for p in self.analysis_packets) / len(self.analysis_packets)
             avg_tempo = sum(p["tempo"] for p in self.analysis_packets) / len(self.analysis_packets)
             
-            # Aggregate CLAP label probabilities
             label_sums = {}
             for p in self.analysis_packets:
                 for label, prob in p["labels"].items():
                     label_sums[label] = label_sums.get(label, 0.0) + prob
             
             avg_labels = {label: total / len(self.analysis_packets) for label, total in label_sums.items()}
-            # Filter for tags with avg prob > 0.15 and sort
             detected = [f"{label} ({prob:.2%})" for label, prob in avg_labels.items() if prob > 0.15]
             detected_str = ", ".join(detected) if detected else "no distinct sound patterns detected"
 
@@ -242,7 +284,6 @@ Generate a brief, evocative, synesthetic description (1 to 2 sentences) of the c
 - DO NOT use prefixes or headers like "Aural Glossary:" or "Description:". Output ONLY the description itself.
 """
 
-        # Choose LLM API
         if self.args.llm == "mock":
             return self._generate_mock_story(dialogue, features)
             
@@ -288,24 +329,19 @@ Generate a brief, evocative, synesthetic description (1 to 2 sentences) of the c
         return "[Unsupported LLM type]"
 
     def _generate_mock_story(self, dialogue, features):
-        # Extract dialogue snippet
         dialogue_snippet = ""
         if "No dialogue captured" not in dialogue:
             lines = [line.strip("- \" ") for line in dialogue.split("\n") if line.strip()]
             if lines:
-                # Get last dialogue line without confidence
                 last_line = lines[-1].split('" (confidence:')[0].strip('"')
                 dialogue_snippet = f'a voice murmuring "{last_line}"'
 
-        # Analyze features to build sound description
         sound_desc = "a quiet, suspended stillness settles over the room"
         
-        # Check loudest tag from CLAP
         top_tag = ""
         if "zero-shot tags):" in features:
             tag_part = features.split("zero-shot tags):")[1].strip()
             if tag_part and "no distinct" not in tag_part:
-                # E.g. "loud distorted drone or static noise (99.98%)"
                 first_tag = tag_part.split(",")[0]
                 top_tag = first_tag.split("(")[0].strip()
 
@@ -334,12 +370,76 @@ Generate a brief, evocative, synesthetic description (1 to 2 sentences) of the c
         if dialogue_snippet:
             return f"Underneath {dialogue_snippet}, {sound_desc}."
         else:
-            # Capitalize first letter
             return sound_desc[0].upper() + sound_desc[1:] + "."
 
+    # WebSocket clients broadcast
+    def broadcast(self, message):
+        if not self.ws_clients or not self.ws_loop:
+            return
+        for client in list(self.ws_clients):
+            try:
+                asyncio.run_coroutine_threadsafe(client.send(message), self.ws_loop)
+            except Exception as e:
+                pass
+
+    # WebSocket connection handler
+    async def ws_handler(self, websocket):
+        self.ws_clients.add(websocket)
+        # Send initial status
+        status = "started" if self.is_running else "stopped"
+        await websocket.send(json.dumps({"type": "status", "status": status}))
+        try:
+            async for message in websocket:
+                try:
+                    data = json.loads(message)
+                    cmd = data.get("cmd")
+                    if cmd == "start":
+                        self.start_processes(data.get("llm"), data.get("labels"))
+                    elif cmd == "stop":
+                        self.stop_processes()
+                except Exception as e:
+                    print(f"Brain WS Handler: Error parsing client message: {e}", file=sys.stderr)
+        except websockets.exceptions.ConnectionClosed:
+            pass
+        finally:
+            self.ws_clients.remove(websocket)
+
+    def start_http_server(self):
+        handler = lambda *args, **kwargs: http.server.SimpleHTTPRequestHandler(*args, directory="aural-glossary/web_ui", **kwargs)
+        # Avoid "Address already in use" errors during quick restarts
+        socketserver.TCPServer.allow_reuse_address = True
+        try:
+            with socketserver.TCPServer(("", self.args.http_port), handler) as httpd:
+                print(f"Brain: Web Dashboard hosted at http://localhost:{self.args.http_port}", file=sys.stderr)
+                httpd.serve_forever()
+        except Exception as e:
+            print(f"Brain HTTP Server Error: {e}", file=sys.stderr)
+
+    def start_ws_server(self):
+        self.ws_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.ws_loop)
+        
+        async def main_server():
+            async with websockets.serve(self.ws_handler, "0.0.0.0", self.args.ws_port):
+                print(f"Brain: WebSocket server listening on port {self.args.ws_port}", file=sys.stderr)
+                await asyncio.Future()  # run forever
+
+        self.ws_loop.run_until_complete(main_server())
+
     def run_loop(self):
-        self.start_processes()
-        print("Brain: Loop started. Analyzing streams...", file=sys.stderr)
+        # Start HTTP server thread
+        http_thread = threading.Thread(target=self.start_http_server, daemon=True)
+        http_thread.start()
+
+        # Start WebSocket server thread
+        ws_thread = threading.Thread(target=self.start_ws_server, daemon=True)
+        ws_thread.start()
+
+        # Auto-start if requested
+        if self.args.auto_start:
+            self.start_processes()
+
+        print("Brain: Web UI and WebSocket gateways active. Waiting for client start command...", file=sys.stderr)
         
         last_generation = time.time()
         
@@ -348,27 +448,27 @@ Generate a brief, evocative, synesthetic description (1 to 2 sentences) of the c
                 # Update queue events and sliding buffers
                 self.update_buffers()
                 
-                # Periodically generate commentary
+                # Periodically generate commentary if running
                 now = time.time()
-                if now - last_generation >= self.args.interval:
+                if self.is_running and (now - last_generation >= self.args.interval):
                     dialogue, features = self.get_summary_context()
-                    
-                    # Only generate if there is some activity (RMS > 0.005 or dialogue exists)
                     has_activity = len(self.transcriptions) > 0 or len(self.analysis_packets) > 0
                     
                     if has_activity:
                         story = self.query_llm(dialogue, features)
                         
-                        # Print story packet to stdout
                         output_packet = {
                             "type": "story",
                             "timestamp_ms": int(time.time() * 1000),
                             "story": story
                         }
-                        print(json.dumps(output_packet))
+                        
+                        # Print to stdout and broadcast to all web clients
+                        packet_str = json.dumps(output_packet)
+                        print(packet_str)
                         sys.stdout.flush()
+                        self.broadcast(packet_str)
 
-                        # Optional OSC broadcast
                         if self.osc_client:
                             try:
                                 self.osc_client.send_message("/story", story)
@@ -381,11 +481,7 @@ Generate a brief, evocative, synesthetic description (1 to 2 sentences) of the c
         except KeyboardInterrupt:
             print("Brain shutting down...", file=sys.stderr)
         finally:
-            # Terminate subprocesses
-            if hasattr(self, "proc_a"):
-                self.proc_a.terminate()
-            if hasattr(self, "proc_b"):
-                self.proc_b.terminate()
+            self.stop_processes()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aural Glossary Brain: Subprocess Orchestration & LLM Generator")
@@ -409,6 +505,11 @@ if __name__ == "__main__":
     parser.add_argument("--context-file", type=str, default=None, help="Performance context file (genre, vocabulary, setlist)")
     parser.add_argument("--output-osc-ip", type=str, default=None, help="OSC target IP address for story streaming")
     parser.add_argument("--output-osc-port", type=int, default=7772, help="OSC target port for story streaming")
+
+    # Web Dashboard parameters
+    parser.add_argument("--http-port", type=int, default=8080, help="HTTP port to host the dashboard UI on")
+    parser.add_argument("--ws-port", type=int, default=8081, help="WebSocket port to host communication on")
+    parser.add_argument("--auto-start", action="store_true", default=False, help="Automatically start capturing engines on script launch")
 
     args = parser.parse_args()
     
