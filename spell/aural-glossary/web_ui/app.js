@@ -430,6 +430,8 @@ btnSaveScript.onclick = () => {
     .catch(err => console.error('Error saving script:', err));
 };
 
-// Start connection and fetch script on load
-connect();
-fetchScript();
+// Start connection and fetch script on load once page finishes loading
+window.addEventListener('load', () => {
+    connect();
+    fetchScript();
+});

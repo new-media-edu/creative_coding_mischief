@@ -653,6 +653,11 @@ int main(int argc, char* argv[]) {
     // Serve Web UI dashboard
     svr.set_mount_point("/", "aural-glossary/web_ui");
     
+    // Serve empty response for favicon.ico to prevent 404 noise
+    svr.Get("/favicon.ico", [](const httplib::Request&, httplib::Response& res) {
+        res.status = 204;
+    });
+    
     // SSE Stream
     svr.Get("/events", [&](const httplib::Request& req, httplib::Response& res) {
         res.set_header("Content-Type", "text/event-stream");
