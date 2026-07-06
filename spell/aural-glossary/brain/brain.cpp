@@ -439,6 +439,9 @@ void get_summary_context(std::string& out_dialogue, std::string& out_features) {
 
 // Query LLM
 std::string query_llm(const AppArgs& args, const std::string& dialogue, const std::string& features, const std::string& context_info) {
+    if (args.llm == "none") {
+        return "";
+    }
     std::string prompt = 
         "You are \"Aural Glossary\", a live AI-driven captioning and translation engine designed to describe the qualitative and synesthetic parameters of sound for deaf and aural-diverse audiences.\n\n"
         + context_info + "\n\n"
@@ -590,7 +593,7 @@ void background_loop() {
                 has_activity = !g_transcriptions.empty() || !g_analysis_packets.empty();
             }
             
-            if (has_activity) {
+            if (has_activity && g_args.llm != "none") {
                 std::string context_info = load_context_file(g_args.context_file);
                 std::string story = query_llm(g_args, dialogue, features, context_info);
                 

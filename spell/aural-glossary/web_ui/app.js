@@ -9,10 +9,8 @@ const pulseIndicator = systemStatus.querySelector('.pulse-indicator');
 
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
-const selectLlm = document.getElementById('llm-select');
 const inputLabels = document.getElementById('labels-input');
 
-const storyDisplay = document.getElementById('story-display');
 const transcriptionFeed = document.getElementById('transcription-feed');
 const clapContainer = document.getElementById('clap-container');
 
@@ -84,13 +82,12 @@ function setStartedState(started) {
     isStarted = started;
     btnStart.disabled = started;
     btnStop.disabled = !started;
-    selectLlm.disabled = started;
     inputLabels.disabled = started;
     
     if (started) {
-        btnStart.textContent = 'System Running...';
+        btnStart.textContent = 'SYSTEM RUNNING...';
     } else {
-        btnStart.textContent = 'Start System';
+        btnStart.textContent = 'START SYSTEM';
     }
 }
 
@@ -271,14 +268,8 @@ function appendTranscription(text, confidence, startMs, endMs) {
     transcriptionFeed.scrollTop = transcriptionFeed.scrollHeight;
 }
 
-// Update Live Story
+// Update Live Story (no-op in minimal mode)
 function updateStory(story) {
-    // Add smooth fade out/in effect
-    storyDisplay.style.opacity = '0';
-    setTimeout(() => {
-        storyDisplay.textContent = story;
-        storyDisplay.style.opacity = '1';
-    }, 200);
 }
 
 // Render script with layout preservation
@@ -354,7 +345,7 @@ function updateWordHighlighting(newIndex) {
 // Bind Button actions
 btnStart.onclick = () => {
     const cmd = {
-        llm: selectLlm.value,
+        llm: 'none',
         labels: inputLabels.value || null
     };
     

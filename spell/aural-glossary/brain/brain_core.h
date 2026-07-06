@@ -58,7 +58,7 @@ struct AppArgs {
     int engine_b_device = -1;
     std::string engine_b_labels = "";
     double interval = 5.0;
-    std::string llm = "mock";
+    std::string llm = "none";
     std::string ollama_model = "llama3";
     std::string ollama_url = "http://localhost:11434";
     std::string gemini_model = "gemini-2.5-flash";
