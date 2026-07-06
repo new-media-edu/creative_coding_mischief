@@ -29,6 +29,29 @@
 
 #include "brain_core.h"
 
+// Default Shakespeare Script
+const std::string g_default_script = 
+    "To be, or not to be, that is the question:\n"
+    "Whether 'tis nobler in the mind to suffer\n"
+    "The slings and arrows of outrageous fortune,\n"
+    "Or to take arms against a sea of troubles\n"
+    "And by opposing end them. To die—to sleep,\n"
+    "No more; and by a sleep to say we end\n"
+    "The heart-ache and the thousand natural shocks\n"
+    "That flesh is heir to: 'tis a consummation\n"
+    "Devoutly to be wish'd. To die, to sleep;\n"
+    "To sleep, perchance to dream—ay, there's the rub:\n"
+    "For in that sleep of death what dreams may come,\n"
+    "When we have shuffled off this mortal coil,\n"
+    "Must give us pause.";
+
+// Script variables
+std::mutex g_script_mutex;
+std::string g_script_text = "";
+std::vector<std::string> g_script_words;
+int g_script_index = 0;
+double g_script_threshold = 0.7; // default 70% accuracy
+
 // Global / class-level state
 AppArgs g_args;
 std::mutex g_process_mutex;
@@ -130,6 +153,48 @@ void handle_incoming_line(const std::string& name, const std::string& line) {
                 if (g_transcriptions.size() > 10) {
                     g_transcriptions.erase(g_transcriptions.begin());
                 }
+                
+                // Perform script alignment
+                std::string text = j.value("text", "");
+                auto trans_words = tokenize_words(text);
+                
+                MatchResult match;
+                bool following = false;
+                int old_index = 0;
+                {
+                    std::lock_guard<std::mutex> lock_script(g_script_mutex);
+                    old_index = g_script_index;
+                    match = find_best_match(g_script_words, g_script_index, trans_words, g_script_threshold);
+                    following = (match.best_similarity >= g_script_threshold);
+                    if (following) {
+                        g_script_index = g_script_index + match.best_offset + match.best_len;
+                    }
+                }
+                
+                std::string expected_slice = "";
+                {
+                    std::lock_guard<std::mutex> lock_script(g_script_mutex);
+                    if (following) {
+                        int start = old_index + match.best_offset;
+                        int length = match.best_len;
+                        for (int i = 0; i < length; ++i) {
+                            if (start + i >= 0 && start + i < (int)g_script_words.size()) {
+                                if (i > 0) expected_slice += " ";
+                                expected_slice += g_script_words[start + i];
+                            }
+                        }
+                    }
+                }
+                
+                nlohmann::json align_packet = {
+                    {"type", "alignment"},
+                    {"status", following ? "following" : "deviating"},
+                    {"accuracy", match.best_similarity},
+                    {"script_index", g_script_index},
+                    {"transcription", text},
+                    {"expected_slice", expected_slice}
+                };
+                broadcast_to_sse(align_packet.dump());
             }
         } else if (name == "engine-b") {
             if (j.contains("type") && j["type"] == "analysis") {
@@ -552,6 +617,15 @@ int main(int argc, char* argv[]) {
     // Force PortAudio lib path for Engine B python scripts
     setenv("LD_LIBRARY_PATH", "/home/grayson/.local/share/mamba/envs/.mamba-env/lib", 1);
     
+    // Initialize script state
+    {
+        std::lock_guard<std::mutex> lock(g_script_mutex);
+        g_script_text = g_default_script;
+        g_script_words = tokenize_words(g_default_script);
+        g_script_index = 0;
+        g_script_threshold = 0.7;
+    }
+    
     g_args = parse_args(argc, argv);
     
     // Check environment for Gemini API Key if missing
@@ -623,6 +697,92 @@ int main(int argc, char* argv[]) {
     });
     
     // HTTP API Endpoints
+    svr.Get("/api/script", [&](const httplib::Request& req, httplib::Response& res) {
+        std::lock_guard<std::mutex> lock(g_script_mutex);
+        nlohmann::json data = {
+            {"script", g_script_text},
+            {"words", g_script_words},
+            {"script_index", g_script_index},
+            {"threshold", g_script_threshold}
+        };
+        res.set_content(data.dump(), "application/json");
+    });
+    
+    svr.Post("/api/script", [&](const httplib::Request& req, httplib::Response& res) {
+        nlohmann::json body;
+        try {
+            body = nlohmann::json::parse(req.body);
+        } catch(...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Invalid JSON\"}", "application/json");
+            return;
+        }
+        
+        std::string new_script = body.value("script", "");
+        {
+            std::lock_guard<std::mutex> lock(g_script_mutex);
+            g_script_text = new_script;
+            g_script_words = tokenize_words(new_script);
+            g_script_index = 0;
+        }
+        
+        nlohmann::json response = {
+            {"success", true},
+            {"word_count", g_script_words.size()}
+        };
+        
+        nlohmann::json reset_packet = {
+            {"type", "script_reset"},
+            {"script", g_script_text},
+            {"words", g_script_words},
+            {"threshold", g_script_threshold}
+        };
+        broadcast_to_sse(reset_packet.dump());
+        
+        res.set_content(response.dump(), "application/json");
+    });
+    
+    svr.Post("/api/set_threshold", [&](const httplib::Request& req, httplib::Response& res) {
+        nlohmann::json body;
+        try {
+            body = nlohmann::json::parse(req.body);
+        } catch(...) {
+            res.status = 400;
+            res.set_content("{\"error\":\"Invalid JSON\"}", "application/json");
+            return;
+        }
+        
+        double th = body.value("threshold", 0.7);
+        {
+            std::lock_guard<std::mutex> lock(g_script_mutex);
+            g_script_threshold = th;
+        }
+        
+        nlohmann::json response = {
+            {"success", true},
+            {"threshold", g_script_threshold}
+        };
+        res.set_content(response.dump(), "application/json");
+    });
+    
+    svr.Post("/api/reset_script", [&](const httplib::Request& req, httplib::Response& res) {
+        {
+            std::lock_guard<std::mutex> lock(g_script_mutex);
+            g_script_index = 0;
+        }
+        nlohmann::json response = {{"success", true}};
+        
+        nlohmann::json reset_packet = {
+            {"type", "script_reset"},
+            {"script", g_script_text},
+            {"words", g_script_words},
+            {"threshold", g_script_threshold}
+        };
+        broadcast_to_sse(reset_packet.dump());
+        
+        res.set_content(response.dump(), "application/json");
+    });
+
     svr.Get("/api/status", [&](const httplib::Request& req, httplib::Response& res) {
         nlohmann::json status = {
             {"status", g_is_running ? "started" : "stopped"}

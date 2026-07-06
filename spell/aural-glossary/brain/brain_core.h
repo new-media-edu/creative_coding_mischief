@@ -13,6 +13,7 @@
 #include <cctype>
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
 
 #include "json.hpp"
 
@@ -84,52 +85,106 @@ inline std::string trim(const std::string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-// Parse Command Line Args
-inline AppArgs parse_args(int argc, char* argv[]) {
-    AppArgs args;
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
-        if (arg == "--whisper-bin" && i + 1 < argc) {
-            args.whisper_bin = argv[++i];
-        } else if (arg == "--whisper-model" && i + 1 < argc) {
-            args.whisper_model = argv[++i];
-        } else if (arg == "--whisper-device" && i + 1 < argc) {
-            args.whisper_device = std::stoi(argv[++i]);
-        } else if (arg == "--engine-b-script" && i + 1 < argc) {
-            args.engine_b_script = argv[++i];
-        } else if (arg == "--engine-b-window" && i + 1 < argc) {
-            args.engine_b_window = std::stod(argv[++i]);
-        } else if (arg == "--engine-b-step" && i + 1 < argc) {
-            args.engine_b_step = std::stod(argv[++i]);
-        } else if (arg == "--engine-b-device" && i + 1 < argc) {
-            args.engine_b_device = std::stoi(argv[++i]);
-        } else if (arg == "--engine-b-labels" && i + 1 < argc) {
-            args.engine_b_labels = argv[++i];
-        } else if (arg == "--interval" && i + 1 < argc) {
-            args.interval = std::stod(argv[++i]);
-        } else if (arg == "--llm" && i + 1 < argc) {
-            args.llm = argv[++i];
-        } else if (arg == "--ollama-model" && i + 1 < argc) {
-            args.ollama_model = argv[++i];
-        } else if (arg == "--ollama-url" && i + 1 < argc) {
-            args.ollama_url = argv[++i];
-        } else if (arg == "--gemini-model" && i + 1 < argc) {
-            args.gemini_model = argv[++i];
-        } else if (arg == "--api-key" && i + 1 < argc) {
-            args.api_key = argv[++i];
-        } else if (arg == "--context-file" && i + 1 < argc) {
-            args.context_file = argv[++i];
-        } else if (arg == "--output-osc-ip" && i + 1 < argc) {
-            args.output_osc_ip = argv[++i];
-        } else if (arg == "--output-osc-port" && i + 1 < argc) {
-            args.output_osc_port = std::stoi(argv[++i]);
-        } else if (arg == "--http-port" && i + 1 < argc) {
-            args.http_port = std::stoi(argv[++i]);
-        } else if (arg == "--auto-start") {
-            args.auto_start = true;
+// Tokenize text into normalized lowercase alphanumeric words
+inline std::vector<std::string> tokenize_words(const std::string& text) {
+    std::vector<std::string> words;
+    std::string current;
+    for (char c : text) {
+        if (std::isalnum(static_cast<unsigned char>(c))) {
+            current += std::tolower(static_cast<unsigned char>(c));
+        } else if (std::isspace(static_cast<unsigned char>(c)) || std::ispunct(static_cast<unsigned char>(c))) {
+            if (!current.empty()) {
+                words.push_back(current);
+                current.clear();
+            }
         }
     }
-    return args;
+    if (!current.empty()) {
+        words.push_back(current);
+    }
+    return words;
+}
+
+// Calculate Levenshtein edit distance between two word sequences
+inline int get_edit_distance(const std::vector<std::string>& a, const std::vector<std::string>& b) {
+    int n = a.size();
+    int m = b.size();
+    if (n == 0) return m;
+    if (m == 0) return n;
+    
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(m + 1, 0));
+    for (int i = 0; i <= n; ++i) dp[i][0] = i;
+    for (int j = 0; j <= m; ++j) dp[0][j] = j;
+    
+    for (int i = 1; i <= n; ++i) {
+        for (int j = 1; j <= m; ++j) {
+            int cost = (a[i - 1] == b[j - 1]) ? 0 : 1;
+            dp[i][j] = std::min({
+                dp[i - 1][j] + 1,
+                dp[i][j - 1] + 1,
+                dp[i - 1][j - 1] + cost
+            });
+        }
+    }
+    return dp[n][m];
+}
+
+// Calculate similarity ratio
+inline double get_similarity(const std::vector<std::string>& a, const std::vector<std::string>& b) {
+    int max_len = std::max(a.size(), b.size());
+    if (max_len == 0) return 1.0;
+    int dist = get_edit_distance(a, b);
+    return 1.0 - static_cast<double>(dist) / max_len;
+}
+
+struct MatchResult {
+    int best_offset = 0;
+    int best_len = 0;
+    double best_similarity = 0.0;
+};
+
+// Locate best alignment window for transcribed text in the script
+inline MatchResult find_best_match(const std::vector<std::string>& script, int current_idx, const std::vector<std::string>& transcribed, double threshold) {
+    MatchResult res;
+    if (transcribed.empty()) return res;
+    
+    int t_size = transcribed.size();
+    
+    // 1. Scan locally (offset -5 to 15)
+    for (int offset = -5; offset <= 15; ++offset) {
+        int start_idx = current_idx + offset;
+        if (start_idx < 0 || start_idx >= (int)script.size()) continue;
+        
+        for (int len = std::max(1, t_size - 3); len <= t_size + 3; ++len) {
+            if (start_idx + len > (int)script.size()) continue;
+            
+            std::vector<std::string> slice(script.begin() + start_idx, script.begin() + start_idx + len);
+            double sim = get_similarity(transcribed, slice);
+            if (sim > res.best_similarity) {
+                res.best_similarity = sim;
+                res.best_offset = offset;
+                res.best_len = len;
+            }
+        }
+    }
+    
+    // 2. Recovery search: scan up to 100 words ahead if local match fails
+    if (res.best_similarity < threshold) {
+        for (int offset = 16; offset <= 100; ++offset) {
+            int start_idx = current_idx + offset;
+            if (start_idx + t_size > (int)script.size()) break;
+            
+            std::vector<std::string> slice(script.begin() + start_idx, script.begin() + start_idx + t_size);
+            double sim = get_similarity(transcribed, slice);
+            if (sim > res.best_similarity && sim >= threshold) {
+                res.best_similarity = sim;
+                res.best_offset = offset;
+                res.best_len = t_size;
+            }
+        }
+    }
+    
+    return res;
 }
 
 // Generate Mock Story
@@ -177,6 +232,54 @@ inline std::string generate_mock_story(const std::string& dialogue, const std::s
         if (!upper_desc.empty()) upper_desc[0] = toupper(upper_desc[0]);
         return upper_desc + ".";
     }
+}
+
+// Parse Command Line Args
+inline AppArgs parse_args(int argc, char* argv[]) {
+    AppArgs args;
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--whisper-bin" && i + 1 < argc) {
+            args.whisper_bin = argv[++i];
+        } else if (arg == "--whisper-model" && i + 1 < argc) {
+            args.whisper_model = argv[++i];
+        } else if (arg == "--whisper-device" && i + 1 < argc) {
+            args.whisper_device = std::stoi(argv[++i]);
+        } else if (arg == "--engine-b-script" && i + 1 < argc) {
+            args.engine_b_script = argv[++i];
+        } else if (arg == "--engine-b-window" && i + 1 < argc) {
+            args.engine_b_window = std::stod(argv[++i]);
+        } else if (arg == "--engine-b-step" && i + 1 < argc) {
+            args.engine_b_step = std::stod(argv[++i]);
+        } else if (arg == "--engine-b-device" && i + 1 < argc) {
+            args.engine_b_device = std::stoi(argv[++i]);
+        } else if (arg == "--engine-b-labels" && i + 1 < argc) {
+            args.engine_b_labels = argv[++i];
+        } else if (arg == "--interval" && i + 1 < argc) {
+            args.interval = std::stod(argv[++i]);
+        } else if (arg == "--llm" && i + 1 < argc) {
+            args.llm = argv[++i];
+        } else if (arg == "--ollama-model" && i + 1 < argc) {
+            args.ollama_model = argv[++i];
+        } else if (arg == "--ollama-url" && i + 1 < argc) {
+            args.ollama_url = argv[++i];
+        } else if (arg == "--gemini-model" && i + 1 < argc) {
+            args.gemini_model = argv[++i];
+        } else if (arg == "--api-key" && i + 1 < argc) {
+            args.api_key = argv[++i];
+        } else if (arg == "--context-file" && i + 1 < argc) {
+            args.context_file = argv[++i];
+        } else if (arg == "--output-osc-ip" && i + 1 < argc) {
+            args.output_osc_ip = argv[++i];
+        } else if (arg == "--output-osc-port" && i + 1 < argc) {
+            args.output_osc_port = std::stoi(argv[++i]);
+        } else if (arg == "--http-port" && i + 1 < argc) {
+            args.http_port = std::stoi(argv[++i]);
+        } else if (arg == "--auto-start") {
+            args.auto_start = true;
+        }
+    }
+    return args;
 }
 
 // Load performance context

@@ -97,12 +97,55 @@ void test_safe_queue() {
     std::cout << "test_safe_queue passed!\n";
 }
 
+void test_alignment() {
+    // 1. tokenize_words
+    std::string text = "To be, or not to be, that is the question!";
+    auto tokens = tokenize_words(text);
+    assert(tokens.size() == 10);
+    assert(tokens[0] == "to");
+    assert(tokens[1] == "be");
+    assert(tokens[2] == "or");
+    assert(tokens[9] == "question");
+
+    // 2. get_similarity
+    std::vector<std::string> a = {"to", "be", "or", "not", "to", "be"};
+    std::vector<std::string> b = {"to", "be", "or", "not", "to", "be"};
+    assert(get_similarity(a, b) == 1.0);
+
+    std::vector<std::string> c = {"to", "be", "or", "not", "to", "see"};
+    double sim = get_similarity(a, c);
+    assert(sim >= 0.8 && sim < 1.0); // 5/6 match = ~83.3%
+
+    // 3. find_best_match
+    std::vector<std::string> script = {"to", "be", "or", "not", "to", "be", "that", "is", "the", "question"};
+    std::vector<std::string> transcribed1 = {"to", "be", "or", "not"};
+    MatchResult match1 = find_best_match(script, 0, transcribed1, 0.7);
+    assert(match1.best_similarity == 1.0);
+    assert(match1.best_offset == 0);
+    assert(match1.best_len == 4);
+
+    // Test deviation
+    std::vector<std::string> transcribed_dev = {"banana", "apple", "grape"};
+    MatchResult match_dev = find_best_match(script, 0, transcribed_dev, 0.7);
+    assert(match_dev.best_similarity < 0.3);
+
+    // Test recovery search (speaker skips ahead to "that is the question")
+    std::vector<std::string> transcribed_rec = {"that", "is", "the", "question"};
+    MatchResult match_rec = find_best_match(script, 0, transcribed_rec, 0.7);
+    assert(match_rec.best_similarity == 1.0);
+    assert(match_rec.best_offset == 6);
+    assert(match_rec.best_len == 4);
+
+    std::cout << "test_alignment passed!\n";
+}
+
 int main() {
     std::cout << "Running C++ Brain Unit Tests...\n";
     test_trim();
     test_parse_args();
     test_generate_mock_story();
     test_safe_queue();
+    test_alignment();
     std::cout << "All C++ Brain Unit Tests Passed Successfully!\n";
     return 0;
 }

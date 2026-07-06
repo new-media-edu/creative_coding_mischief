@@ -24,6 +24,25 @@ const fillCentroid = document.getElementById('fill-centroid');
 const valTempo = document.getElementById('val-tempo');
 const fillTempo = document.getElementById('fill-tempo');
 
+// Teleprompter DOM Elements
+const alignmentStatus = document.getElementById('alignment-status');
+const valAccuracy = document.getElementById('val-accuracy');
+const thresholdSlider = document.getElementById('threshold-slider');
+const valThreshold = document.getElementById('val-threshold');
+const btnResetScript = document.getElementById('btn-reset-script');
+const btnToggleEdit = document.getElementById('btn-toggle-edit');
+const scriptEditContainer = document.getElementById('script-edit-container');
+const scriptTextarea = document.getElementById('script-textarea');
+const btnSaveScript = document.getElementById('btn-save-script');
+const btnCancelEdit = document.getElementById('btn-cancel-edit');
+const teleprompterView = document.getElementById('teleprompter-view');
+const deviationPanel = document.getElementById('deviation-panel');
+const deviationTranscription = document.getElementById('deviation-transcription');
+
+// Script State
+let scriptWords = [];
+let scriptIndex = 0;
+
 // Initialize Connection
 function connect() {
     console.log('Connecting to EventSource: /events');
@@ -100,6 +119,47 @@ function handleServerEvent(packet) {
     // Brain: Synesthetic Story
     if (packet.type === 'story') {
         updateStory(packet.story);
+    }
+    
+    // Script reset/update
+    if (packet.type === 'script_reset') {
+        scriptTextarea.value = packet.script;
+        thresholdSlider.value = packet.threshold;
+        valThreshold.textContent = `${Math.round(packet.threshold * 100)}%`;
+        renderScript(packet.script, packet.words, 0);
+        
+        // Reset status
+        alignmentStatus.className = 'align-status-badge';
+        alignmentStatus.querySelector('.align-status-text').textContent = 'IDLE';
+        valAccuracy.textContent = '0%';
+        deviationPanel.classList.add('hidden');
+    }
+    
+    // Script alignment updates
+    if (packet.type === 'alignment') {
+        const accuracy = packet.accuracy;
+        const newIndex = packet.script_index;
+        const status = packet.status;
+        
+        // Update accuracy
+        valAccuracy.textContent = `${Math.round(accuracy * 100)}%`;
+        
+        // Update status badge
+        if (status === 'following') {
+            alignmentStatus.className = 'align-status-badge following';
+            alignmentStatus.querySelector('.align-status-text').textContent = 'FOLLOWING';
+            deviationPanel.classList.add('hidden');
+            
+            // Highlight matching words
+            updateWordHighlighting(newIndex);
+        } else {
+            alignmentStatus.className = 'align-status-badge deviating';
+            alignmentStatus.querySelector('.align-status-text').textContent = 'DEVIATING';
+            
+            // Show deviation transcription
+            deviationPanel.classList.remove('hidden');
+            deviationTranscription.textContent = packet.transcription;
+        }
     }
 }
 
@@ -221,6 +281,76 @@ function updateStory(story) {
     }, 200);
 }
 
+// Render script with layout preservation
+function renderScript(script, words, currentIndex) {
+    scriptWords = words || [];
+    scriptIndex = currentIndex || 0;
+    
+    teleprompterView.innerHTML = '';
+    
+    if (scriptWords.length === 0) {
+        teleprompterView.innerHTML = '<div class="feed-placeholder">No script loaded. Click "Edit Script" to paste one.</div>';
+        return;
+    }
+    
+    const rawTokens = script.split(/(\s+)/);
+    let wordCounter = 0;
+    
+    rawTokens.forEach(token => {
+        if (token.trim() === '') {
+            const textNode = document.createTextNode(token);
+            teleprompterView.appendChild(textNode);
+        } else {
+            const span = document.createElement('span');
+            span.className = 'word-span';
+            span.id = `word-${wordCounter}`;
+            span.textContent = token;
+            
+            if (wordCounter < scriptIndex) {
+                span.classList.add('word-spoken');
+            } else if (wordCounter === scriptIndex) {
+                span.classList.add('word-current');
+            }
+            
+            teleprompterView.appendChild(span);
+            wordCounter++;
+        }
+    });
+}
+
+function fetchScript() {
+    fetch('/api/script')
+        .then(res => res.json())
+        .then(data => {
+            scriptTextarea.value = data.script;
+            thresholdSlider.value = data.threshold;
+            valThreshold.textContent = `${Math.round(data.threshold * 100)}%`;
+            renderScript(data.script, data.words, data.script_index);
+        })
+        .catch(err => console.error('Error fetching script:', err));
+}
+
+function updateWordHighlighting(newIndex) {
+    scriptIndex = newIndex;
+    for (let i = 0; i < scriptWords.length; ++i) {
+        const span = document.getElementById(`word-${i}`);
+        if (!span) continue;
+        
+        if (i < scriptIndex) {
+            span.className = 'word-span word-spoken';
+        } else if (i === scriptIndex) {
+            span.className = 'word-span word-current';
+        } else {
+            span.className = 'word-span';
+        }
+    }
+    
+    const currentWordEl = document.getElementById(`word-${scriptIndex}`);
+    if (currentWordEl) {
+        currentWordEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
 // Bind Button actions
 btnStart.onclick = () => {
     const cmd = {
@@ -261,5 +391,54 @@ btnStop.onclick = () => {
     });
 };
 
-// Start connection on load
+// Bind Teleprompter Control Listeners
+thresholdSlider.oninput = () => {
+    const val = thresholdSlider.value;
+    valThreshold.textContent = `${Math.round(val * 100)}%`;
+    
+    fetch('/api/set_threshold', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ threshold: parseFloat(val) })
+    })
+    .catch(err => console.error('Error setting threshold:', err));
+};
+
+btnResetScript.onclick = () => {
+    fetch('/api/reset_script', {
+        method: 'POST'
+    })
+    .catch(err => console.error('Error resetting script:', err));
+};
+
+btnToggleEdit.onclick = () => {
+    scriptEditContainer.classList.toggle('hidden');
+};
+
+btnCancelEdit.onclick = () => {
+    scriptEditContainer.classList.add('hidden');
+};
+
+btnSaveScript.onclick = () => {
+    const scriptVal = scriptTextarea.value;
+    fetch('/api/script', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ script: scriptVal })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            scriptEditContainer.classList.add('hidden');
+        }
+    })
+    .catch(err => console.error('Error saving script:', err));
+};
+
+// Start connection and fetch script on load
 connect();
+fetchScript();
