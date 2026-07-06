@@ -11,3 +11,5 @@ aural-glossary/engine_a/whisper.cpp/models/ggml-*.bin
 aural-glossary/engine_a/whisper.cpp/models/for-tests-*.bin
 __pycache__/
 *.pyc
+aural-glossary/brain/build/
+

@@ -1,6 +1,5 @@
-// WebSocket Client Connection
-let ws = null;
-let reconnectInterval = 1000;
+// EventSource Client Connection
+let eventSource = null;
 let isStarted = false;
 
 // DOM Elements
@@ -27,35 +26,26 @@ const fillTempo = document.getElementById('fill-tempo');
 
 // Initialize Connection
 function connect() {
-    const wsUrl = `ws://${window.location.hostname}:8081`;
-    console.log(`Connecting to WebSocket server: ${wsUrl}`);
+    console.log('Connecting to EventSource: /events');
     
-    ws = new WebSocket(wsUrl);
+    eventSource = new EventSource('/events');
     
-    ws.onopen = () => {
-        console.log('WebSocket connected');
+    eventSource.onopen = () => {
+        console.log('EventSource connected');
         updateStatus(true);
-        reconnectInterval = 1000; // reset reconnect timer
     };
     
-    ws.onclose = () => {
-        console.log('WebSocket disconnected');
+    eventSource.onerror = (error) => {
+        console.error('EventSource Error:', error);
         updateStatus(false);
-        // Try reconnecting
-        setTimeout(connect, reconnectInterval);
-        reconnectInterval = Math.min(reconnectInterval * 2, 10000); // exponential backoff
     };
     
-    ws.onerror = (error) => {
-        console.error('WebSocket Error:', error);
-    };
-    
-    ws.onmessage = (event) => {
+    eventSource.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
             handleServerEvent(data);
         } catch (e) {
-            console.error('Failed to parse websocket message:', e);
+            console.error('Failed to parse EventSource message:', e);
         }
     };
 }
@@ -233,24 +223,43 @@ function updateStory(story) {
 
 // Bind Button actions
 btnStart.onclick = () => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        const cmd = {
-            cmd: 'start',
-            llm: selectLlm.value,
-            labels: inputLabels.value || null
-        };
-        ws.send(json.dumps ? json.dumps(cmd) : JSON.stringify(cmd));
-        setStartedState(true);
-    }
+    const cmd = {
+        llm: selectLlm.value,
+        labels: inputLabels.value || null
+    };
+    
+    fetch('/api/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cmd)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            setStartedState(true);
+        } else {
+            alert('Failed to start system.');
+        }
+    })
+    .catch(err => {
+        console.error('Error starting system:', err);
+    });
 };
 
 btnStop.onclick = () => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        const cmd = { cmd: 'stop' };
-        ws.send(json.dumps ? json.dumps(cmd) : JSON.stringify(cmd));
+    fetch('/api/stop', {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(data => {
         setStartedState(false);
-    }
+    })
+    .catch(err => {
+        console.error('Error stopping system:', err);
+    });
 };
 
-// Start WS connection on load
+// Start connection on load
 connect();
