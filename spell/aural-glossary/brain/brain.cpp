@@ -617,8 +617,17 @@ void background_loop() {
 }
 
 int main(int argc, char* argv[]) {
-    // Force PortAudio lib path for Engine B python scripts
-    setenv("LD_LIBRARY_PATH", "/home/grayson/.local/share/mamba/envs/.mamba-env/lib", 1);
+    // Force PortAudio lib path for Engine B and libwhisper for Engine A
+    char cwd[1024];
+    std::string ld_lib_path = "/home/grayson/.local/share/mamba/envs/.mamba-env/lib";
+    if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+        ld_lib_path += ":" + std::string(cwd) + "/aural-glossary/engine_a/whisper.cpp/build/bin";
+    }
+    char* existing_ld = std::getenv("LD_LIBRARY_PATH");
+    if (existing_ld) {
+        ld_lib_path += ":" + std::string(existing_ld);
+    }
+    setenv("LD_LIBRARY_PATH", ld_lib_path.c_str(), 1);
     
     // Initialize script state
     {
