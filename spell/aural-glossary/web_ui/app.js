@@ -4,8 +4,8 @@ let isStarted = false;
 
 // DOM Elements
 const systemStatus = document.getElementById('system-status');
-const statusText = systemStatus.querySelector('.status-text');
-const pulseIndicator = systemStatus.querySelector('.pulse-indicator');
+const statusText = systemStatus ? systemStatus.querySelector('.status-text') || systemStatus : null;
+const pulseIndicator = systemStatus ? systemStatus.querySelector('.pulse-indicator') : null;
 
 const btnStart = document.getElementById('btn-start');
 const btnStop = document.getElementById('btn-stop');
@@ -69,11 +69,11 @@ function connect() {
 
 function updateStatus(isOnline) {
     if (isOnline) {
-        statusText.textContent = 'ONLINE';
-        pulseIndicator.className = 'pulse-indicator online';
+        if (statusText) statusText.textContent = '[ONLINE]';
+        if (pulseIndicator) pulseIndicator.className = 'pulse-indicator online';
     } else {
-        statusText.textContent = 'OFFLINE';
-        pulseIndicator.className = 'pulse-indicator offline';
+        if (statusText) statusText.textContent = '[OFFLINE]';
+        if (pulseIndicator) pulseIndicator.className = 'pulse-indicator offline';
         setStartedState(false);
     }
 }

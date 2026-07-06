@@ -1,15 +1,15 @@
 :root {
-    --bg-dark: #000000;
-    --card-bg: #0b0b0b;
-    --border-color: #222222;
+    --bg-dark: #fcfcfc;        /* White(ish) background */
+    --card-bg: #ffffff;        /* White card backgrounds */
+    --border-color: #dddddd;    /* Light grey borders */
     
-    --text-primary: #ffffff;
-    --text-secondary: #777777;
-    --text-muted: #444444;
+    --text-primary: #000000;   /* Stark black text */
+    --text-secondary: #666666; /* Medium grey text */
+    --text-muted: #999999;     /* Light grey text for unspoken words */
     
-    --fill-color: #ffffff;
-    --hover-bg: #ffffff;
-    --hover-text: #000000;
+    --fill-color: #000000;     /* Black fills for progress bars */
+    --hover-bg: #000000;       /* Black on hover */
+    --hover-text: #ffffff;     /* White text on hover */
 }
 
 * {
@@ -39,7 +39,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--text-primary);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -62,9 +62,10 @@ header {
 .status-badge {
     font-family: 'Space Mono', monospace;
     padding: 0.4rem 0.8rem;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--text-primary);
     font-size: 0.85rem;
     font-weight: 700;
+    background-color: var(--card-bg);
 }
 
 /* Dashboard Layout */
@@ -88,7 +89,7 @@ header {
 /* Stark Cards */
 .card {
     background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--text-primary);
     padding: 1.2rem;
 }
 
@@ -124,8 +125,8 @@ header {
 }
 
 input[type="text"] {
-    background: #000000;
-    border: 1px solid var(--border-color);
+    background: #ffffff;
+    border: 1px solid var(--text-primary);
     color: var(--text-primary);
     padding: 0.5rem;
     font-family: 'Space Mono', monospace;
@@ -139,8 +140,8 @@ input[type="text"]:focus {
 
 /* Buttons */
 .btn {
-    border: 1px solid var(--border-color);
-    background: #000000;
+    border: 1px solid var(--text-primary);
+    background: #ffffff;
     color: var(--text-primary);
     padding: 0.5rem 1rem;
     font-family: 'Space Mono', monospace;
@@ -197,7 +198,7 @@ input[type="text"]:focus {
 .progress-bar {
     width: 100%;
     height: 6px;
-    background-color: #111111;
+    background-color: #eeeeee;
     border: 1px solid var(--border-color);
     position: relative;
 }
@@ -241,7 +242,7 @@ input[type="text"]:focus {
     height: 180px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
-    background: #000000;
+    background: #ffffff;
     padding: 0.5rem;
 }
 
@@ -254,7 +255,7 @@ input[type="text"]:focus {
 }
 
 .dialogue-item {
-    border-bottom: 1px solid #111111;
+    border-bottom: 1px solid #eeeeee;
     padding: 0.4rem 0;
     font-family: 'Space Mono', monospace;
     font-size: 0.8rem;
@@ -306,12 +307,13 @@ input[type="text"]:focus {
     font-size: 0.8rem;
     font-weight: 700;
     padding: 0.2rem 0.5rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--text-primary);
+    background: #ffffff;
 }
 
 .align-status-badge.following {
     background-color: var(--text-primary);
-    color: #000000;
+    color: var(--bg-dark);
     border-color: var(--text-primary);
 }
 
@@ -339,7 +341,7 @@ input[type="text"]:focus {
     margin-bottom: 1rem;
     padding: 0.6rem 0.8rem;
     border: 1px solid var(--border-color);
-    background: #050505;
+    background: #f7f7f7;
 }
 
 .threshold-control {
@@ -374,7 +376,7 @@ input[type="text"]:focus {
     max-height: 450px;
     overflow-y: auto;
     padding: 1.2rem;
-    background: #000000;
+    background: #ffffff;
     border: 1px solid var(--border-color);
     font-size: 1.2rem;
     line-height: 2.2rem;
@@ -396,7 +398,7 @@ input[type="text"]:focus {
 }
 
 .word-span.word-current {
-    color: #000000;
+    color: #ffffff;
     background-color: var(--text-primary);
     font-weight: 700;
     padding: 0 0.15rem;
@@ -406,8 +408,8 @@ input[type="text"]:focus {
 .deviation-overlay {
     margin-top: 1rem;
     padding: 1rem;
-    background: #100505;
-    border: 1px solid #4a1010;
+    background: #fff8f8;
+    border: 1px solid #ffd0d0;
 }
 
 .deviation-tag {
@@ -433,13 +435,13 @@ input[type="text"]:focus {
     margin-bottom: 1rem;
     padding: 0.8rem;
     border: 1px solid var(--border-color);
-    background: #050505;
+    background: #f7f7f7;
 }
 
 .script-edit-container textarea {
     width: 100%;
     height: 150px;
-    background: #000000;
+    background: #ffffff;
     border: 1px solid var(--border-color);
     padding: 0.5rem;
     color: var(--text-primary);
